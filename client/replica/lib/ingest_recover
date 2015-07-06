@@ -1,0 +1,51 @@
+﻿#!/usr/bin/php
+<?php
+//error_reporting(E_ALL);
+$sFolder = '/Volumes/XSAN/clips';
+
+if('/' != substr($sFolder, strlen($sFolder)-1))
+    $sFolder .= '/';
+$aApprovedChars = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','0','1','2','3','4','5','6','7','8','9');
+if ($nHandle = opendir($sFolder))
+{
+    while (false !== ($sFile = readdir($nHandle)))
+    {
+        if ($sFile == "." || $sFile == "..")
+            continue;
+        $sFile = $sFolder.$sFile;
+        if(is_dir($sFile))
+        {
+            $ahRetVal += NormalizeFilenames($sFile);
+            continue;
+        }
+        $ahPathInfo = pathinfo($sFile);
+        $sOldFilename = $ahPathInfo['filename'];
+        if(0 === strpos($sOldFilename, '._'))
+        {
+            //unlink($sNewFilename);
+			echo 'unlink('.$sFile.')'."\n";
+            continue;
+        }
+        //$sTempFilename = str_replace(array(' ','.','/','\\','?','%','*',':','|','"','<','>','(',')','&',';',',','\'','#','!','@','$','^','-','=','+','.','`','~'), '', $sNewFilename);
+		$sNewFilename = '';
+		for($n=0; strlen($sOldFilename) > $n; $n++)
+		{
+			if(in_array($sOldFilename[$n], $aApprovedChars))
+				$sNewFilename .= $sOldFilename[$n];
+		}
+
+        $nNFLen = strlen($sNewFilename);
+        if($nNFLen != strlen($sOldFilename))
+        {
+            $sNewFilename = $ahPathInfo['dirname'].'/'.$sNewFilename.(empty($ahPathInfo['extension'])?'':'.'.$ahPathInfo['extension']);
+            if(0 < $nNFLen && !file_exists($sNewFilename))
+                rename($sFile, $sNewFilename);
+                //echo 'rename('.$sFile.', '.$sNewFilename.')'."\n";
+            else
+                //unlink($sFile);
+                echo 'unlink('.$sFile.')'."\n";
+        }
+    }
+    closedir($nHandle);
+}
+?>

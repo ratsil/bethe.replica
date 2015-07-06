@@ -1,0 +1,248 @@
+﻿<navigation:Page
+        x:Class="replica.sl.playlist" 
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"  
+        xmlns:controlsToolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit" 
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        d:DesignWidth="1340" d:DesignHeight="400" Background="Black"
+        Title="плейлист" VerticalContentAlignment="Top" VerticalAlignment="Stretch" xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk" BorderBrush="#FFFFFCDB">
+    <StackPanel Orientation="Vertical" Background="#FF456D89" >
+        <Grid Width="1240">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="18"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+                <sdk:Label Content="сейчас в эфире:" Grid.Row="0" Grid.Column="0" Height="20" Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="'Жанна Агузарова:Вою на луну'" Grid.Row="0" Grid.Column="1" Height="20" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_lblCurrentItem" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFEEC7FF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="время выхода:" Height="20" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" Margin="10,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="2011_09_08   14:02:37" Grid.Row="0" Grid.Column="3" Height="20" HorizontalAlignment="Left" Margin="0,0,10,0" Name="_ui_lblCurrentItemsdtStart" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFEEC7FF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="тип:" Height="20" Grid.Row="0" Grid.Column="4" HorizontalAlignment="Left" Margin="10,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="оформление" Height="20" Grid.Row="0" Grid.Column="5" HorizontalAlignment="Left" Margin="0,0,10,0" Name="_ui_lblCurrentItemsType" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFEEC7FF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <StackPanel Grid.Row="0" Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right">
+                <sdk:Label Content="осталось:" Height="20" HorizontalAlignment="Left" Margin="0,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+                <sdk:Label Content="0:43:12" Height="20" HorizontalAlignment="Left" Margin="0,0,10,0" Name="_ui_lblCurrentItemLeft" VerticalAlignment="Bottom" FontSize="17" Foreground="#FFEEC7FF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            </StackPanel>
+            <sdk:Label Content="далее:" Height="20" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="10,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="'Жанна Агузарова:Вою на луну'" Grid.Row="1" Grid.Column="1" Height="20" HorizontalAlignment="Left" Margin="0,0,10,0" Name="_ui_lblNextItem" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFFFFFC7" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="время выхода:" Height="20" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" Margin="10,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="2011_09_08   14:02:37" Height="20" Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left" Margin="0,0,10,0" Name="_ui_lblNextItemsdtStert" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFFFFFC7" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="тип:" Height="20" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="4" Margin="10,0,10,0" VerticalAlignment="Bottom" FontSize="11" Foreground="#FFC7ECFF" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+            <sdk:Label Content="оформление" Height="20" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="5" Margin="0,0,10,0" Name="_ui_lblNextItemsType" VerticalAlignment="Bottom" FontSize="12" Foreground="#FFFFFFC7" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+        </Grid>
+        <ScrollViewer Name="_ui_svMainViewer" BorderBrush="{x:Null}" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
+            <!-- <StackPanel  Grid.Row="1" Grid.Column="1" Background="RoyalBlue" Height="400"  ScrollViewer.VerticalScrollBarVisibility="Visible"> -->
+            <Grid x:Name="LayoutRoot" ShowGridLines="False" Background="#FF456D89">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <slc:ReducePanel Grid.Row="0" x:Name="_ui_rpArchived" IsOpen="True" Title="архив" Margin="0,5,0,5" FontSize="16" FontWeight="Bold" Foreground="#FF456D89">
+                    <Grid Background="{x:Null}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <data:DataGrid x:Name="_ui_dgArchived" AlternatingRowBackground="Azure" GridLinesVisibility="None" SelectionMode="Single" AutoGenerateColumns="False" MaxHeight="400" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23">
+                            <itk:ContextMenuService.ContextMenu>
+                                <itk:ContextMenu Name="_ui_cmArch" Opened="_ui_cmArch_Opened">
+                                    <itk:MenuItem Header="для этой строки нет действий" />
+                                    <itk:Separator/>
+                                    <itk:MenuItem Header="обновить плейлист" Click="_ui_cmPlanned_Refresh" IsEnabled="False" />
+                                </itk:ContextMenu>
+                            </itk:ContextMenuService.ContextMenu>
+                            <data:DataGrid.Columns>
+                                <data:DataGridTextColumn Binding="{Binding sdtStart}" Header="дата и время выхода" IsReadOnly="True" Width="160"/>
+                                <data:DataGridTextColumn Binding="{Binding sName}" Header="название ассета" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding sDuration}" Header="хронометраж" IsReadOnly="True"/>
+                                <data:DataGridTextColumn Binding="{Binding cStatus.sName}" Header="статус" IsReadOnly="True" Width="60"/>
+                                <data:DataGridTextColumn Binding="{Binding stFile.sFilename}" Header="имя файла" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" Header="титрование" IsReadOnly="True" Width="150"/>
+                                <data:DataGridTextColumn Binding="{Binding sRotationName}" Header="ротация" IsReadOnly="True" Width="54"/>
+                                <sdk:DataGridTemplateColumn Header="тип" IsReadOnly="True" Width="60">
+                                    <sdk:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox Background="{Binding cBrush}" Text="{Binding stFile.stStorage.sName}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+                                        </DataTemplate>
+                                    </sdk:DataGridTemplateColumn.CellTemplate>
+                                </sdk:DataGridTemplateColumn>
+                            </data:DataGrid.Columns>
+                        </data:DataGrid>
+                        <Button Grid.Row="1" Content="Сегодня" Width="100" HorizontalAlignment="Right" Height="22" Click="ArchivedToday_Click" FontSize="11" FontWeight="Normal" />
+                        <Button Grid.Row="1" Content="Вчера"  Width="100" HorizontalAlignment="Right" Height="22" Margin="0,0,106,0" Click="ArchivedYesterday_Click" FontSize="11" FontWeight="Normal" />
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <sdk:Label Height="28" HorizontalAlignment="Right" Margin="0,0,8,0" Name="_ui_lblArchivedQty" VerticalAlignment="Bottom"  FontSize="22" Foreground="#FF456D89" Content="0" FontWeight="Bold" VerticalContentAlignment="Top" />
+                            <sdk:Label Height="20" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_lblArchivedQty1" VerticalAlignment="Bottom" Width="92" FontSize="14" Foreground="#FF456D89" Content="items total" FontWeight="Bold" VerticalContentAlignment="Top" />
+                        </StackPanel>
+                    </Grid>
+                </slc:ReducePanel>
+                <slc:ReducePanel Grid.Row="1" IsOpen="True" x:Name="_ui_rpAir" Title="эфир" Margin="0,5,0,5" FontSize="16" FontWeight="Bold" Foreground="#FF456D89">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <data:DataGrid x:Name="_ui_dgOnAir" GridLinesVisibility="Horizontal" SelectionMode="Single" AutoGenerateColumns="False" AllowDrop="False" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23" MaxHeight="400" IsReadOnly="True">
+                            <itk:ContextMenuService.ContextMenu>
+                                <itk:ContextMenu Name="_ui_cmOnAir" Opened="_ui_cmOnAir_Opened">
+                                    <itk:MenuItem Header="для этой строки нет действий" />
+                                    <itk:Separator/>
+                                    <itk:MenuItem Header="обновить плейлист" Click="_ui_cmOnAir_Refresh" IsEnabled="False" />
+                                </itk:ContextMenu>
+                            </itk:ContextMenuService.ContextMenu>
+                            <data:DataGrid.Columns>
+                                <data:DataGridTextColumn Binding="{Binding sdtStart}" Header="дата и время выхода" IsReadOnly="True" Width="160"/>
+                                <data:DataGridTextColumn Binding="{Binding sName}" Header="название ассета" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding sDuration}" Header="хронометраж" IsReadOnly="True"/>
+                                <data:DataGridTextColumn Binding="{Binding cStatus.sName}" Header="статус" IsReadOnly="True" Width="60"/>
+                                <data:DataGridTextColumn Binding="{Binding stFile.sFilename}" Header="имя файла" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" Header="титрование" IsReadOnly="True" Width="150"/>
+                                <data:DataGridTextColumn Binding="{Binding sRotationName}" Header="ротация" IsReadOnly="True" Width="54"/>
+                                <sdk:DataGridTemplateColumn Header="тип" IsReadOnly="True" Width="60">
+                                    <sdk:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox Background="{Binding cBrush}" Text="{Binding stFile.stStorage.sName}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+                                        </DataTemplate>
+                                    </sdk:DataGridTemplateColumn.CellTemplate>
+                                </sdk:DataGridTemplateColumn>
+                            </data:DataGrid.Columns>
+                        </data:DataGrid>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <!--<Button  Width="140" HorizontalAlignment="Right" Click="_ui_btnRecalculate_Click"  Height="22" Name="_ui_btnRecalculate" Margin="4,3,0,3" FontSize="11" FontWeight="Normal">
+                                <Button.Content>
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Width="130">
+                                        <sdk:Label Name="_ui_lblPLRecalcText" Content="Пересчет плей-листа" HorizontalAlignment="Center" />
+                                        <ProgressBar Height="10" Margin="0,0,0,0" HorizontalAlignment="Stretch" Name="_ui_pbPLRecalcProgress" Visibility="Collapsed" IsIndeterminate="True" Foreground="#FF027DB8" Background="#FFD2D5D8" />
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>-->
+                            <Button Content="Oбновить" Width="100" HorizontalAlignment="Right" Click="_ui_btnOnAirRefresh_Click" Height="22" Name="_ui_btnOnAirRefresh" Margin="4,3,0,3" FontSize="11" FontWeight="Normal" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <sdk:Label Height="28" HorizontalAlignment="Center" Margin="0,0,8,0" Name="_ui_lblOnAirQty" VerticalAlignment="Bottom" FontSize="22" Foreground="#FF456D89" Content="0" FontWeight="Bold" VerticalContentAlignment="Top" />
+                            <sdk:Label Height="20" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_lblOnAirQty1" VerticalAlignment="Bottom" Width="92" FontSize="14" Foreground="#FF456D89" Content="items total" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+                        </StackPanel>
+                    </Grid>
+                </slc:ReducePanel>
+                <slc:ReducePanel Grid.Row="2" IsOpen="True" x:Name="_ui_rpPlanned" Title="запланировано" Margin="0,5,0,5" FontSize="16" FontWeight="Bold" Foreground="#FF456D89">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <data:DataGrid Grid.Row="1" x:Name="_ui_dgPlanned" SelectionChanged="_ui_dgPlanned_SelectionChanged" AlternatingRowBackground="Azure" GridLinesVisibility="Horizontal" SelectionMode="Extended" AutoGenerateColumns="False" MaxHeight="400" MouseRightButtonDown="_ui_dgPlanned_MouseRightButtonDown" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" HorizontalGridLinesBrush="#FFC9CACA" CanUserSortColumns="True" CanUserReorderColumns="False" AllowDrop="True" ColumnHeaderHeight="23" RowHeight="23" IsReadOnly="True">
+                            <itk:ContextMenuService.ContextMenu>
+                                <itk:ContextMenu Name="_ui_cmPlanned" Closed="_ui_cmPlanned_Closed" Opened="_ui_cmPlanned_Opened">
+                                    <itk:MenuItem Name="_ui_cmPlannedMove" Header="передвинуть на другое время" Click="_ui_cmPlanned_Move" IsEnabled="False" />
+                                    <itk:MenuItem Name="_ui_cmPlannedAdd" Header="вставить ассет после" Click="_ui_cmPlanned_Add" IsEnabled="False" />
+                                    <itk:MenuItem Name="_ui_cmPlannedProperties" Header="свойства" Click="_ui_cmPlanned_Properties" IsEnabled="False" />
+                                    <itk:MenuItem Name="_ui_cmPlannedDelete" Header="удалить" Click="_ui_cmPlanned_Delete" IsEnabled="False" />
+                                    <itk:MenuItem Name="_ui_cmPlannedDeleteSince" Header="удалить ВСЁ начиная с" Click="_ui_cmPlannedDeleteSince_Click"  IsEnabled="False" />
+                                    <itk:Separator/>
+                                    <itk:MenuItem Name="_ui_cmPlannedRefresh" Header="обновить плейлист" Click="_ui_cmPlanned_Refresh" IsEnabled="False" />
+                                    <itk:MenuItem Name="_ui_cmPlannedRecalculatePart" Header="пересчитать на 5 часов вперед" Click="_ui_cmPlannedRecalculatePart_Click" IsEnabled="False" />
+                                </itk:ContextMenu>
+                            </itk:ContextMenuService.ContextMenu>
+                            <data:DataGrid.Columns>
+                                <data:DataGridTextColumn Binding="{Binding sdtStart}" Header="дата и время выхода" IsReadOnly="True" Width="160"/>
+                                <data:DataGridTextColumn Binding="{Binding sName}" Header="название ассета" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding sDuration}" Header="хронометраж" IsReadOnly="True"/>
+                                <data:DataGridTextColumn Binding="{Binding cStatus.sName}" Header="статус" IsReadOnly="True" Width="60"/>
+                                <data:DataGridTextColumn Binding="{Binding stFile.sFilename}" Header="имя файла" IsReadOnly="True" Width="*"/>
+                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" Header="титрование" IsReadOnly="True" Width="150"/>
+                                <data:DataGridTextColumn Binding="{Binding sRotationName}" Header="ротация" IsReadOnly="True" Width="54"/>
+                                <sdk:DataGridTemplateColumn Header="тип" IsReadOnly="True" Width="60">
+                                    <sdk:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox Background="{Binding cBrush}" Text="{Binding stFile.stStorage.sName}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+                                        </DataTemplate>
+                                    </sdk:DataGridTemplateColumn.CellTemplate>
+                                </sdk:DataGridTemplateColumn>
+                            </data:DataGrid.Columns>
+                        </data:DataGrid>
+                        <StackPanel Grid.Row="2" Width="720" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" Orientation="Horizontal">
+                            <Button Content="Показать" Name="_ui_btnChooseDate" HorizontalAlignment="Left" Margin="0,0,2,0" Width="65" Click="Planned_Click" FlowDirection="LeftToRight" Height="22" FontSize="11" FontWeight="Normal" />
+                            <sdk:Label Height="22" Width="29" HorizontalAlignment="Left" Name="_ui_lblDays" Margin="0,0,2,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="дня:" FlowDirection="LeftToRight" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
+                            <itk:NumericUpDown Height="24" Width="Auto" Name="_ui_nudDaysQty" Margin="0,0,4,0" ValueChanged="_ui_nudDaysQty_ValueChanged" FontSize="14" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FF456D89" Minimum="3" Maximum="33" />
+                            <sdk:Label Height="22" HorizontalAlignment="Right" Margin="0,0,26,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="через" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
+                            <Button Content="Послезавтра" Name="_ui_btnTheDayAfterTomorrow" HorizontalAlignment="Left" Margin="0,0,6,0" Width="90" Click="Planned_Click"  Height="22" FontSize="11" FontWeight="Normal" />
+                            <Button Content="Завтра" Name="_ui_btnTomorrow" HorizontalAlignment="Left" Margin="0,0,6,0" Width="80" Click="Planned_Click"  Height="22" FontSize="11" FontWeight="Normal" />
+                            <Button  Content="Сегодня" Name="_ui_btnToday" Width="80" HorizontalAlignment="Right" Click="Planned_Click"  Height="22" Margin="0,0,6,0" FontSize="11" FontWeight="Normal" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" >
+                            <Button Name="_ui_btnImport" Click="_ui_btnImport_Click" HorizontalAlignment="Left" Width="90" Height="22" VerticalAlignment="Top" Margin="0,3,3,0" FontSize="11" FontWeight="Normal" >
+                                <Button.Content>
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Width="80">
+                                        <sdk:Label Name="_ui_lblPLImportText" Content="Импорт..." HorizontalAlignment="Center" />
+                                        <ProgressBar Height="10" Margin="0,0,0,0" HorizontalAlignment="Stretch" Name="_ui_pbPLImportProgress" Visibility="Collapsed" IsIndeterminate="True" Foreground="#FF027DB8" Background="#FFD2D5D8" />
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                               
+                            <Button Content="Вставка..." HorizontalAlignment="Left" Margin="3,0,3,0" Width="100" Name="_ui_btnAdd" Click="_ui_btnAdd_Click"  Height="22" FontSize="11" FontWeight="Normal" />
+                            <TextBox Width="3" Height="20" Margin="3,0,3,0" Background="{x:Null}">
+                                <TextBox.BorderBrush>
+                                    <LinearGradientBrush>
+                                        <GradientStop Color="#FFA3AEB9" Offset="0" />
+                                        <GradientStop Color="#FF8399A9" Offset="0.375" />
+                                        <GradientStop Color="#FF718597" Offset="0.375" />
+                                        <GradientStop Color="#FF456D89" Offset="1" />
+                                    </LinearGradientBrush>
+                                </TextBox.BorderBrush>
+                            </TextBox>
+                            <Button Content="Удалить выделенное" HorizontalAlignment="Left" Margin="3,0,2,0" Width="140" Click="_ui_cmPlanned_Delete"  Height="22" FontSize="11" FontWeight="Normal" />
+                            <sdk:Label Height="24" HorizontalAlignment="Left" Margin="0,2,3,0" Name="_ui_lblPlannedSelected" VerticalAlignment="Top" Width="AUTO" FontSize="18" Foreground="#FFB73900" Content="0" FontWeight="Bold" VerticalContentAlignment="Top" />
+                            <TextBox Width="3" Height="20" Margin="3,0,3,0" Background="{x:Null}">
+                                <TextBox.BorderBrush>
+                                    <LinearGradientBrush>
+                                        <GradientStop Color="#FFA3AEB9" Offset="0" />
+                                        <GradientStop Color="#FF8399A9" Offset="0.375" />
+                                        <GradientStop Color="#FF718597" Offset="0.375" />
+                                        <GradientStop Color="#FF456D89" Offset="1" />
+                                    </LinearGradientBrush>
+                                </TextBox.BorderBrush>
+                            </TextBox>
+                            <Button  Width="90" HorizontalAlignment="Left" Click="_ui_btnRecalculate_Click"  Height="22" Name="_ui_btnRecalculatePart" Margin="3,2,0,3" FontSize="11" FontWeight="Normal" IsEnabled="False">
+                                <Button.Content>
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Width="80" >
+                                        <sdk:Label Name="_ui_lblPLRecalcPartText" Content="Пересчет:" HorizontalAlignment="Center" Visibility="Visible" />
+                                        <ProgressBar Height="10" Margin="0,0,0,0" HorizontalAlignment="Stretch" Name="_ui_pbPLRecalcPartProgress" Visibility="Collapsed" IsIndeterminate="True" Foreground="#FF027DB8" Background="#FFD2D5D8" />
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <itk:NumericUpDown Height="20" Width="AUTO" Name="_ui_nudHoursQty" Margin="2,0,4,0" ValueChanged="_ui_nudHoursQty_ValueChanged"  FontSize="12" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FF456D89" Minimum="0" Maximum="24" Value="5" />
+                            <sdk:Label Height="22" HorizontalAlignment="Right" Margin="-3,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="hrs" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="50,0,0,0" >
+                            <sdk:Label Height="28" HorizontalAlignment="Center" Margin="0,0,8,0" Name="_ui_lblPlannedQty" VerticalAlignment="Bottom" FontSize="22" Foreground="#FF456D89" Content="0" FontWeight="Bold" VerticalContentAlignment="Top" />
+                            <sdk:Label Height="20" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_lblPlannedQty1" VerticalAlignment="Bottom" Width="92" FontSize="14" Foreground="#FF456D89" Content="items total" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" />
+                        </StackPanel>
+                    </Grid>
+                    <slc:ReducePanel.BorderBrush>
+                        <SolidColorBrush />
+                    </slc:ReducePanel.BorderBrush>
+                </slc:ReducePanel>
+            </Grid>
+            <!--</StackPanel>-->
+        </ScrollViewer>
+    </StackPanel>
+</navigation:Page>

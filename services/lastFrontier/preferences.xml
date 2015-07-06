@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<preferences>
+	<replica>
+		<lfrontier folder="d:/cues/emergency/" />
+	</replica>
+	<ingenie>
+		<initiator>
+			<process name="ingenie.server" owner="replica" />
+		</initiator>
+		<userspace server="127.0.0.1" />
+		<shared port="1238" />
+	</ingenie>
+	<helpers>
+		<common>
+			<logger level="debug1">
+				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
+					<targets>
+						<target level="warning">user1@example.com,user2@example.com</target>
+						<target level="error">user@example.com</target>
+						<target level="fatal">user@example.com</target>
+					</targets>
+				</mail>
+			</logger>
+		</common>
+	</helpers>
+</preferences>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<proxy target="{%RUNTIME::PROXY::(-1)::TYPE::CLIP%}">
+	<video file="{%RUNTIME::PLAYER::PROXY::FILE%}" opacity="true" start="1" stop="-400" />
+	<plugin file="d:/cues/blender/blender.dll" class="Blender" start="3" duration="300">
+		<fallback>
+			<video file="{%RUNTIME::PLAYER::PROXY::FILE%}" opacity="true" start="-399" duration="300" />
+		</fallback>
+		<data blend="d:/cues/blender/sd.blend" threads="16" output="{%RUNTIME::PLAYER::PROXY::FILE::FOLDERED%}">
+			<python>
+# ВНИМАНИЕ! результат надо брать со 2-го кадра (т.е. без 0-го и 1-го). 3 последних кадра будут пустые!!
+
+import bpy
+import os
+import sys
+import datetime
+
+bpy.context.screen.scene = bpy.data.scenes[0]
+bpy.context.scene.frame_start = 1
+bpy.context.scene.frame_end = 302
+bpy.context.scene.render.image_settings.file_format = 'FFMPEG'
+bpy.context.scene.render.image_settings.color_mode = 'RGB'
+bpy.context.scene.render.ffmpeg.format = 'QUICKTIME'
+bpy.context.scene.render.ffmpeg.codec = 'PNG'
+bpy.context.scene.render.ffmpeg.video_bitrate = 10000   # для PNG - это не битрейт, а скорее абстрактное качество. тут 110 Мбит будет файл.
+bpy.context.scene.render.ffmpeg.minrate = 10000
+bpy.context.scene.render.ffmpeg.maxrate = 10000
+bpy.context.scene.render.ffmpeg.audio_codec = 'PCM'
+bpy.context.scene.render.ffmpeg.audio_bitrate = 264   # тоже странный параметр для PCM
+#bpy.context.scene.render.filepath = "{%RUNTIME::PLAYER::PROXY::FILE::FOLDERED::ESCAPED%}\\0.mov"
+
+#bpy.context.scene.render.threads_mode = 'AUTO'
+#bpy.context.scene.render.threads_mode = 'FIXED'
+#bpy.context.scene.render.threads = 4
+#bpy.ops.render.render(animation=True)
+			</python>
+		</data>
+	</plugin>
+	<video file="{%RUNTIME::PLAYER::PROXY::FILE%}" opacity="true" start="-99" />
+</proxy>

@@ -1,0 +1,316 @@
+﻿<navigation:Page
+        x:Class="replica.sl.ingest" 
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"  
+        xmlns:controlsToolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        mc:Ignorable="d"
+        d:DesignWidth="640" d:DesignHeight="640">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+        <local:Math xmlns:local="clr-namespace:helpers.sl.xaml;assembly=helpers.common.sl" x:Key="math" />
+    </UserControl.Resources>
+    <ScrollViewer BorderThickness="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid x:Name="LayoutRoot">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <slc:ReducePanel x:Name="_ui_rpFiles" Title="{Binding Path=cCommon.sFiles, Source={StaticResource g}}" Loaded="_ui_rpFiles_Loaded" Margin="3,10" IsOpen="True" HorizontalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical">
+                    <Grid Background="#FF65829D">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=cReplica.sNoticeIngest1, Source={StaticResource g}}" VerticalAlignment="Center" Margin="5,0,10,0" />
+                        <TextBlock Grid.Column="1" Name="_ui_txtFilename" VerticalAlignment="Center" FontStyle="Italic" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sSelectFile, Source={StaticResource g}}" />
+                        <Button Grid.Column="2" x:Name="_ui_btnBrowse" Margin="0,5,5,5" Padding="5" MinWidth="75" VerticalAlignment="Stretch" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sBrowse, Source={StaticResource g}}" Click="_ui_btnBrowse_Click" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Background="#FF65829D" Margin="0,5,0,5">
+                        <TextBlock Text="{Binding Path=cReplica.sNoticeIngest6, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10,10,10" />
+                        <ComboBox Name="_ui_ddlAge" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,20,10">
+                            <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sNotApplicable, Source={StaticResource g}}" />
+                            <ComboBoxItem>
+                                <ComboBoxItem.Content>
+                                    <Grid>
+                                        <itk:NumericUpDown Minimum="1" Maximum="99" Name="_ui_nudAge" ValueChanged="_ui_nud_ValueChanged" />
+                                    </Grid>
+                                </ComboBoxItem.Content>
+                            </ComboBoxItem>
+                        </ComboBox>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Name="_ui_txtAction" Text="{Binding Path=cReplica.sNoticeIngest7, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+                        <ComboBox Grid.Row="2" Grid.Column="1" Name="_ui_ddlAction" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10">
+                            <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sMove, Source={StaticResource g}}" />
+                            <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" />
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Background="#FF65829D">
+                        <TextBlock Text="{Binding Path=cReplica.sNoticeIngest3, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10,10,10" />
+                        <ComboBox Name="_ui_ddlAir" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sVersion, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+                        <ComboBox Name="_ui_ddlVersion" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10">
+                            <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sNotApplicable, Source={StaticResource g}}" />
+                            <ComboBoxItem>
+                                <ComboBoxItem.Content>
+                                    <Grid>
+                                        <itk:NumericUpDown Minimum="1" Maximum="99" Name="_ui_nudVersion" ValueChanged="_ui_nud_ValueChanged" />
+                                    </Grid>
+                                </ComboBoxItem.Content>
+                            </ComboBoxItem>
+                        </ComboBox>
+
+                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sFormat, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+                        <ComboBox Name="_ui_ddlFormat" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" />
+
+                        <TextBlock Text="fps:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+                        <ComboBox Name="_ui_ddlFPS" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" />
+                    </StackPanel>
+                    <sdk:TabControl TabStripPlacement="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5" Name="_ui_tcPresets" VerticalAlignment="Top" Background="#FF65829D" SelectionChanged="_ui_tcPresets_SelectionChanged">
+						<sdk:TabItem Name="_ui_tiPresetsNew" Header="  + " FontSize="12" Foreground="#FF456D89">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition />
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition />
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+									<RowDefinition />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+
+								<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sFolder, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+								<ScrollViewer Grid.Row="0" Grid.Column="1" Grid.RowSpan="4" Height="250" Margin="0,10,10,10" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+									<sdk:TreeView HorizontalAlignment="Stretch" Name="_ui_tvNewFolder" />
+								</ScrollViewer>
+
+								<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sType, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+								<ComboBox Grid.Row="0" Grid.Column="3" Name="_ui_ddlNewTypes" DisplayMemberPath="sName" Margin="0,10,0,10" />
+
+								<TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sStorage, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+								<ComboBox Grid.Row="1" Grid.Column="3" Name="_ui_ddlNewStorages" DisplayMemberPath="sName" Margin="0,10,0,10" />
+
+								<TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+								<TextBox Grid.Row="2" Grid.Column="3" Name="_ui_tbNewCaption" Margin="0,10,0,10" />
+
+								<Button Grid.Row="3" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Padding="5" Margin="0,10,0,10" Click="TabAdd_Click" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sAdd, Source={StaticResource g}}" />
+							</Grid>
+						</sdk:TabItem>
+					</sdk:TabControl>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Path=cReplica.sNoticeIngest5, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" FontStretch="SemiExpanded" Name="_ui_txtTargetName" VerticalAlignment="Center" />
+                        <Button Grid.Row="0" Grid.Column="2" x:Name="_ui_btnSave" MinWidth="75" Padding="5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sCopy, Source={StaticResource g}}" Click="_ui_btnSave_Click" IsEnabled="False" VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="1" Name="_ui_txtError" Visibility="Collapsed" />
+                    </Grid>
+                </StackPanel>
+            </slc:ReducePanel>
+            <slc:ReducePanel Grid.Row="1" x:Name="_ui_rpTasks" Title="{Binding Path=cCommon.sTasks, Source={StaticResource g}}" Margin="3,0" IsOpen="False" HorizontalContentAlignment="Stretch">
+				<ScrollViewer HorizontalScrollBarVisibility="Auto">
+					<Grid Name="_ui_gTasksLayout" MaxWidth="1400">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*" />
+						</Grid.RowDefinitions>
+					</Grid>
+				</ScrollViewer>
+			</slc:ReducePanel>
+			<Grid Name="_ui_gClip" Grid.Row="1" Visibility="Collapsed">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Grid Grid.Column="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+
+					<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sArtists, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" />
+					<slc:SearchControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" x:Name="_ui_scClipSearch" Height="25" Margin="0,2,0,0" />
+
+					<ListBox Grid.Row="2" Grid.Column="1" Height="284" Name="_ui_lbClipArtists" DisplayMemberPath="sName" MouseLeftButtonUp="_ui_lbClipArtists_MouseLeftButtonUp"  MouseRightButtonDown="_ui_lbClipArtists_MouseRightButtonDown">
+						<itk:ContextMenuService.ContextMenu>
+							<itk:ContextMenu Name="_ui_cmClipArtists" Opened="_ui_cmClipArtists_Opened">
+								<itk:MenuItem Header="{Binding Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_cmClipArtists_Refresh" />
+								<itk:Separator/>
+								<itk:MenuItem Name="_ui_cmClipArtistsDelete" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_cmClipArtists_Delete" />
+								<itk:MenuItem Name="_ui_cmClipArtistsRename" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRename, Source={StaticResource g}}" Click="_ui_cmClipArtists_Rename" />
+							</itk:ContextMenu>
+						</itk:ContextMenuService.ContextMenu>
+					</ListBox>
+					<ListBox Grid.Row="2" Grid.Column="2" Name="_ui_lbClipArtistsSelected" DisplayMemberPath="sName" SelectionChanged="_ui_lbClipArtistsSelected_SelectionChanged" />
+
+					<TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sSong, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" />
+					<TextBox Grid.Row="3"  Grid.Column="1" Grid.ColumnSpan="2" Name="_ui_tbClipSong" IsEnabled="True" TextChanged="_ui_tb_TextChanged" Margin="0,2,0,0" />
+
+				</Grid>
+				<Grid Grid.Column="1" Grid.ColumnSpan="2">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+
+					<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sQuality, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="1" Grid.Column="1" Name="_ui_ddlClipQuality" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Path=cReplica.sNoticeIngest2, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="2" Grid.Column="1" Name="_ui_ddlClipShow" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sRemix, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="4" Grid.Column="1" Name="_ui_ddlClipRemix" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sPromo, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="5" Grid.Column="1" Name="_ui_ddlClipPromo" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sCutted, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="6" Grid.Column="1" Name="_ui_ddlClipCut" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="9" Grid.Column="0" Text="{Binding Path=cReplica.sNoticeIngest4, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+					<ComboBox Grid.Row="9" Grid.Column="1" Name="_ui_ddlClipForeign" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+				</Grid>
+			</Grid>
+			<Grid Name="_ui_gAdvertisement" Visibility="Collapsed">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<TextBlock Grid.Row="0" Grid.Column="0" Name="_ui_txtAdvertisementID" Text="id:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<TextBox Grid.Row="0" Grid.Column="1" Name="_ui_tbAdvertisementID" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sCompany, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<TextBox Grid.Row="1" Grid.Column="1" Name="_ui_tbAdvertisementCompany" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sCampaign, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<TextBox Grid.Row="2" Grid.Column="1" Name="_ui_tbAdvertisementCampaign" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+			</Grid>
+			<Grid Name="_ui_gProgram" Visibility="Collapsed">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sSeries, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+				<ComboBox Grid.Row="0" Grid.Column="1" Name="_ui_ddlProgramSeries" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sEpisode, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+				<ComboBox Grid.Row="1" Grid.Column="1" Name="_ui_ddlProgramEpisodes" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sPart, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<itk:NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="99" Value="0" Name="_ui_nudProgramPart" ValueChanged="_ui_nud_ValueChanged" Background="White" Margin="0,10,0,10" />
+			</Grid>
+			<Grid Name="_ui_gDesign" Visibility="Collapsed">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sNoticeIngest14, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+				<ComboBox Grid.Row="0" Grid.Column="1" Name="_ui_ddlDesignSeason" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10">
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sNotApplicable, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sWinter, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sSpring, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sSummer, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sAutumn, Source={StaticResource g}}" />
+				</ComboBox>
+
+				<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sType, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+				<ComboBox Grid.Row="1" Grid.Column="1" Name="_ui_ddlDesignType" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10">
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sNotApplicable, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sIn, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sOut, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sBumper, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sMix, Source={StaticResource g}}" />
+					<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sOther, Source={StaticResource g}}" />
+				</ComboBox>
+
+				<TextBlock Grid.Row="2" Grid.Column="0" Text="dtmf" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+				<ComboBox Grid.Row="2" Grid.Column="1" Name="_ui_ddlDesignDTMF" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<TextBox Grid.Row="3" Grid.Column="2" Name="_ui_tbDesignName" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+			</Grid>
+		</Grid>
+    </ScrollViewer>
+</navigation:Page>

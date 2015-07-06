@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<preferences>
+	<replica>
+		<management>
+			<commands sleep="00:00:00.3" />
+		</management>
+	</replica>
+	<helpers>
+		<common>
+			<database server="db.channel.replica" port="5432" name="replica" user="replica_management" password="" timeout="240" />
+			<logger level="debug1">
+				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
+					<targets>
+						<target level="warning">user1@example.com,user2@example.com</target>
+						<target level="error">user@example.com</target>
+						<target level="fatal">user@example.com</target>
+					</targets>
+				</mail>
+			</logger>
+		</common>
+	</helpers>
+</preferences>

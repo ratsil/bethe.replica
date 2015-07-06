@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B8351864-ABE0-4427-AACB-FFCC090113F9}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>webservice</RootNamespace>
+    <AssemblyName>webservice</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightApplicationList>{17EE2BDF-9737-4419-BB58-757E12398EB5}|..\replica\replica.csproj|ClientBin|False</SilverlightApplicationList>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <UseIISExpress>false</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>\projects\!bin\$(SolutionName)\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>\projects\!obj\$(SolutionName)\$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>\projects\!bin\$(SolutionName)\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>\projects\!obj\$(SolutionName)\$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Facebook">
+      <HintPath>..\..\packages\Facebook.6.4.2\lib\net40-client\Facebook.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Core, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\!dlls\IKVM.OpenJDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\!dlls\IKVM.OpenJDK.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\!dlls\IKVM.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="LinqToTwitter">
+      <HintPath>..\..\packages\linqtotwitter.2.1.8\lib\net40\LinqToTwitter.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="org.apache.poi, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\!dlls\org.apache.poi.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Extensions.Design" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.Mobile" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="clientaccesspolicy.xml" />
+    <Content Include="ClientBin\replica.xap" />
+    <Content Include="ia\messages.aspx" />
+    <Content Include="social.aspx" />
+    <Content Include="images\social_fb.png" />
+    <Content Include="images\social_tt.png" />
+    <Content Include="images\social_vk.png" />
+    <Content Include="js\social.js" />
+    <Content Include="js\request.js" />
+    <Content Include="main.css" />
+    <Content Include="main.html" />
+    <Content Include="current.aspx" />
+    <None Include="App_Data\lib\IKVM.OpenJDK.Core.dll" />
+    <Content Include="App_Data\lib\IKVM.OpenJDK.Util.dll" />
+    <None Include="App_Data\lib\IKVM.Runtime.dll" />
+    <Content Include="App_Data\lib\org.apache.poi.dll" />
+    <Content Include="grids\grid.xml" />
+    <Content Include="ia\cliporder.aspx" />
+    <Content Include="ia\clips.aspx" />
+    <Content Include="ia\current.aspx" />
+    <Content Include="ia\grids.aspx" />
+    <Content Include="ia\message.aspx" />
+    <Content Include="ia\pl.aspx" />
+    <Content Include="ia\vjstatus.aspx" />
+    <None Include="preferences.xml" />
+    <Content Include="NearestAdvertsBlock.aspx" />
+    <Content Include="js\replica.js" />
+    <Content Include="request.aspx" />
+    <Content Include="scr\vj.aspx" />
+    <Content Include="scr\vj.html" />
+    <Content Include="services\DBInteract.asmx" />
+    <Content Include="services\Preferences.asmx" />
+    <Content Include="Silverlight.js" />
+    <Content Include="index.aspx" />
+    <Content Include="index.html" />
+    <Content Include="packages.config" />
+    <Content Include="replica.pfx" />
+    <None Include="Properties\PublishProfiles\replica-local.pubxml" />
+    <None Include="services\.htaccess" />
+    <None Include="templates\export.rao.row.xml" />
+    <None Include="templates\export.rao.footer.xml" />
+    <None Include="templates\export.rao.header.xml" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="crossdomain.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="globalization\Webservice.ru-RU.Designer.cs">
+      <DependentUpon>Webservice.ru-RU.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="globalization\Webservice.Designer.cs">
+      <DependentUpon>Webservice.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="ia\messages.aspx.cs">
+      <DependentUpon>messages.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\messages.aspx.designer.cs">
+      <DependentUpon>messages.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="lib\social\OAuth.cs" />
+    <Compile Include="social.aspx.cs">
+      <DependentUpon>social.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="current.aspx.cs">
+      <DependentUpon>current.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="current.aspx.designer.cs">
+      <DependentUpon>current.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\grids.aspx.cs">
+      <DependentUpon>grids.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\grids.aspx.designer.cs">
+      <DependentUpon>grids.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="lib\DBInteract.cs" />
+    <Compile Include="ia\cliporder.aspx.cs">
+      <DependentUpon>cliporder.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\cliporder.aspx.designer.cs">
+      <DependentUpon>cliporder.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\clips.aspx.cs">
+      <DependentUpon>clips.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\clips.aspx.designer.cs">
+      <DependentUpon>clips.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\current.aspx.cs">
+      <DependentUpon>current.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\current.aspx.designer.cs">
+      <DependentUpon>current.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\XML.cs" />
+    <Compile Include="ia\Logger.cs" />
+    <Compile Include="ia\message.aspx.cs">
+      <DependentUpon>message.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\message.aspx.designer.cs">
+      <DependentUpon>message.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\pl.aspx.cs">
+      <DependentUpon>pl.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\pl.aspx.designer.cs">
+      <DependentUpon>pl.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ia\vjstatus.aspx.cs">
+      <DependentUpon>vjstatus.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ia\vjstatus.aspx.designer.cs">
+      <DependentUpon>vjstatus.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="lib\Profile.cs" />
+    <Compile Include="NearestAdvertsBlock.aspx.cs">
+      <DependentUpon>NearestAdvertsBlock.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NearestAdvertsBlock.aspx.designer.cs">
+      <DependentUpon>NearestAdvertsBlock.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="request.aspx.cs">
+      <DependentUpon>request.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="scr\vj.aspx.cs">
+      <DependentUpon>vj.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="scr\vj.aspx.designer.cs">
+      <DependentUpon>vj.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="services\Logger.cs" />
+    <Compile Include="services\PlaylistImport.cs" />
+    <Compile Include="services\Preferences.asmx.cs">
+      <DependentUpon>Preferences.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="templates.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>templates.resx</DependentUpon>
+    </Compile>
+    <Compile Include="services\DBInteract.asmx.cs">
+      <DependentUpon>DBInteract.asmx</DependentUpon>
+    </Compile>
+    <Compile Include="services\Error.cs" />
+    <Compile Include="services\MSDatabase.cs" />
+    <Compile Include="lib\Preferences.cs" />
+    <Compile Include="services\SessionInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\!helpers\helpers.replica\helpers.replica.csproj">
+      <Project>{1F234A17-6AC8-4DD1-84E6-76C4B40994BF}</Project>
+      <Name>helpers.replica</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common.globalization\helpers.common.globalization.csproj">
+      <Project>{3231FCF5-FC39-47EC-A1C5-FDA5467075DB}</Project>
+      <Name>helpers.common.globalization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common\helpers.common.csproj">
+      <Project>{6274E189-EF3E-4457-B13B-F82F284AB903}</Project>
+      <Name>helpers.common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\helpers.db\helpers.db.csproj">
+      <Project>{6d2e75af-bc9f-43fe-9dd7-a0b687092364}</Project>
+      <Name>helpers.db</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="globalization\Webservice.ru-RU.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Webservice.ru-RU.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>globalization</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="globalization\Webservice.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Webservice.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>globalization</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="templates.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>templates.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>3597</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/dev</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://replica/</IISAppRootUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>http://127.0.0.1/</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

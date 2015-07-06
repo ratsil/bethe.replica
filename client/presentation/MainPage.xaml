@@ -1,0 +1,87 @@
+﻿<UserControl xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"  x:Class="presentation.sl.MainPage"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:ctrls="clr-namespace:controls.replica.sl;assembly=helpers.replica.sl"
+		mc:Ignorable="d"
+		d:DesignHeight="600" d:DesignWidth="800" xmlns:my="clr-namespace:controls.sl;assembly=controls.sl">
+
+    <Grid Background="White">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="300" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<ctrls:TemplateButton Grid.Column="0" Grid.Row="0" sText="логотип: " sFile="e:/replica/templates/logo.xml" Height="23" Margin="10,10,10,40" HorizontalAlignment="Center" Name="_ui_tplbLogo" VerticalAlignment="Center" Width="140" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+		<ctrls:TemplateButton Grid.Column="1" Grid.Row="0" sText="видео: " sFile="e:/replica/templates/video.xml" Height="23" Margin="10,10,10,40" HorizontalAlignment="Center" Name="_ui_tplbVideo" VerticalAlignment="Center" Width="140" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+		<ctrls:TemplateButton Grid.Column="2" Grid.Row="0" sText="анимация: " sFile="e:/replica/templates/animation.xml" Height="23" Margin="10,10,10,40" HorizontalAlignment="Center" Name="_ui_tplbAnimation" VerticalAlignment="Center" Width="140" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+		<TextBox Grid.Column="1" Grid.Row="1" Margin="10,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="_ui_tbText"
+				 Text="•низкая стоимость необходимого оборудования&#13;•отсутствие специфических требований к рабочим местам пользователей&#13;•прозрачная интеграция сторонних решений&#13;•поддержка всего спектра интерактивных сервисов&#13;•отсутствие жёстких технических требований&#13;•полноценное и всеобъемлющее резервирование и отказоустойчивость&#13;•отсутствие ограничений на графическое оформление эфира&#13;•гибкая система генерации отчётов и статистической информации&#13;•всесторонний мониторинг задействованных процессов&#13;•прозрачное расширение функционала&#13;•поддержка горизонтального масштабирования"
+				 TextWrapping="Wrap" AcceptsReturn="True" />
+		<Grid Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Margin="5,0,0,0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Column="0" Grid.Row="0" Text="шрифт:" VerticalAlignment="Center" />
+			<ComboBox Grid.Column="1" Grid.Row="0" Name="_ui_ddlRollFonts" HorizontalAlignment="Stretch" Margin="5" />
+			<TextBlock Grid.Column="0" Grid.Row="1" Text="цвет:" VerticalAlignment="Center" />
+			<Border Grid.Column="1" Grid.Row="1" BorderThickness="1" CornerRadius="5" BorderBrush="Black" Margin="5">
+				<my:ColorPicker Name="_ui_cpRollColor" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedColor="Yellow" MinWidth="58" />
+			</Border>
+			<TextBlock Grid.Column="0" Grid.Row="2" Text="размер:" VerticalAlignment="Center" />
+			<toolkit:NumericUpDown Grid.Column="1" Grid.Row="2" Name="_ui_nudRollSize" HorizontalAlignment="Stretch" Margin="5" Value="25" Minimum="5" Maximum="100" />
+			<TextBlock Grid.Column="0" Grid.Row="3" Text="скорость" HorizontalAlignment="Center" VerticalAlignment="Center" />
+			<toolkit:NumericUpDown Grid.Column="1" Grid.Row="3" Name="_ui_nudRollSpeed" HorizontalAlignment="Stretch" Margin="5" Value="25" Minimum="5" Maximum="100" />
+			<ctrls:TemplateButton Grid.Column="1" Grid.Row="4" sText="барабан: " Name="_ui_tplbRoll" sFile="e:/replica/templates/roll.xml" Height="23" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="140" Margin="5" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+		</Grid>
+		<Grid Grid.Column="2" Grid.Row="1" VerticalAlignment="Stretch" Margin="0,0,5,0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Column="0" Grid.Row="0" Text="шрифт:" VerticalAlignment="Center" />
+			<ComboBox Grid.Column="1" Grid.Row="0" Name="_ui_ddlCrawlFonts" HorizontalAlignment="Stretch" Margin="5">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel>
+							<TextBlock FontFamily="{Binding BindsDirectlyToSource=True}" Text="{Binding BindsDirectlyToSource=True}" />
+						</StackPanel>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<TextBlock Grid.Column="0" Grid.Row="1" Text="цвет:" VerticalAlignment="Center" />
+			<Border Grid.Column="1" Grid.Row="1" BorderThickness="1" CornerRadius="5" BorderBrush="Black" Margin="5">
+				<my:ColorPicker Name="_ui_cpCrawlColor" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedColor="Yellow" MinWidth="58" />
+			</Border>
+			<TextBlock Grid.Column="0" Grid.Row="2" Text="размер:" VerticalAlignment="Center" />
+			<toolkit:NumericUpDown Grid.Column="1" Grid.Row="2" Name="_ui_nudCrawlSize" HorizontalAlignment="Stretch" Margin="5" Value="25" Minimum="5" Maximum="100" />
+			<TextBlock Grid.Column="0" Grid.Row="3" Text="скорость" HorizontalAlignment="Center" VerticalAlignment="Center" />
+			<toolkit:NumericUpDown Grid.Column="1" Grid.Row="3" Name="_ui_nudCrawlSpeed" HorizontalAlignment="Stretch" Margin="5" Value="25" Minimum="5" Maximum="100" />
+			<ctrls:TemplateButton Grid.Column="1" Grid.Row="4" sText="строка: " Name="_ui_tplbCrawl" sFile="e:/replica/templates/crawl.xml" Height="23" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="140" Margin="5" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+		</Grid>
+		<ctrls:TemplateButton Grid.Column="1" Grid.Row="2" sText="MARADONA: " Name="_ui_tplbMaradona" sFile="e:/replica/templates/maradona.xml" Height="23" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="140" Margin="5" TemplatePrepare="TemplatePrepare" TemplateStart="TemplateStart" TemplateStop="TemplateStop" />
+	</Grid>
+</UserControl>

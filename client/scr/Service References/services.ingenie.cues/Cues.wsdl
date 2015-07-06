@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://replica/ig/services/Cues.asmx" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://replica/ig/services/Cues.asmx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://replica/ig/services/Cues.asmx">
+      <s:element name="ItemCreate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sPreset" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sFile" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aUserReplacements" type="tns:ArrayOfUserReplacement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfUserReplacement">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="UserReplacement" nillable="true" type="tns:UserReplacement" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="UserReplacement">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="sKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sValue" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ItemCreateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemCreateResult" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Item" abstract="true">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:unsignedLong" />
+          <s:element minOccurs="0" maxOccurs="1" name="sPreset" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sCurrentClass" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStatusChanged" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="eStatus" type="tns:Status" />
+          <s:element minOccurs="0" maxOccurs="1" name="sInfo" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Status">
+        <s:restriction base="s:string">
+          <s:enumeration value="Unknown" />
+          <s:enumeration value="Idle" />
+          <s:enumeration value="Prepared" />
+          <s:enumeration value="Started" />
+          <s:enumeration value="Stopped" />
+          <s:enumeration value="Error" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="Template">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Item" />
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="ItemsRunningGet">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemsRunningGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemsRunningGetResult" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Item" nillable="true" type="tns:Item" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="StartDTMF">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sFile" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="StartDTMFResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DirectoriesSCRGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sFolder" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DirectoriesSCRGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DirectoriesSCRGetResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AddTextToRoll">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sTemplateInfo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sText" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddTextToRollResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddTextToRollResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Init">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="nClientBrowserID" type="s:unsignedLong" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="InitResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="InitResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Ping">
+        <s:complexType />
+      </s:element>
+      <s:element name="PingResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemsUpdate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aItems" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemsUpdateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemsUpdateResult" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemDelete">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemDeleteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemDeleteResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemPrepare">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemPrepareResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemPrepareResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStart">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStartResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemStartResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStop">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStopResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemStopResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteError">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sEx" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteErrorResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="WriteNotice">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sMsg" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteNoticeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerDisable">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerDisableResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerEnable">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="nLevel" type="s:unsignedByte" />
+            <s:element minOccurs="1" maxOccurs="1" name="bInternal" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerEnableResponse">
+        <s:complexType />
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ItemCreateSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemCreate" />
+  </wsdl:message>
+  <wsdl:message name="ItemCreateSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemCreateResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemsRunningGetSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemsRunningGet" />
+  </wsdl:message>
+  <wsdl:message name="ItemsRunningGetSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemsRunningGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="StartDTMFSoapIn">
+    <wsdl:part name="parameters" element="tns:StartDTMF" />
+  </wsdl:message>
+  <wsdl:message name="StartDTMFSoapOut">
+    <wsdl:part name="parameters" element="tns:StartDTMFResponse" />
+  </wsdl:message>
+  <wsdl:message name="DirectoriesSCRGetSoapIn">
+    <wsdl:part name="parameters" element="tns:DirectoriesSCRGet" />
+  </wsdl:message>
+  <wsdl:message name="DirectoriesSCRGetSoapOut">
+    <wsdl:part name="parameters" element="tns:DirectoriesSCRGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddTextToRollSoapIn">
+    <wsdl:part name="parameters" element="tns:AddTextToRoll" />
+  </wsdl:message>
+  <wsdl:message name="AddTextToRollSoapOut">
+    <wsdl:part name="parameters" element="tns:AddTextToRollResponse" />
+  </wsdl:message>
+  <wsdl:message name="InitSoapIn">
+    <wsdl:part name="parameters" element="tns:Init" />
+  </wsdl:message>
+  <wsdl:message name="InitSoapOut">
+    <wsdl:part name="parameters" element="tns:InitResponse" />
+  </wsdl:message>
+  <wsdl:message name="PingSoapIn">
+    <wsdl:part name="parameters" element="tns:Ping" />
+  </wsdl:message>
+  <wsdl:message name="PingSoapOut">
+    <wsdl:part name="parameters" element="tns:PingResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemsUpdateSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemsUpdate" />
+  </wsdl:message>
+  <wsdl:message name="ItemsUpdateSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemsUpdateResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemDeleteSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemDelete" />
+  </wsdl:message>
+  <wsdl:message name="ItemDeleteSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemDeleteResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemPrepareSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemPrepare" />
+  </wsdl:message>
+  <wsdl:message name="ItemPrepareSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemPrepareResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemStartSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemStart" />
+  </wsdl:message>
+  <wsdl:message name="ItemStartSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemStartResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemStopSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemStop" />
+  </wsdl:message>
+  <wsdl:message name="ItemStopSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemStopResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteErrorSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteError" />
+  </wsdl:message>
+  <wsdl:message name="WriteErrorSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteErrorResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteNoticeSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteNotice" />
+  </wsdl:message>
+  <wsdl:message name="WriteNoticeSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteNoticeResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerDisableSoapIn">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerDisable" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerDisableSoapOut">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerDisableResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerEnableSoapIn">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerEnable" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerEnableSoapOut">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerEnableResponse" />
+  </wsdl:message>
+  <wsdl:portType name="CuesSoap">
+    <wsdl:operation name="ItemCreate">
+      <wsdl:input message="tns:ItemCreateSoapIn" />
+      <wsdl:output message="tns:ItemCreateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <wsdl:input message="tns:ItemsRunningGetSoapIn" />
+      <wsdl:output message="tns:ItemsRunningGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="StartDTMF">
+      <wsdl:input message="tns:StartDTMFSoapIn" />
+      <wsdl:output message="tns:StartDTMFSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DirectoriesSCRGet">
+      <wsdl:input message="tns:DirectoriesSCRGetSoapIn" />
+      <wsdl:output message="tns:DirectoriesSCRGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddTextToRoll">
+      <wsdl:input message="tns:AddTextToRollSoapIn" />
+      <wsdl:output message="tns:AddTextToRollSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <wsdl:input message="tns:InitSoapIn" />
+      <wsdl:output message="tns:InitSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <wsdl:input message="tns:PingSoapIn" />
+      <wsdl:output message="tns:PingSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <wsdl:input message="tns:ItemsUpdateSoapIn" />
+      <wsdl:output message="tns:ItemsUpdateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <wsdl:input message="tns:ItemDeleteSoapIn" />
+      <wsdl:output message="tns:ItemDeleteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <wsdl:input message="tns:ItemPrepareSoapIn" />
+      <wsdl:output message="tns:ItemPrepareSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <wsdl:input message="tns:ItemStartSoapIn" />
+      <wsdl:output message="tns:ItemStartSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <wsdl:input message="tns:ItemStopSoapIn" />
+      <wsdl:output message="tns:ItemStopSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <wsdl:input message="tns:WriteErrorSoapIn" />
+      <wsdl:output message="tns:WriteErrorSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <wsdl:input message="tns:WriteNoticeSoapIn" />
+      <wsdl:output message="tns:WriteNoticeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <wsdl:input message="tns:DeviceDownStreamKeyerDisableSoapIn" />
+      <wsdl:output message="tns:DeviceDownStreamKeyerDisableSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <wsdl:input message="tns:DeviceDownStreamKeyerEnableSoapIn" />
+      <wsdl:output message="tns:DeviceDownStreamKeyerEnableSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CuesSoap" type="tns:CuesSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ItemCreate">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemCreate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="StartDTMF">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/StartDTMF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoriesSCRGet">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/DirectoriesSCRGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddTextToRoll">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/AddTextToRoll" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/Init" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/Ping" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemsUpdate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemDelete" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemPrepare" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemStart" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/ItemStop" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/WriteError" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/WriteNotice" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/DeviceDownStreamKeyerDisable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <soap:operation soapAction="http://replica/ig/services/Cues.asmx/DeviceDownStreamKeyerEnable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CuesSoap12" type="tns:CuesSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ItemCreate">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemCreate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="StartDTMF">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/StartDTMF" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoriesSCRGet">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/DirectoriesSCRGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddTextToRoll">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/AddTextToRoll" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/Init" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/Ping" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemsUpdate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemDelete" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemPrepare" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemStart" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/ItemStop" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/WriteError" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/WriteNotice" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/DeviceDownStreamKeyerDisable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <soap12:operation soapAction="http://replica/ig/services/Cues.asmx/DeviceDownStreamKeyerEnable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Cues">
+    <wsdl:port name="CuesSoap" binding="tns:CuesSoap">
+      <soap:address location="http://cues.scr.replica/ig/services/Cues.asmx" />
+    </wsdl:port>
+    <wsdl:port name="CuesSoap12" binding="tns:CuesSoap12">
+      <soap12:address location="http://cues.scr.replica/ig/services/Cues.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

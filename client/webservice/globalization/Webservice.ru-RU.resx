@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sErrorDBInteract1" xml:space="preserve">
+    <value>внутреннее хранилище объектов сессии не проинициализировано</value>
+  </data>
+  <data name="sErrorDBInteract2" xml:space="preserve">
+    <value>объект сессии отсутствует</value>
+  </data>
+  <data name="sErrorDBInteract3" xml:space="preserve">
+    <value>Нет элементов для перемещения</value>
+  </data>
+  <data name="sErrorDBInteract4" xml:space="preserve">
+    <value>Один из перемещаемых элементов находится в кэше плеера:</value>
+  </data>
+  <data name="sErrorDBInteract5" xml:space="preserve">
+    <value>Попытка переместить планируемые элементы в прошлое:</value>
+  </data>
+  <data name="sErrorDBInteract6" xml:space="preserve">
+    <value>Целевой диапазон перемещения содержит закэшированные элементы:</value>
+  </data>
+  <data name="sErrorDBInteract7" xml:space="preserve">
+    <value>ID смены полученного актуального объявления не совпадает с ID текущей смены</value>
+  </data>
+  <data name="sErrorDBInteract8" xml:space="preserve">
+    <value>класс у клипа не может быть пустым</value>
+  </data>
+  <data name="sErrorPLImport1" xml:space="preserve">
+    <value>ошибка ротации отбивки:</value>
+  </data>
+  <data name="sErrorPLImport10" xml:space="preserve">
+    <value>не удалось найти подходящие ассеты в процессе анализа файла Video International</value>
+  </data>
+  <data name="sErrorPLImport12" xml:space="preserve">
+    <value>отсутствует начало рекламного блока</value>
+  </data>
+  <data name="sErrorPLImport14" xml:space="preserve">
+    <value>ошибка ассета:</value>
+  </data>
+  <data name="sErrorPLImport15" xml:space="preserve">
+    <value>ИМПОРТ ПЛЕЙЛИСТА ПРОИЗОШЕЛ С ФАТАЛЬНОЙ ОШИБКОЙ! СРОЧНО СВЯЖИТЕСЬ С РАЗРАБОТЧИКОМ СИСТЕМЫ! сообщите разработчику следующую информацию: проблема с импортом плейлиста; в выборке video international присутствует элемент дольше 3,5 минут:</value>
+  </data>
+  <data name="sErrorPLImport16" xml:space="preserve">
+    <value>элементы НЕ были добавлены в плейлист по причине нулевого хронометража:</value>
+  </data>
+  <data name="sErrorPLImport17" xml:space="preserve">
+    <value>не удалось внедрить рекламные блоки VI на {0}{1} часов {2} минут</value>
+  </data>
+  <data name="sErrorPLImport18" xml:space="preserve">
+    <value>не удалось найти блок VI на {0}{1} часов {2} минут</value>
+  </data>
+  <data name="sErrorPLImport19" xml:space="preserve">
+    <value>обнаружено отсутствие контента между {0} и {1}</value>
+  </data>
+  <data name="sErrorPLImport2" xml:space="preserve">
+    <value>некорректный формат файла PowerGold в строках:</value>
+  </data>
+  <data name="sErrorPLImport20" xml:space="preserve">
+    <value>не удалось найти подходящие ассеты в процессе анализа файла оформления</value>
+  </data>
+  <data name="sErrorPLImport3" xml:space="preserve">
+    <value>отсутствуют привязки индентификаторов PG к ассетам:</value>
+  </data>
+  <data name="sErrorPLImport4" xml:space="preserve">
+    <value>не удалось найти подходящие ассеты в процессе анализа файла PowerGold</value>
+  </data>
+  <data name="sErrorPLImport5" xml:space="preserve">
+    <value>не удалось найти загруженный файл по промежуточному имени:</value>
+  </data>
+  <data name="sErrorPLImport6" xml:space="preserve">
+    <value>отсутствует название рекламного блока на</value>
+  </data>
+  <data name="sErrorPLImport7" xml:space="preserve">
+    <value>неправильный формат времени старта блока:</value>
+  </data>
+  <data name="sErrorPLImport8" xml:space="preserve">
+    <value>отсутствует VI ID рекламного ролика на {0}{1} часов {2} минут</value>
+  </data>
+  <data name="sErrorPLImport9" xml:space="preserve">
+    <value>отсутствуют привязки индентификаторов VI к ассетам:</value>
+  </data>
+  <data name="sNoticePLImport1" xml:space="preserve">
+    <value>ВНИМАНИЕ! Следующие рекламные ассеты из блока на {0} НЕ БЫЛИ ИСПОЛЬЗОВАНЫ:</value>
+  </data>
+  <data name="sNoticePLImport2" xml:space="preserve">
+    <value>Номер ролика</value>
+  </data>
+  <data name="sNoticePLImport4" xml:space="preserve">
+    <value>заглушка</value>
+  </data>
+  <data name="sNoticePreferences1" xml:space="preserve">
+    <value>Запланировано</value>
+  </data>
+  <data name="sNoticePreferences2" xml:space="preserve">
+    <value>Поставлено в очередь</value>
+  </data>
+  <data name="sNoticePreferences3" xml:space="preserve">
+    <value>Подготовлено</value>
+  </data>
+  <data name="sNoticePreferences4" xml:space="preserve">
+    <value>В эфире</value>
+  </data>
+  <data name="sNoticePreferences5" xml:space="preserve">
+    <value>Проигранно</value>
+  </data>
+  <data name="sNoticePreferences6" xml:space="preserve">
+    <value>Пропущенно</value>
+  </data>
+  <data name="sNoticePreferences7" xml:space="preserve">
+    <value>Другое</value>
+  </data>
+  <data name="sNoticeVJ1" xml:space="preserve">
+    <value>не указана</value>
+  </data>
+</root>

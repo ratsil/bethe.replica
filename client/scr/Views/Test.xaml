@@ -1,0 +1,31 @@
+﻿<navigation:Page x:Class="scr.Views.Test" 
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d"
+		xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+		xmlns:cvps="clr-namespace:controls.video.preview.sl;assembly=controls.video.preview.sl"
+		d:DesignWidth="640" d:DesignHeight="480"
+		Title="Test Page">
+    <navigation:Page.Resources>
+        <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </navigation:Page.Resources>
+    <Grid x:Name="LayoutRoot" Background="White">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="288" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="{Binding Path=cSCR.sNoticeTest1, Source={StaticResource g}}" />
+		<TextBox Grid.Row="0" Grid.Column="1" Name="_ui_tbFilename" Text="http://localhost/preview.mov"  VerticalAlignment="Center" />
+        <Button Grid.Row="0" Grid.Column="2" x:Name="_ui_btnStart" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStart, Source={StaticResource g}}" Click="_ui_btnStart_Click" />
+		<cvps:MediaPreview Grid.Row="1" Grid.ColumnSpan="2" Visibility="Visible" HorizontalAlignment="Left" Name="_ui_ctrlMediaPreview" VerticalAlignment="Top" Width="360" Height="288" />
+	</Grid>
+</navigation:Page>

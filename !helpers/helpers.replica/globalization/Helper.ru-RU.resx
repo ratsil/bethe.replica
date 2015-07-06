@@ -1,0 +1,495 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sAdvertisement" xml:space="preserve">
+    <value>Реклама</value>
+  </data>
+  <data name="sAdvertisementBlock" xml:space="preserve">
+    <value>Рекламный блок</value>
+  </data>
+  <data name="sAlbum" xml:space="preserve">
+    <value>Альбом</value>
+  </data>
+  <data name="sArchive" xml:space="preserve">
+    <value>Архив</value>
+  </data>
+  <data name="sArtist" xml:space="preserve">
+    <value>Исполнитель</value>
+  </data>
+  <data name="sArtists" xml:space="preserve">
+    <value>Исполнители</value>
+  </data>
+  <data name="sArtistsMissing" xml:space="preserve">
+    <value>Исполнители отсутствуют</value>
+  </data>
+  <data name="sAssetID" xml:space="preserve">
+    <value>ID ассета</value>
+  </data>
+  <data name="sAssetName" xml:space="preserve">
+    <value>Название ассета</value>
+  </data>
+  <data name="sAssets" xml:space="preserve">
+    <value>Ассеты</value>
+  </data>
+  <data name="sAssetSearch" xml:space="preserve">
+    <value>Поиск ассета</value>
+  </data>
+  <data name="sChannel" xml:space="preserve">
+    <value>Канал</value>
+  </data>
+  <data name="sChat" xml:space="preserve">
+    <value>Чат</value>
+  </data>
+  <data name="sCheckPoint" xml:space="preserve">
+    <value>КПП</value>
+  </data>
+  <data name="sClass" xml:space="preserve">
+    <value>Класс</value>
+  </data>
+  <data name="sClip" xml:space="preserve">
+    <value>Клип</value>
+  </data>
+  <data name="sClips" xml:space="preserve">
+    <value>Клипы</value>
+  </data>
+  <data name="sClockFace" xml:space="preserve">
+    <value>циферблат</value>
+  </data>
+  <data name="sCrawl" xml:space="preserve">
+    <value>Бегущая строка</value>
+  </data>
+  <data name="sCrawls" xml:space="preserve">
+    <value>Бегущие строки</value>
+  </data>
+  <data name="sCue" xml:space="preserve">
+    <value>Титр</value>
+  </data>
+  <data name="sCues" xml:space="preserve">
+    <value>Титры</value>
+  </data>
+  <data name="sCuesClass" xml:space="preserve">
+    <value>Класс титрования</value>
+  </data>
+  <data name="sCurrentItem" xml:space="preserve">
+    <value>Текущий элемент</value>
+  </data>
+  <data name="sCustomValues" xml:space="preserve">
+    <value>Пользовательские параметры</value>
+  </data>
+  <data name="sCutted" xml:space="preserve">
+    <value>Oбрезано</value>
+  </data>
+  <data name="sDays" xml:space="preserve">
+    <value>дней</value>
+  </data>
+  <data name="sDesign" xml:space="preserve">
+    <value>Оформление</value>
+  </data>
+  <data name="sDuration" xml:space="preserve">
+    <value>Длительность</value>
+  </data>
+  <data name="sEditArtistName" xml:space="preserve">
+    <value>Отредактируйте имя артиста</value>
+  </data>
+  <data name="sEnd" xml:space="preserve">
+    <value>Конец</value>
+  </data>
+  <data name="sEnded" xml:space="preserve">
+    <value>Завершено</value>
+  </data>
+  <data name="sEpisode" xml:space="preserve">
+    <value>Эпизод</value>
+  </data>
+  <data name="sEqual" xml:space="preserve">
+    <value>равно</value>
+  </data>
+  <data name="sErrorDBInteract1" xml:space="preserve">
+    <value>статус не проинициализирован</value>
+  </data>
+  <data name="sErrorDBInteract2" xml:space="preserve">
+    <value>указан некорректный статус</value>
+  </data>
+  <data name="sErrorDBInteract3" xml:space="preserve">
+    <value>ошибка добавления смены АСБ</value>
+  </data>
+  <data name="sErrorDBInteract4" xml:space="preserve">
+    <value>ошибка запуска смены АСБ</value>
+  </data>
+  <data name="sErrorDBInteract5" xml:space="preserve">
+    <value>ошибка остановки смены АСБ</value>
+  </data>
+  <data name="sErrorGettingFileTimings" xml:space="preserve">
+    <value>Произошла ошибка определения хронометража файла</value>
+  </data>
+  <data name="sErrorLiveIsMissing" xml:space="preserve">
+    <value>Текущий эфир отсутствует</value>
+  </data>
+  <data name="sErrorReceiveArtistsList" xml:space="preserve">
+    <value>Ошибка при получении списка исполнителей</value>
+  </data>
+  <data name="sErrorReceiveAssetsList" xml:space="preserve">
+    <value>Ошибка при получении списка ассетов</value>
+  </data>
+  <data name="sErrorReceiveStylesList" xml:space="preserve">
+    <value>Ошибка при получении списка стилей</value>
+  </data>
+  <data name="sEventStart" xml:space="preserve">
+    <value>старт события</value>
+  </data>
+  <data name="sFileID" xml:space="preserve">
+    <value>ID файла</value>
+  </data>
+  <data name="sFinishing" xml:space="preserve">
+    <value>завершение</value>
+  </data>
+  <data name="sFirst" xml:space="preserve">
+    <value>Первая</value>
+  </data>
+  <data name="sFontName" xml:space="preserve">
+    <value>Название шрифта</value>
+  </data>
+  <data name="sFontSize" xml:space="preserve">
+    <value>Размер шрифта</value>
+  </data>
+  <data name="sFor" xml:space="preserve">
+    <value>для</value>
+  </data>
+  <data name="sFormat" xml:space="preserve">
+    <value>Формат</value>
+  </data>
+  <data name="sFramesQty" xml:space="preserve">
+    <value>кол-во кадров</value>
+  </data>
+  <data name="sGrid" xml:space="preserve">
+    <value>Сетка</value>
+  </data>
+  <data name="sHours" xml:space="preserve">
+    <value>часов</value>
+  </data>
+  <data name="sInsert" xml:space="preserve">
+    <value>Вставка</value>
+  </data>
+  <data name="sItShouldBeFixedWith" xml:space="preserve">
+    <value>необходимо исправить на</value>
+  </data>
+  <data name="sLeft" xml:space="preserve">
+    <value>Осталось</value>
+  </data>
+  <data name="sLess" xml:space="preserve">
+    <value>меньше</value>
+  </data>
+  <data name="sLine1" xml:space="preserve">
+    <value>Строка 1</value>
+  </data>
+  <data name="sLine2" xml:space="preserve">
+    <value>Строка 2</value>
+  </data>
+  <data name="sLive" xml:space="preserve">
+    <value>Прямой эфир</value>
+  </data>
+  <data name="sLogo" xml:space="preserve">
+    <value>Логотип</value>
+  </data>
+  <data name="sMedia" xml:space="preserve">
+    <value>Медиа</value>
+  </data>
+  <data name="sMessages" xml:space="preserve">
+    <value>Сообщения</value>
+  </data>
+  <data name="sMore" xml:space="preserve">
+    <value>больше</value>
+  </data>
+  <data name="sNextItemsWereNotAdded" xml:space="preserve">
+    <value>Следующие элементы не были добавлены:</value>
+  </data>
+  <data name="sNoticeTemplateButton1" xml:space="preserve">
+    <value>Вы уверены, что хотите сбросить подготовленный эффект?</value>
+  </data>
+  <data name="sOnAir" xml:space="preserve">
+    <value>Эфир</value>
+  </data>
+  <data name="sPalette" xml:space="preserve">
+    <value>Палитра</value>
+  </data>
+  <data name="sParentAssetID" xml:space="preserve">
+    <value>Введите ID родительского ассета:</value>
+  </data>
+  <data name="sPart" xml:space="preserve">
+    <value>Часть</value>
+  </data>
+  <data name="sPersons" xml:space="preserve">
+    <value>Персоны</value>
+  </data>
+  <data name="sPersonSearch" xml:space="preserve">
+    <value>поиск персоны</value>
+  </data>
+  <data name="sPhoto" xml:space="preserve">
+    <value>Фото</value>
+  </data>
+  <data name="sPlaylist" xml:space="preserve">
+    <value>Плейлист</value>
+  </data>
+  <data name="sPlaylistArchive" xml:space="preserve">
+    <value>Отыгранный плейлист</value>
+  </data>
+  <data name="sPlaylistImport" xml:space="preserve">
+    <value>импорт плейлиста</value>
+  </data>
+  <data name="sPlaylistItemProperties" xml:space="preserve">
+    <value>свойства элемента плейлиста</value>
+  </data>
+  <data name="sPlaylistItemsMove" xml:space="preserve">
+    <value>перемещение элементов плейлиста</value>
+  </data>
+  <data name="sPlaylistsIntegration" xml:space="preserve">
+    <value>интеграция плейлистов</value>
+  </data>
+  <data name="sPlug" xml:space="preserve">
+    <value>Заглушка</value>
+  </data>
+  <data name="sPossessor" xml:space="preserve">
+    <value>Правообладатель</value>
+  </data>
+  <data name="sProgram" xml:space="preserve">
+    <value>Программа</value>
+  </data>
+  <data name="sPrograms" xml:space="preserve">
+    <value>Программы</value>
+  </data>
+  <data name="sProgramType" xml:space="preserve">
+    <value>Тип программы</value>
+  </data>
+  <data name="sPromo" xml:space="preserve">
+    <value>Промо</value>
+  </data>
+  <data name="sQuality" xml:space="preserve">
+    <value>Качество</value>
+  </data>
+  <data name="sRecalculate" xml:space="preserve">
+    <value>Пересчитать</value>
+  </data>
+  <data name="sRecalculateTimings" xml:space="preserve">
+    <value>пересчитать хронометраж</value>
+  </data>
+  <data name="sRecalculation" xml:space="preserve">
+    <value>Пересчет</value>
+  </data>
+  <data name="sRefreshPlaylist" xml:space="preserve">
+    <value>Обновить плейлист</value>
+  </data>
+  <data name="sRemix" xml:space="preserve">
+    <value>Ремикс</value>
+  </data>
+  <data name="sRemovingAssetsParent" xml:space="preserve">
+    <value>Удаление родителей у ассетов</value>
+  </data>
+  <data name="sRotation" xml:space="preserve">
+    <value>Ротация</value>
+  </data>
+  <data name="sSec" xml:space="preserve">
+    <value>Сек</value>
+  </data>
+  <data name="sSecond" xml:space="preserve">
+    <value>Вторая</value>
+  </data>
+  <data name="sSelectAsset" xml:space="preserve">
+    <value>Выберите ассет</value>
+  </data>
+  <data name="sSelectClip" xml:space="preserve">
+    <value>Выберите клип</value>
+  </data>
+  <data name="sSequence" xml:space="preserve">
+    <value>Секвенция</value>
+  </data>
+  <data name="sSeries" xml:space="preserve">
+    <value>Цикл</value>
+  </data>
+  <data name="sServerFilesPath" xml:space="preserve">
+    <value>Путь к файлам на видео-сервере:</value>
+  </data>
+  <data name="sSetParent" xml:space="preserve">
+    <value>назначить родителя</value>
+  </data>
+  <data name="sSettingAssetsParent" xml:space="preserve">
+    <value>Назначение родителя для ассетов</value>
+  </data>
+  <data name="sSong" xml:space="preserve">
+    <value>Композиция</value>
+  </data>
+  <data name="sSound" xml:space="preserve">
+    <value>Звук</value>
+  </data>
+  <data name="sSpeed" xml:space="preserve">
+    <value>Скорость</value>
+  </data>
+  <data name="sStart" xml:space="preserve">
+    <value>Старт</value>
+  </data>
+  <data name="sStartTime" xml:space="preserve">
+    <value>Время старта</value>
+  </data>
+  <data name="sStatistics" xml:space="preserve">
+    <value>Статистика</value>
+  </data>
+  <data name="sStop" xml:space="preserve">
+    <value>Стоп</value>
+  </data>
+  <data name="sStorage" xml:space="preserve">
+    <value>Хранилище</value>
+  </data>
+  <data name="sStyles" xml:space="preserve">
+    <value>Стили</value>
+  </data>
+  <data name="sStylesMissing" xml:space="preserve">
+    <value>Стили отсутствуют</value>
+  </data>
+  <data name="sTemplateName" xml:space="preserve">
+    <value>Имя шаблона</value>
+  </data>
+  <data name="sTemplates" xml:space="preserve">
+    <value>Шаблоны</value>
+  </data>
+  <data name="sThird" xml:space="preserve">
+    <value>Третья</value>
+  </data>
+  <data name="sTimings" xml:space="preserve">
+    <value>Хронометраж</value>
+  </data>
+  <data name="sTrailers" xml:space="preserve">
+    <value>Анонсы</value>
+  </data>
+  <data name="sUnsetParent" xml:space="preserve">
+    <value>отвязать родителя</value>
+  </data>
+  <data name="sUploadedFilesAnalyzing" xml:space="preserve">
+    <value>анализ загруженных файлов</value>
+  </data>
+  <data name="sVideo" xml:space="preserve">
+    <value>Видео</value>
+  </data>
+  <data name="sBumper" xml:space="preserve">
+    <value>Отбивка</value>
+  </data>
+  <data name="sTrailer" xml:space="preserve">
+    <value>Анонс</value>
+  </data>
+  <data name="sMix" xml:space="preserve">
+    <value>Нарезка</value>
+  </data>
+</root>

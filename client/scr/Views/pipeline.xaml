@@ -1,0 +1,70 @@
+﻿<navigation:Page
+        x:Class="scr.Views.pipeline" 
+        xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        mc:Ignorable="d"
+        d:DesignWidth="640" d:DesignHeight="480"
+        Title="Pipeline">
+    <navigation:Page.Resources>
+        <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </navigation:Page.Resources>
+    <Grid x:Name="LayoutRoot">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<Border Grid.Row="0"  BorderBrush="Silver" BorderThickness="1" Height="Auto" Width="Auto" Margin="100,10" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+			<Grid Name="_ui_gChannelFirst">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition Width="4*" />
+					<ColumnDefinition />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition />
+					<RowDefinition />
+				</Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="10" FontWeight="ExtraBold" Text="{Binding Path=cSCR.sNoticePipeline8, Source={StaticResource g}}" />
+                <Button Grid.Row="1" Grid.Column="0" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStart, Source={StaticResource g}}" Height="23" HorizontalAlignment="Right" Name="_ui_btnChannelFirstStart" VerticalAlignment="Center" Width="75" Click="_ui_btnStart_Click" Visibility="Collapsed" />
+                <TextBox Grid.Row="1" Grid.Column="1" Height="23" HorizontalAlignment="Stretch" Name="_ui_tbChannelFirstFileName" VerticalAlignment="Center" FontStyle="Italic" Foreground="Gray" Tag="" Text="{Binding Path=cSCR.sNoticePipeline10, Source={StaticResource g}}" GotFocus="_ui_tbFileName_GotFocus" LostFocus="_ui_tbFileName_LostFocus" TextChanged="_ui_tbFileName_TextChanged" />
+                <Button Grid.Row="1" Grid.Column="2" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStop, Source={StaticResource g}}" Height="23" HorizontalAlignment="Left" Name="_ui_btnChannelFirstStop" VerticalAlignment="Center" Width="75" Click="_ui_btnStop_Click" Visibility="Collapsed" />
+				<sdk:DataGrid Grid.Row="2" Grid.ColumnSpan="3" Name="_ui_dgChannelFirstStatus" AutoGenerateColumns="False" HeadersVisibility="None" Margin="100,0">
+					<sdk:DataGrid.Columns>
+						<sdk:DataGridTextColumn Binding="{Binding Key}" Width="*" FontWeight="Bold" />
+						<sdk:DataGridTextColumn Binding="{Binding Value}" Width="*" />
+					</sdk:DataGrid.Columns>
+				</sdk:DataGrid>
+			</Grid>
+		</Border>
+		<Border Grid.Row="1"  BorderBrush="Silver" BorderThickness="1" Height="Auto" Width="Auto" Margin="100, 10" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+			<Grid Name="_ui_gChannelSecond">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition Width="4*" />
+					<ColumnDefinition />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition />
+					<RowDefinition />
+				</Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="10" FontWeight="ExtraBold" Text="{Binding Path=cSCR.sNoticePipeline9, Source={StaticResource g}}" />
+                <Button Grid.Row="1" Grid.Column="0" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStart, Source={StaticResource g}}" Height="23" HorizontalAlignment="Right" Name="_ui_btnChannelSecondStart" VerticalAlignment="Center" Width="75" Click="_ui_btnStart_Click" Visibility="Collapsed" />
+                <TextBox Grid.Row="1" Grid.Column="1" Height="23" HorizontalAlignment="Stretch" Name="_ui_tbChannelSecondFileName" VerticalAlignment="Center" FontStyle="Italic" Foreground="Gray" Tag="" Text="{Binding Path=cSCR.sNoticePipeline10, Source={StaticResource g}}" GotFocus="_ui_tbFileName_GotFocus" LostFocus="_ui_tbFileName_LostFocus" TextChanged="_ui_tbFileName_TextChanged" />
+                <Button Grid.Row="1" Grid.Column="2" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStop, Source={StaticResource g}}" Height="23" HorizontalAlignment="Left" Name="_ui_btnChannelSecondStop" VerticalAlignment="Center" Width="75" Click="_ui_btnStop_Click" Visibility="Collapsed" />
+				<sdk:DataGrid Grid.Row="2" Grid.ColumnSpan="3" Name="_ui_dgChannelSecondStatus" AutoGenerateColumns="False" HeadersVisibility="None" Margin="100,0">
+					<sdk:DataGrid.Columns>
+						<sdk:DataGridTextColumn Binding="{Binding Key}" Width="*" FontWeight="Bold" />
+						<sdk:DataGridTextColumn Binding="{Binding Value}" Width="*" />
+					</sdk:DataGrid.Columns>
+				</sdk:DataGrid>
+			</Grid>
+		</Border>
+	</Grid>
+</navigation:Page>

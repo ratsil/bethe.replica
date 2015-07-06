@@ -1,0 +1,1 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="vjstatus.aspx.cs" Inherits="webservice.ia.vjstatus" %>

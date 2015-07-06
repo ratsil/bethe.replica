@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://replica/ig/services/Preferences.asmx" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://replica/ig/services/Preferences.asmx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://replica/ig/services/Preferences.asmx">
+      <s:element name="SCRGet">
+        <s:complexType />
+      </s:element>
+      <s:element name="SCRGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SCRGetResult" type="tns:SCR" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SCR">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Preferences">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="aPresets" type="tns:ArrayOfPreset" />
+              <s:element minOccurs="0" maxOccurs="1" name="aTemplates" type="tns:ArrayOfTemplate" />
+              <s:element minOccurs="0" maxOccurs="1" name="aPlaques" type="tns:ArrayOfPlaque" />
+              <s:element minOccurs="0" maxOccurs="1" name="sTemplateChannelMask" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sTemplatePresetMask" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Preferences" />
+      <s:complexType name="ArrayOfPreset">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Preset" nillable="true" type="tns:Preset" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Preset">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:IdNamePair">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="sChannel" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sFolder" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sCaption" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="IdNamePair">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTemplate">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Template" nillable="true" type="tns:Template" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Template">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="eBind" type="tns:Bind" />
+          <s:element minOccurs="0" maxOccurs="1" name="sFile" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="aOffsets" type="tns:ArrayOfOffset" />
+          <s:element minOccurs="0" maxOccurs="1" name="aConflicts" type="tns:ArrayOfConflict" />
+          <s:element minOccurs="0" maxOccurs="1" name="aParameters" type="tns:ArrayOfParameters" />
+          <s:element minOccurs="0" maxOccurs="1" name="aPlayerParameters" type="tns:ArrayOfPlayerParameters" />
+          <s:element minOccurs="1" maxOccurs="1" name="stScaleVideo" type="tns:Area" />
+          <s:element minOccurs="1" maxOccurs="1" name="nPixelAspectRatio" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Bind">
+        <s:restriction base="s:string">
+          <s:enumeration value="playlist" />
+          <s:enumeration value="channel_credits" />
+          <s:enumeration value="channel_logo" />
+          <s:enumeration value="channel_chat" />
+          <s:enumeration value="channel_user1" />
+          <s:enumeration value="channel_user2" />
+          <s:enumeration value="channel_user3" />
+          <s:enumeration value="channel_user4" />
+          <s:enumeration value="preset_logo" />
+          <s:enumeration value="preset_credits" />
+          <s:enumeration value="preset_notice" />
+          <s:enumeration value="preset_credits_advert" />
+          <s:enumeration value="preset_notice_advert" />
+          <s:enumeration value="preset_credits_trail" />
+          <s:enumeration value="preset_notice_trail" />
+          <s:enumeration value="preset_bumper" />
+          <s:enumeration value="preset_user1" />
+          <s:enumeration value="preset_user2" />
+          <s:enumeration value="preset_user3" />
+          <s:enumeration value="preset_user4" />
+          <s:enumeration value="preset_sequence" />
+          <s:enumeration value="dtmf_in" />
+          <s:enumeration value="dtmf_out" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfOffset">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Offset" nillable="true" type="tns:Offset" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Offset">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nPresetID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="nOffsetIn" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="nOffsetOut" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="nDurationSafe" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="sType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sClass" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sPreType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sPreClass" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sNextType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sNextClass" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bDoOnlyIfLast" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfConflict">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Conflict" nillable="true" type="tns:Conflict" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Conflict">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nPresetID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="eBind" type="tns:Bind" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfParameters">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Parameters" nillable="true" type="tns:Parameters" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Parameters">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nPresetID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="sText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bIsVisible" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="bIsEnabled" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="bAutostart" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="eFirstAction" type="tns:FirstAction" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="FirstAction">
+        <s:restriction base="s:string">
+          <s:enumeration value="prepare" />
+          <s:enumeration value="start" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="PlayerParameters">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Parameters">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="bClipChooserVisible" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="bClipChooserOpened" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="bOpened" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="sFolder" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfPlayerParameters">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PlayerParameters" nillable="true" type="tns:PlayerParameters" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Area">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nTop" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="nLeft" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="nWidth" type="s:unsignedShort" />
+          <s:element minOccurs="1" maxOccurs="1" name="nHeight" type="s:unsignedShort" />
+          <s:element minOccurs="1" maxOccurs="1" name="nRight" type="s:short" />
+          <s:element minOccurs="1" maxOccurs="1" name="nBottom" type="s:short" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPlaque">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Plaque" nillable="true" type="tns:Plaque" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Plaque">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nPresetID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="bOpened" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="nHeight" type="s:unsignedShort" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="PresentationGet">
+        <s:complexType />
+      </s:element>
+      <s:element name="PresentationGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PresentationGetResult" type="tns:Presentation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Presentation">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Preferences">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="aFontFamilies" type="tns:ArrayOfString" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="SCRGetSoapIn">
+    <wsdl:part name="parameters" element="tns:SCRGet" />
+  </wsdl:message>
+  <wsdl:message name="SCRGetSoapOut">
+    <wsdl:part name="parameters" element="tns:SCRGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="PresentationGetSoapIn">
+    <wsdl:part name="parameters" element="tns:PresentationGet" />
+  </wsdl:message>
+  <wsdl:message name="PresentationGetSoapOut">
+    <wsdl:part name="parameters" element="tns:PresentationGetResponse" />
+  </wsdl:message>
+  <wsdl:portType name="PreferencesSoap">
+    <wsdl:operation name="SCRGet">
+      <wsdl:input message="tns:SCRGetSoapIn" />
+      <wsdl:output message="tns:SCRGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PresentationGet">
+      <wsdl:input message="tns:PresentationGetSoapIn" />
+      <wsdl:output message="tns:PresentationGetSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PreferencesSoap" type="tns:PreferencesSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SCRGet">
+      <soap:operation soapAction="http://replica/ig/services/Preferences.asmx/SCRGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PresentationGet">
+      <soap:operation soapAction="http://replica/ig/services/Preferences.asmx/PresentationGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="PreferencesSoap12" type="tns:PreferencesSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SCRGet">
+      <soap12:operation soapAction="http://replica/ig/services/Preferences.asmx/SCRGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PresentationGet">
+      <soap12:operation soapAction="http://replica/ig/services/Preferences.asmx/PresentationGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Preferences">
+    <wsdl:port name="PreferencesSoap" binding="tns:PreferencesSoap">
+      <soap:address location="http://preferences.scr.replica/ig/services/Preferences.asmx" />
+    </wsdl:port>
+    <wsdl:port name="PreferencesSoap12" binding="tns:PreferencesSoap12">
+      <soap12:address location="http://preferences.scr.replica/ig/services/Preferences.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

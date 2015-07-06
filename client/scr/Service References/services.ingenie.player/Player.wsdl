@@ -1,0 +1,1167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://replica/ig/services/Player.asmx" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://replica/ig/services/Player.asmx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://replica/ig/services/Player.asmx">
+      <s:element name="StoragesSet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aStorages" type="tns:ArrayOfIdNamePair" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfIdNamePair">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IdNamePair" nillable="true" type="tns:IdNamePair" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IdNamePair">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="StoragesSetResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ShiftStart">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="sSubject" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="nPresetID" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="sPresetName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ShiftStartResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ShiftStop">
+        <s:complexType />
+      </s:element>
+      <s:element name="ShiftStopResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemCreate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sPreset" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aItems" type="tns:ArrayOfPlaylistItem" />
+            <s:element minOccurs="1" maxOccurs="1" name="nLayer" type="s:unsignedShort" />
+            <s:element minOccurs="1" maxOccurs="1" name="bStopOnEmpty" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfPlaylistItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PlaylistItem" nillable="true" type="tns:PlaylistItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PlaylistItem">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="_eType" type="tns:PLIType" />
+          <s:element minOccurs="1" maxOccurs="1" name="bIsFirstItemInBlock" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="_nFramesQty" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStorageName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bFileExist" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="bFileIsImage" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="nTransDuration" type="s:unsignedShort" />
+          <s:element minOccurs="1" maxOccurs="1" name="nEndTransDuration" type="s:unsignedShort" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStartReal" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStopReal" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="nAtomHashCode" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="nEffectID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="_cAdvertSCR" type="tns:Advertisement" />
+          <s:element minOccurs="0" maxOccurs="1" name="_cClipSCR" type="tns:Clip" />
+          <s:element minOccurs="0" maxOccurs="1" name="sFilename" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sFilenameFull" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="PLIType">
+        <s:restriction base="s:string">
+          <s:enumeration value="AdvBlock" />
+          <s:enumeration value="AdvBlockItem" />
+          <s:enumeration value="Clip" />
+          <s:enumeration value="File" />
+          <s:enumeration value="JustString" />
+          <s:enumeration value="Studio" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="Advertisement">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nAssetID" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="nPlaylistID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sFilename" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="nFramesQty" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sDuration" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStartPlanned" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStartSoft" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStartReal" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStartPlanned" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStorageName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStoragePath" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bFileExist" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="sClassName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bLogoBinding" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Clip">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sFilename" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="nFramesQty" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="sDuration" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStorageName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sStoragePath" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sSong" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sArtist" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sRotation" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bLocked" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="bSmoking" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="sClassName" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ItemCreateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemCreateResult" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Item" abstract="true">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:unsignedLong" />
+          <s:element minOccurs="0" maxOccurs="1" name="sPreset" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sCurrentClass" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="dtStatusChanged" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="eStatus" type="tns:Status" />
+          <s:element minOccurs="0" maxOccurs="1" name="sInfo" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Status">
+        <s:restriction base="s:string">
+          <s:enumeration value="Unknown" />
+          <s:enumeration value="Idle" />
+          <s:enumeration value="Prepared" />
+          <s:enumeration value="Started" />
+          <s:enumeration value="Stopped" />
+          <s:enumeration value="Error" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="Playlist">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Item" />
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="AddVideo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+            <s:element minOccurs="0" maxOccurs="1" name="aItems" type="tns:ArrayOfPlaylistItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddVideoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddVideoResult" type="tns:ArrayOfPlaylistItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Skip">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+            <s:element minOccurs="1" maxOccurs="1" name="bSkipLastEffect" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="nTransitionDuration" type="s:unsignedShort" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SkipResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SkipResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PlaylistItemsGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PlaylistItemsGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PlaylistItemsGetResult" type="tns:ArrayOfPlaylistItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PlaylistItemDelete">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+            <s:element minOccurs="0" maxOccurs="1" name="aItems" type="tns:ArrayOfPlaylistItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PlaylistItemDeleteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PlaylistItemDeleteResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ClipsSCRGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aClips" type="tns:ArrayOfClip" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfClip">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Clip" nillable="true" type="tns:Clip" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ClipsSCRGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ClipsSCRGetResult" type="tns:ArrayOfClip" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AdvertsSCRGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aAdverts" type="tns:ArrayOfAdvertisement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfAdvertisement">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Advertisement" nillable="true" type="tns:Advertisement" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AdvertsSCRGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AdvertsSCRGetResult" type="tns:ArrayOfAdvertisement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AdvertsStoppedGet">
+        <s:complexType />
+      </s:element>
+      <s:element name="AdvertsStoppedGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AdvertsStoppedGetResult" type="tns:ArrayOfLong" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfLong">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="long" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FilesSCRGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sFilesFolder" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aExtensions" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FilesSCRGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="FilesSCRGetResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VideoFramesQtyGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sFilenameFull" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VideoFramesQtyGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="VideoFramesQtyGetResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemsRunningGet">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemsRunningGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemsRunningGetResult" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Item" nillable="true" type="tns:Item" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Init">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="nClientBrowserID" type="s:unsignedLong" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="InitResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="InitResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Ping">
+        <s:complexType />
+      </s:element>
+      <s:element name="PingResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemsUpdate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aItems" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemsUpdateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemsUpdateResult" type="tns:ArrayOfItem" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemDelete">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemDeleteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemDeleteResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemPrepare">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemPrepareResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemPrepareResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStart">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStartResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemStartResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStop">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cItem" type="tns:Item" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemStopResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemStopResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteError">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sEx" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteErrorResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="WriteNotice">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sMsg" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteNoticeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerDisable">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerDisableResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerEnable">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="nLevel" type="s:unsignedByte" />
+            <s:element minOccurs="1" maxOccurs="1" name="bInternal" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeviceDownStreamKeyerEnableResponse">
+        <s:complexType />
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="StoragesSetSoapIn">
+    <wsdl:part name="parameters" element="tns:StoragesSet" />
+  </wsdl:message>
+  <wsdl:message name="StoragesSetSoapOut">
+    <wsdl:part name="parameters" element="tns:StoragesSetResponse" />
+  </wsdl:message>
+  <wsdl:message name="ShiftStartSoapIn">
+    <wsdl:part name="parameters" element="tns:ShiftStart" />
+  </wsdl:message>
+  <wsdl:message name="ShiftStartSoapOut">
+    <wsdl:part name="parameters" element="tns:ShiftStartResponse" />
+  </wsdl:message>
+  <wsdl:message name="ShiftStopSoapIn">
+    <wsdl:part name="parameters" element="tns:ShiftStop" />
+  </wsdl:message>
+  <wsdl:message name="ShiftStopSoapOut">
+    <wsdl:part name="parameters" element="tns:ShiftStopResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemCreateSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemCreate" />
+  </wsdl:message>
+  <wsdl:message name="ItemCreateSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemCreateResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddVideoSoapIn">
+    <wsdl:part name="parameters" element="tns:AddVideo" />
+  </wsdl:message>
+  <wsdl:message name="AddVideoSoapOut">
+    <wsdl:part name="parameters" element="tns:AddVideoResponse" />
+  </wsdl:message>
+  <wsdl:message name="SkipSoapIn">
+    <wsdl:part name="parameters" element="tns:Skip" />
+  </wsdl:message>
+  <wsdl:message name="SkipSoapOut">
+    <wsdl:part name="parameters" element="tns:SkipResponse" />
+  </wsdl:message>
+  <wsdl:message name="PlaylistItemsGetSoapIn">
+    <wsdl:part name="parameters" element="tns:PlaylistItemsGet" />
+  </wsdl:message>
+  <wsdl:message name="PlaylistItemsGetSoapOut">
+    <wsdl:part name="parameters" element="tns:PlaylistItemsGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="PlaylistItemDeleteSoapIn">
+    <wsdl:part name="parameters" element="tns:PlaylistItemDelete" />
+  </wsdl:message>
+  <wsdl:message name="PlaylistItemDeleteSoapOut">
+    <wsdl:part name="parameters" element="tns:PlaylistItemDeleteResponse" />
+  </wsdl:message>
+  <wsdl:message name="ClipsSCRGetSoapIn">
+    <wsdl:part name="parameters" element="tns:ClipsSCRGet" />
+  </wsdl:message>
+  <wsdl:message name="ClipsSCRGetSoapOut">
+    <wsdl:part name="parameters" element="tns:ClipsSCRGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="AdvertsSCRGetSoapIn">
+    <wsdl:part name="parameters" element="tns:AdvertsSCRGet" />
+  </wsdl:message>
+  <wsdl:message name="AdvertsSCRGetSoapOut">
+    <wsdl:part name="parameters" element="tns:AdvertsSCRGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="AdvertsStoppedGetSoapIn">
+    <wsdl:part name="parameters" element="tns:AdvertsStoppedGet" />
+  </wsdl:message>
+  <wsdl:message name="AdvertsStoppedGetSoapOut">
+    <wsdl:part name="parameters" element="tns:AdvertsStoppedGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="FilesSCRGetSoapIn">
+    <wsdl:part name="parameters" element="tns:FilesSCRGet" />
+  </wsdl:message>
+  <wsdl:message name="FilesSCRGetSoapOut">
+    <wsdl:part name="parameters" element="tns:FilesSCRGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="VideoFramesQtyGetSoapIn">
+    <wsdl:part name="parameters" element="tns:VideoFramesQtyGet" />
+  </wsdl:message>
+  <wsdl:message name="VideoFramesQtyGetSoapOut">
+    <wsdl:part name="parameters" element="tns:VideoFramesQtyGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemsRunningGetSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemsRunningGet" />
+  </wsdl:message>
+  <wsdl:message name="ItemsRunningGetSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemsRunningGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="InitSoapIn">
+    <wsdl:part name="parameters" element="tns:Init" />
+  </wsdl:message>
+  <wsdl:message name="InitSoapOut">
+    <wsdl:part name="parameters" element="tns:InitResponse" />
+  </wsdl:message>
+  <wsdl:message name="PingSoapIn">
+    <wsdl:part name="parameters" element="tns:Ping" />
+  </wsdl:message>
+  <wsdl:message name="PingSoapOut">
+    <wsdl:part name="parameters" element="tns:PingResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemsUpdateSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemsUpdate" />
+  </wsdl:message>
+  <wsdl:message name="ItemsUpdateSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemsUpdateResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemDeleteSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemDelete" />
+  </wsdl:message>
+  <wsdl:message name="ItemDeleteSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemDeleteResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemPrepareSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemPrepare" />
+  </wsdl:message>
+  <wsdl:message name="ItemPrepareSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemPrepareResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemStartSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemStart" />
+  </wsdl:message>
+  <wsdl:message name="ItemStartSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemStartResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemStopSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemStop" />
+  </wsdl:message>
+  <wsdl:message name="ItemStopSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemStopResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteErrorSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteError" />
+  </wsdl:message>
+  <wsdl:message name="WriteErrorSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteErrorResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteNoticeSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteNotice" />
+  </wsdl:message>
+  <wsdl:message name="WriteNoticeSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteNoticeResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerDisableSoapIn">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerDisable" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerDisableSoapOut">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerDisableResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerEnableSoapIn">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerEnable" />
+  </wsdl:message>
+  <wsdl:message name="DeviceDownStreamKeyerEnableSoapOut">
+    <wsdl:part name="parameters" element="tns:DeviceDownStreamKeyerEnableResponse" />
+  </wsdl:message>
+  <wsdl:portType name="PlayerSoap">
+    <wsdl:operation name="StoragesSet">
+      <wsdl:input message="tns:StoragesSetSoapIn" />
+      <wsdl:output message="tns:StoragesSetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStart">
+      <wsdl:input message="tns:ShiftStartSoapIn" />
+      <wsdl:output message="tns:ShiftStartSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStop">
+      <wsdl:input message="tns:ShiftStopSoapIn" />
+      <wsdl:output message="tns:ShiftStopSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemCreate">
+      <wsdl:input message="tns:ItemCreateSoapIn" />
+      <wsdl:output message="tns:ItemCreateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddVideo">
+      <wsdl:input message="tns:AddVideoSoapIn" />
+      <wsdl:output message="tns:AddVideoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Skip">
+      <wsdl:input message="tns:SkipSoapIn" />
+      <wsdl:output message="tns:SkipSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemsGet">
+      <wsdl:input message="tns:PlaylistItemsGetSoapIn" />
+      <wsdl:output message="tns:PlaylistItemsGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemDelete">
+      <wsdl:input message="tns:PlaylistItemDeleteSoapIn" />
+      <wsdl:output message="tns:PlaylistItemDeleteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ClipsSCRGet">
+      <wsdl:input message="tns:ClipsSCRGetSoapIn" />
+      <wsdl:output message="tns:ClipsSCRGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsSCRGet">
+      <wsdl:input message="tns:AdvertsSCRGetSoapIn" />
+      <wsdl:output message="tns:AdvertsSCRGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsStoppedGet">
+      <wsdl:input message="tns:AdvertsStoppedGetSoapIn" />
+      <wsdl:output message="tns:AdvertsStoppedGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FilesSCRGet">
+      <wsdl:input message="tns:FilesSCRGetSoapIn" />
+      <wsdl:output message="tns:FilesSCRGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VideoFramesQtyGet">
+      <wsdl:input message="tns:VideoFramesQtyGetSoapIn" />
+      <wsdl:output message="tns:VideoFramesQtyGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <wsdl:input message="tns:ItemsRunningGetSoapIn" />
+      <wsdl:output message="tns:ItemsRunningGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <wsdl:input message="tns:InitSoapIn" />
+      <wsdl:output message="tns:InitSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <wsdl:input message="tns:PingSoapIn" />
+      <wsdl:output message="tns:PingSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <wsdl:input message="tns:ItemsUpdateSoapIn" />
+      <wsdl:output message="tns:ItemsUpdateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <wsdl:input message="tns:ItemDeleteSoapIn" />
+      <wsdl:output message="tns:ItemDeleteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <wsdl:input message="tns:ItemPrepareSoapIn" />
+      <wsdl:output message="tns:ItemPrepareSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <wsdl:input message="tns:ItemStartSoapIn" />
+      <wsdl:output message="tns:ItemStartSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <wsdl:input message="tns:ItemStopSoapIn" />
+      <wsdl:output message="tns:ItemStopSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <wsdl:input message="tns:WriteErrorSoapIn" />
+      <wsdl:output message="tns:WriteErrorSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <wsdl:input message="tns:WriteNoticeSoapIn" />
+      <wsdl:output message="tns:WriteNoticeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <wsdl:input message="tns:DeviceDownStreamKeyerDisableSoapIn" />
+      <wsdl:output message="tns:DeviceDownStreamKeyerDisableSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <wsdl:input message="tns:DeviceDownStreamKeyerEnableSoapIn" />
+      <wsdl:output message="tns:DeviceDownStreamKeyerEnableSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PlayerSoap" type="tns:PlayerSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="StoragesSet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/StoragesSet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStart">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ShiftStart" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStop">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ShiftStop" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemCreate">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemCreate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddVideo">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/AddVideo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Skip">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/Skip" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemsGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/PlaylistItemsGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemDelete">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/PlaylistItemDelete" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ClipsSCRGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ClipsSCRGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsSCRGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/AdvertsSCRGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsStoppedGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/AdvertsStoppedGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FilesSCRGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/FilesSCRGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VideoFramesQtyGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/VideoFramesQtyGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/Init" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/Ping" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemsUpdate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemDelete" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemPrepare" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemStart" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemStop" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/WriteError" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/WriteNotice" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/DeviceDownStreamKeyerDisable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/DeviceDownStreamKeyerEnable" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="PlayerSoap12" type="tns:PlayerSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="StoragesSet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/StoragesSet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStart">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ShiftStart" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ShiftStop">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ShiftStop" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemCreate">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemCreate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddVideo">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/AddVideo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Skip">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/Skip" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemsGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/PlaylistItemsGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaylistItemDelete">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/PlaylistItemDelete" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ClipsSCRGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ClipsSCRGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsSCRGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/AdvertsSCRGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AdvertsStoppedGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/AdvertsStoppedGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FilesSCRGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/FilesSCRGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VideoFramesQtyGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/VideoFramesQtyGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsRunningGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Init">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/Init" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Ping">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/Ping" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsUpdate">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemsUpdate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemDelete">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemDelete" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemPrepare">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemPrepare" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStart">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemStart" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemStop">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemStop" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteError">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/WriteError" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteNotice">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/WriteNotice" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerDisable">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/DeviceDownStreamKeyerDisable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeviceDownStreamKeyerEnable">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/DeviceDownStreamKeyerEnable" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Player">
+    <wsdl:port name="PlayerSoap" binding="tns:PlayerSoap">
+      <soap:address location="http://player.scr.replica/ig/services/Player.asmx" />
+    </wsdl:port>
+    <wsdl:port name="PlayerSoap12" binding="tns:PlayerSoap12">
+      <soap12:address location="http://player.scr.replica/ig/services/Player.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

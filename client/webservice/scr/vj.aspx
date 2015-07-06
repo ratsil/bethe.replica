@@ -1,0 +1,1 @@
+﻿<%@ Page Language="C#" CodeBehind="vj.aspx.cs" Inherits="webservice.scr.vj" %>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<preferences>
+	<showcase path="d:/cues/showcase/" />
+	<ingenie>
+		<userspace server="127.0.0.1" />
+		<shared port="1238" />
+	</ingenie>
+	<helpers>
+		<common>
+			<logger level="notice">
+				<file path="./logs/" date="true" pid="false" />
+			</logger>
+		</common>
+	</helpers>
+</preferences>

@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sError1" xml:space="preserve">
+    <value>Error occurred while DB service initialize</value>
+  </data>
+  <data name="sError10" xml:space="preserve">
+    <value>Error occurred while logging</value>
+  </data>
+  <data name="sError11" xml:space="preserve">
+    <value>Error occurred while playlist create</value>
+  </data>
+  <data name="sError12" xml:space="preserve">
+    <value>Wrong user object while playlist create</value>
+  </data>
+  <data name="sError13" xml:space="preserve">
+    <value>Error occurred while playlist prepare</value>
+  </data>
+  <data name="sError14" xml:space="preserve">
+    <value>No any playlists received</value>
+  </data>
+  <data name="sError15" xml:space="preserve">
+    <value>More than one playlists received</value>
+  </data>
+  <data name="sError16" xml:space="preserve">
+    <value>Less than one playlists received</value>
+  </data>
+  <data name="sError17" xml:space="preserve">
+    <value>Error occurred while playlist item delete</value>
+  </data>
+  <data name="sError18" xml:space="preserve">
+    <value>Cannot prepare specified item</value>
+  </data>
+  <data name="sError19" xml:space="preserve">
+    <value>Name cannot be empty!</value>
+  </data>
+  <data name="sError2" xml:space="preserve">
+    <value>DB service problems!{0}If this error will appear frequently, you would have to restart the DB service and the program!{0}{0}YOU CAN CLOSE THIS WINDOW...</value>
+  </data>
+  <data name="sError20" xml:space="preserve">
+    <value>Item with such name already exists!</value>
+  </data>
+  <data name="sError21" xml:space="preserve">
+    <value>The first line cannot be empty!</value>
+  </data>
+  <data name="sError22" xml:space="preserve">
+    <value>Errors occurred while clips list get</value>
+  </data>
+  <data name="sError3" xml:space="preserve">
+    <value>Error occurred while DB service request...{0}Copy and save error description{0}{0}YOU CAN CLOSE THIS WINDOW...{0}If this error will not appear frequently, you have no need to refresh the page!</value>
+  </data>
+  <data name="sError4" xml:space="preserve">
+    <value>Errors occurred while cues list receive...</value>
+  </data>
+  <data name="sError5" xml:space="preserve">
+    <value>Errors occurred while cues list show...</value>
+  </data>
+  <data name="sError6" xml:space="preserve">
+    <value>Errors occurred while cue save...</value>
+  </data>
+  <data name="sError7" xml:space="preserve">
+    <value>Errors occurred while cue delete...</value>
+  </data>
+  <data name="sError8" xml:space="preserve">
+    <value>Errors occurred while update DB!{0}Perhaps cue with such name already exists.</value>
+  </data>
+  <data name="sError9" xml:space="preserve">
+    <value>Error occurred while nearest advertisement block get.</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser1" xml:space="preserve">
+    <value>Information about advertisement items logo binding was not received or received with errors</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser2" xml:space="preserve">
+    <value>Information about advertisement blocks was not received or received with errors</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser3" xml:space="preserve">
+    <value>Error occurred inside _cDBI_LogoBindingGetCompleted:{0}</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser4" xml:space="preserve">
+    <value>Error occurred inside _cPlayer_AdvertsSCRGetCompleted:{0}</value>
+  </data>
+  <data name="sErrorWebservice" xml:space="preserve">
+    <value>Webservice error</value>
+  </data>
+  <data name="sNoSequence" xml:space="preserve">
+    <value>No selected sequence</value>
+  </data>
+  <data name="sNotice0" xml:space="preserve">
+    <value>replica. SCR management interface</value>
+  </data>
+  <data name="sNotice1" xml:space="preserve">
+    <value>Clips search:</value>
+  </data>
+  <data name="sNotice10" xml:space="preserve">
+    <value>loading current SCR shift...</value>
+  </data>
+  <data name="sNotice11" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="sNotice12" xml:space="preserve">
+    <value>You have to stop the playlist</value>
+  </data>
+  <data name="sNotice13" xml:space="preserve">
+    <value>Attention! All live items will be stopped and playlist will be emptied!!!{0}ARE YOU SURE???</value>
+  </data>
+  <data name="sNotice14" xml:space="preserve">
+    <value>Are you sure you want to delete this cue</value>
+  </data>
+  <data name="sNotice15" xml:space="preserve">
+    <value>hide table</value>
+  </data>
+  <data name="sNotice16" xml:space="preserve">
+    <value>show table</value>
+  </data>
+  <data name="sNotice17" xml:space="preserve">
+    <value>Delete cue</value>
+  </data>
+  <data name="sNotice18" xml:space="preserve">
+    <value>add to playlist</value>
+  </data>
+  <data name="sNotice19" xml:space="preserve">
+    <value>add clips to playlist</value>
+  </data>
+  <data name="sNotice2" xml:space="preserve">
+    <value>DB service initialization...</value>
+  </data>
+  <data name="sNotice20" xml:space="preserve">
+    <value>You cannot interrupt the advertisement!</value>
+  </data>
+  <data name="sNotice21" xml:space="preserve">
+    <value>-- BLOCK --</value>
+  </data>
+  <data name="sNotice22" xml:space="preserve">
+    <value>common</value>
+  </data>
+  <data name="sNotice23" xml:space="preserve">
+    <value>Select template ==&gt;</value>
+  </data>
+  <data name="sNotice24" xml:space="preserve">
+    <value>Order desk</value>
+  </data>
+  <data name="sNotice25" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="sNotice27" xml:space="preserve">
+    <value>LIVE!</value>
+  </data>
+  <data name="sNotice28" xml:space="preserve">
+    <value>simulation</value>
+  </data>
+  <data name="sNotice29" xml:space="preserve">
+    <value>Nearest advertisement block in:</value>
+  </data>
+  <data name="sNotice3" xml:space="preserve">
+    <value>Player initialization...</value>
+  </data>
+  <data name="sNotice30" xml:space="preserve">
+    <value>loops:</value>
+  </data>
+  <data name="sNotice31" xml:space="preserve">
+    <value>show with advertisement</value>
+  </data>
+  <data name="sNotice32" xml:space="preserve">
+    <value>show trailer</value>
+  </data>
+  <data name="sNotice33" xml:space="preserve">
+    <value>Selected cue:</value>
+  </data>
+  <data name="sNotice34" xml:space="preserve">
+    <value>timer</value>
+  </data>
+  <data name="sNotice35" xml:space="preserve">
+    <value>Full playlist</value>
+  </data>
+  <data name="sNotice36" xml:space="preserve">
+    <value>elapsed:</value>
+  </data>
+  <data name="sNotice37" xml:space="preserve">
+    <value>select clip</value>
+  </data>
+  <data name="sNotice38" xml:space="preserve">
+    <value>refresh clips list</value>
+  </data>
+  <data name="sNotice39" xml:space="preserve">
+    <value>selected clip:</value>
+  </data>
+  <data name="sNotice4" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="sNotice40" xml:space="preserve">
+    <value>(no selection)</value>
+  </data>
+  <data name="sNotice41" xml:space="preserve">
+    <value>Continue this air?{0}If press OK the air automation will turn on!</value>
+  </data>
+  <data name="sNotice5" xml:space="preserve">
+    <value>loading storage mappings...</value>
+  </data>
+  <data name="sNotice6" xml:space="preserve">
+    <value>cues initialization...</value>
+  </data>
+  <data name="sNotice7" xml:space="preserve">
+    <value>loading running cues items...</value>
+  </data>
+  <data name="sNotice8" xml:space="preserve">
+    <value>loading running player items...</value>
+  </data>
+  <data name="sNotice9" xml:space="preserve">
+    <value>chat prepare...</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser0" xml:space="preserve">
+    <value>Select advertisement block</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser1" xml:space="preserve">
+    <value>starting{0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser10" xml:space="preserve">
+    <value>show time:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser11" xml:space="preserve">
+    <value>selected block:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser2" xml:space="preserve">
+    <value>loading playlist items - {0} --- {1} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser3" xml:space="preserve">
+    <value>loading playlist items done - {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser4" xml:space="preserve">
+    <value>logo binding completed - in {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser5" xml:space="preserve">
+    <value>logo binding completed - out{0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser6" xml:space="preserve">
+    <value>adverts get from player completed - in {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser7" xml:space="preserve">
+    <value>| foreach end {0} {1} {2}</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser8" xml:space="preserve">
+    <value>| adverts get from player completed - out - {0} {1} {2} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser9" xml:space="preserve">
+    <value>adverts stopped get completed: {0} |</value>
+  </data>
+  <data name="sNoticeEditors1" xml:space="preserve">
+    <value>Add text</value>
+  </data>
+  <data name="sNoticePipeline1" xml:space="preserve">
+    <value>(enter file name...)</value>
+  </data>
+  <data name="sNoticePipeline10" xml:space="preserve">
+    <value>(file name)</value>
+  </data>
+  <data name="sNoticePipeline2" xml:space="preserve">
+    <value>video format:</value>
+  </data>
+  <data name="sNoticePipeline3" xml:space="preserve">
+    <value>horizontal resolution:</value>
+  </data>
+  <data name="sNoticePipeline4" xml:space="preserve">
+    <value>vertical resolution:</value>
+  </data>
+  <data name="sNoticePipeline5" xml:space="preserve">
+    <value>frames per second:</value>
+  </data>
+  <data name="sNoticePipeline6" xml:space="preserve">
+    <value>audio channels qty:</value>
+  </data>
+  <data name="sNoticePipeline7" xml:space="preserve">
+    <value>audio format:</value>
+  </data>
+  <data name="sNoticePipeline8" xml:space="preserve">
+    <value>first channel:</value>
+  </data>
+  <data name="sNoticePipeline9" xml:space="preserve">
+    <value>second channel:</value>
+  </data>
+  <data name="sNoticePrompter0" xml:space="preserve">
+    <value>Prompter</value>
+  </data>
+  <data name="sNoticePrompter1" xml:space="preserve">
+    <value>prompter lines</value>
+  </data>
+  <data name="sNoticeTest1" xml:space="preserve">
+    <value>file link:</value>
+  </data>
+  <data name="sSmoking" xml:space="preserve">
+    <value>Smoking</value>
+  </data>
+</root>

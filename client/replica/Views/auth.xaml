@@ -1,0 +1,44 @@
+﻿<navigation:Page
+        x:Class="replica.sl.Authorization" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480"
+        Foreground="LightBlue"
+        Style="{StaticResource PageStyle}" xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk">
+    
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+
+    <Grid x:Name="LayoutRoot" Background="#FF456D89">
+        <ScrollViewer x:Name="PageScrollViewer" Style="{StaticResource PageScrollViewerStyle}">
+
+            <StackPanel x:Name="ContentStackPanel" Width="400">
+
+                <TextBlock x:Name="HeaderText" Style="{StaticResource HeaderTextStyle}" 
+                                   Text="{Binding Path=cCommon.sAuthorization, Source={StaticResource g}}"/>
+                <TextBlock x:Name="_ui_txtError" Style="{StaticResource ErrorTextStyle}" 
+                                   Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=!, Path=cCommon.sWrongCredentials, Source={StaticResource g}}" Visibility="Collapsed" Margin="50"/>
+                <Grid>
+                    <TextBlock x:Name="_ui_txtUserName" Style="{StaticResource ContentTextStyle}" 
+                                   Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cCommon.sUsername, Source={StaticResource g}}"/>
+                    <HyperlinkButton Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sSave, Source={StaticResource g}}" Height="18" Name="_ui_hlbtnLogin" Click="_ui_hlbtnLogin_Click" Width="70" Foreground="#FF9EBAD8" ClickMode="Press" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" IsTabStop="False" VerticalContentAlignment="Bottom" />
+                </Grid>
+                <TextBox x:Name="_ui_tbUserName" KeyDown="_ui_tbUserName_KeyDown" Text="" />
+                <Grid>
+                    <TextBlock x:Name="_ui_txtPassword" Style="{StaticResource ContentTextStyle}" 
+                                   Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cCommon.sPassword, Source={StaticResource g}}"/>
+                    <HyperlinkButton Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sSave, Source={StaticResource g}}" Height="18" Name="_ui_hlbtnPass" Click="_ui_hlbtnPass_Click"  Width="70" Foreground="#FF9EBAD8" ClickMode="Press" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" IsTabStop="False" VerticalContentAlignment="Bottom" />
+                </Grid>
+                <PasswordBox x:Name="_ui_pswbPassword" KeyDown="_ui_pswbPassword_KeyDown"  />
+
+
+                <Button x:Name="_ui_btnOK" Margin="0,20" Width="100" HorizontalAlignment="Right" Click="_ui_btnOK_Click" ClickMode="Press" Content="{Binding Path=cCommon.sEnter, Source={StaticResource g}}"></Button>
+                <sdk:Label Height="28" Name="_ui_lbVersion" Width="120"  HorizontalContentAlignment="Center" Foreground="#FF313131" Margin="0,70" Content="version: " FontSize="9" />
+            </StackPanel>
+
+        </ScrollViewer>
+    </Grid>
+</navigation:Page>

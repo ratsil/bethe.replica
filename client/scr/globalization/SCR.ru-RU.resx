@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sError1" xml:space="preserve">
+    <value>Ошибка инициализации сервиса БД</value>
+  </data>
+  <data name="sError10" xml:space="preserve">
+    <value>Ошибка во время операции логирования</value>
+  </data>
+  <data name="sError11" xml:space="preserve">
+    <value>Ошибка создания плейлиста</value>
+  </data>
+  <data name="sError12" xml:space="preserve">
+    <value>Некорректный пользовательский объект при создании плейлиста</value>
+  </data>
+  <data name="sError13" xml:space="preserve">
+    <value>Ошибка подготовки плейлиста</value>
+  </data>
+  <data name="sError14" xml:space="preserve">
+    <value>Не получено ни одного плейлиста</value>
+  </data>
+  <data name="sError15" xml:space="preserve">
+    <value>Получено более одного плейлиста</value>
+  </data>
+  <data name="sError16" xml:space="preserve">
+    <value>Получено менее одного плейлиста</value>
+  </data>
+  <data name="sError17" xml:space="preserve">
+    <value>Удаление из плейлиста произошло с ошибками</value>
+  </data>
+  <data name="sError18" xml:space="preserve">
+    <value>Не удалось подготовить указанный элемент</value>
+  </data>
+  <data name="sError19" xml:space="preserve">
+    <value>Имя не может быть пустым!</value>
+  </data>
+  <data name="sError2" xml:space="preserve">
+    <value>Неполадки с сервисом БД!{0}Если ошибка будет часто повторяться, то необходимо перезапустить сервис БД и программу!{0}{0}ЭТО ОКНО МОЖНО ЗАКРЫВАТЬ...</value>
+  </data>
+  <data name="sError20" xml:space="preserve">
+    <value>Такое название уже есть!</value>
+  </data>
+  <data name="sError21" xml:space="preserve">
+    <value>Первая строка не может быть пустой!</value>
+  </data>
+  <data name="sError22" xml:space="preserve">
+    <value>Во время получения списка клипов из БД произошли ошибки!</value>
+  </data>
+  <data name="sError3" xml:space="preserve">
+    <value>Во время обращения к сервису БД возникла ошибка...{0}скопируйте и сохраните текст ошибки!{0}{0}ЭТО ОКНО МОЖНО ЗАКРЫВАТЬ...{0}Перезапускать программу не надо, если только эта ошибка не будет слишком частой!</value>
+  </data>
+  <data name="sError4" xml:space="preserve">
+    <value>Во время получения списка титров возникли ошибки...</value>
+  </data>
+  <data name="sError5" xml:space="preserve">
+    <value>Во время отображения списка титров возникли ошибки...</value>
+  </data>
+  <data name="sError6" xml:space="preserve">
+    <value>При добавлении титра в БД возникли ошибки...</value>
+  </data>
+  <data name="sError7" xml:space="preserve">
+    <value>При удалении титра из БД возникли ошибки...</value>
+  </data>
+  <data name="sError8" xml:space="preserve">
+    <value>При внесении изменений в БД возникли ошибки!{0}возможно титр с таким названием уже существует.</value>
+  </data>
+  <data name="sError9" xml:space="preserve">
+    <value>Во время определения ближайшего рекламного блока возникла ошибка.</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser1" xml:space="preserve">
+    <value>Не получена, либо получена с ошибками информация о привязке шаблона логотипа к рекламным роликам</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser2" xml:space="preserve">
+    <value>Не получена, либо получена с ошибками информация о рекламных блоках</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser3" xml:space="preserve">
+    <value>В _cDBI_LogoBindingGetCompleted произошла ошибка:{0}</value>
+  </data>
+  <data name="sErrorAdvertsBlockChooser4" xml:space="preserve">
+    <value>В _cPlayer_AdvertsSCRGetCompleted произошла ошибка:{0}</value>
+  </data>
+  <data name="sErrorWebservice" xml:space="preserve">
+    <value>Ошибка вебсервиса</value>
+  </data>
+  <data name="sNoSequence" xml:space="preserve">
+    <value>Секвенция не выбрана</value>
+  </data>
+  <data name="sNotice0" xml:space="preserve">
+    <value>replica. интерфейс управления АСБ</value>
+  </data>
+  <data name="sNotice1" xml:space="preserve">
+    <value>Поиск клипов:</value>
+  </data>
+  <data name="sNotice10" xml:space="preserve">
+    <value>загрузка текущей смены АСБ...</value>
+  </data>
+  <data name="sNotice11" xml:space="preserve">
+    <value>Запуск</value>
+  </data>
+  <data name="sNotice12" xml:space="preserve">
+    <value>Необходимо остановить плейлист</value>
+  </data>
+  <data name="sNotice13" xml:space="preserve">
+    <value>Внимание! Будут остановлены все элементы эфира и будет обнулен плейлист!!!{0}ВЫ УВЕРЕНЫ???</value>
+  </data>
+  <data name="sNotice14" xml:space="preserve">
+    <value>Вы действительно хотите удалить титр</value>
+  </data>
+  <data name="sNotice15" xml:space="preserve">
+    <value>скрыть таблицу</value>
+  </data>
+  <data name="sNotice16" xml:space="preserve">
+    <value>показать таблицу</value>
+  </data>
+  <data name="sNotice17" xml:space="preserve">
+    <value>Удалить титр</value>
+  </data>
+  <data name="sNotice18" xml:space="preserve">
+    <value>добавить в плейлист</value>
+  </data>
+  <data name="sNotice19" xml:space="preserve">
+    <value>добавить в плейлист клипы</value>
+  </data>
+  <data name="sNotice2" xml:space="preserve">
+    <value>Инициализация сервиса БД...</value>
+  </data>
+  <data name="sNotice20" xml:space="preserve">
+    <value>Нельзя прерывать рекламу!</value>
+  </data>
+  <data name="sNotice21" xml:space="preserve">
+    <value>-- БЛОК --</value>
+  </data>
+  <data name="sNotice22" xml:space="preserve">
+    <value>общее</value>
+  </data>
+  <data name="sNotice23" xml:space="preserve">
+    <value>Выберите шаблон ==&gt;</value>
+  </data>
+  <data name="sNotice24" xml:space="preserve">
+    <value>Стол заказов</value>
+  </data>
+  <data name="sNotice25" xml:space="preserve">
+    <value>Элементы</value>
+  </data>
+  <data name="sNotice27" xml:space="preserve">
+    <value>ЭФИРА!</value>
+  </data>
+  <data name="sNotice28" xml:space="preserve">
+    <value>имитация</value>
+  </data>
+  <data name="sNotice29" xml:space="preserve">
+    <value>Ближайший рекламный блок через:</value>
+  </data>
+  <data name="sNotice3" xml:space="preserve">
+    <value>Инициализация плеера...</value>
+  </data>
+  <data name="sNotice30" xml:space="preserve">
+    <value>циклов:</value>
+  </data>
+  <data name="sNotice31" xml:space="preserve">
+    <value>дать с рекламой</value>
+  </data>
+  <data name="sNotice32" xml:space="preserve">
+    <value>дать анонс</value>
+  </data>
+  <data name="sNotice33" xml:space="preserve">
+    <value>Выбранный титр:</value>
+  </data>
+  <data name="sNotice34" xml:space="preserve">
+    <value>таймер</value>
+  </data>
+  <data name="sNotice35" xml:space="preserve">
+    <value>Весь плейлист</value>
+  </data>
+  <data name="sNotice36" xml:space="preserve">
+    <value>прошло:</value>
+  </data>
+  <data name="sNotice37" xml:space="preserve">
+    <value>выбор клипа</value>
+  </data>
+  <data name="sNotice38" xml:space="preserve">
+    <value>обновить список клипов</value>
+  </data>
+  <data name="sNotice39" xml:space="preserve">
+    <value>выбранный клип:</value>
+  </data>
+  <data name="sNotice4" xml:space="preserve">
+    <value>Останов</value>
+  </data>
+  <data name="sNotice40" xml:space="preserve">
+    <value>(не выбран)</value>
+  </data>
+  <data name="sNotice41" xml:space="preserve">
+    <value>Продолжить этот прямой эфир?{0}Если нажать OK, то запустится автоматизация эфира!</value>
+  </data>
+  <data name="sNotice5" xml:space="preserve">
+    <value>загрузка привязок расположения...</value>
+  </data>
+  <data name="sNotice6" xml:space="preserve">
+    <value>инициализация графического оформления...</value>
+  </data>
+  <data name="sNotice7" xml:space="preserve">
+    <value>загрузка активных элементов графического оформления...</value>
+  </data>
+  <data name="sNotice8" xml:space="preserve">
+    <value>загрузка активных элементов плеера...</value>
+  </data>
+  <data name="sNotice9" xml:space="preserve">
+    <value>подготовка чата...</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser0" xml:space="preserve">
+    <value>Выбор рекламного блока</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser1" xml:space="preserve">
+    <value>запуск{0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser10" xml:space="preserve">
+    <value>начало отображения:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser11" xml:space="preserve">
+    <value>выбранный блок:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser2" xml:space="preserve">
+    <value>загрузка элементов плейлиста - {0} --- {1} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser3" xml:space="preserve">
+    <value>загрузка элементов плейлиста завершена - {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser4" xml:space="preserve">
+    <value>завершение привязки логотипа - вход {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser5" xml:space="preserve">
+    <value>завершение привязки логотипа - выход{0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser6" xml:space="preserve">
+    <value>завершение загрузки рекламы - вход {0} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser7" xml:space="preserve">
+    <value>| завершение цикла {0} {1} {2}</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser8" xml:space="preserve">
+    <value>| завершение загрузки рекламы - выход - {0} {1} {2} |</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser9" xml:space="preserve">
+    <value>завершение загрузки заблокированной рекламы: {0} |</value>
+  </data>
+  <data name="sNoticeEditors1" xml:space="preserve">
+    <value>Вставить текст</value>
+  </data>
+  <data name="sNoticePipeline1" xml:space="preserve">
+    <value>(введите имя файла...)</value>
+  </data>
+  <data name="sNoticePipeline10" xml:space="preserve">
+    <value>(имя файла)</value>
+  </data>
+  <data name="sNoticePipeline2" xml:space="preserve">
+    <value>формат видео:</value>
+  </data>
+  <data name="sNoticePipeline3" xml:space="preserve">
+    <value>разрешение по горизонтали:</value>
+  </data>
+  <data name="sNoticePipeline4" xml:space="preserve">
+    <value>разрешение по вертикали:</value>
+  </data>
+  <data name="sNoticePipeline5" xml:space="preserve">
+    <value>кадров в секунду:</value>
+  </data>
+  <data name="sNoticePipeline6" xml:space="preserve">
+    <value>кол-во аудиоканалов:</value>
+  </data>
+  <data name="sNoticePipeline7" xml:space="preserve">
+    <value>формат аудио:</value>
+  </data>
+  <data name="sNoticePipeline8" xml:space="preserve">
+    <value>первый канал</value>
+  </data>
+  <data name="sNoticePipeline9" xml:space="preserve">
+    <value>второй канал</value>
+  </data>
+  <data name="sNoticePrompter0" xml:space="preserve">
+    <value>Суфлер</value>
+  </data>
+  <data name="sNoticePrompter1" xml:space="preserve">
+    <value>строки суфлера</value>
+  </data>
+  <data name="sNoticeTest1" xml:space="preserve">
+    <value>ссылка на файл:</value>
+  </data>
+  <data name="sSmoking" xml:space="preserve">
+    <value>Курение</value>
+  </data>
+</root>

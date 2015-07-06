@@ -1,0 +1,460 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sErrorAssetsList1" xml:space="preserve">
+    <value>The parents of these assets have been removed or not found, try to set them the new parents! They will be at the root level of the list and highlighted in red.</value>
+  </data>
+  <data name="sErrorAssetsList2" xml:space="preserve">
+    <value>cannot determine the active tab</value>
+  </data>
+  <data name="sErrorAssetsList3" xml:space="preserve">
+    <value>errors occurred while asset delete</value>
+  </data>
+  <data name="sErrorAssetsList4" xml:space="preserve">
+    <value>errors occurred while assets update!</value>
+  </data>
+  <data name="sErrorAssetsList6" xml:space="preserve">
+    <value>Errors occurred while assets parent set!</value>
+  </data>
+  <data name="sErrorAssetsList8" xml:space="preserve">
+    <value>You can not delete Assets (eg, {1}),{0}which still have children (eg, {2}){0}{0}First unset parents or delete them.</value>
+  </data>
+  <data name="sErrorAssetsList9" xml:space="preserve">
+    <value>Are you sure you want to unset parents from these assets?</value>
+  </data>
+  <data name="sErrorPlaylistImport1" xml:space="preserve">
+    <value>cannot find one or more specified files</value>
+  </data>
+  <data name="sErrorTemplates1" xml:space="preserve">
+    <value>Cannot get information about cues.tTemplate</value>
+  </data>
+  <data name="sErrorTemplates2" xml:space="preserve">
+    <value>Cannot add changes.</value>
+  </data>
+  <data name="sErrorTemplates3" xml:space="preserve">
+    <value>Perhaps some templates have not been saved!{0}Leave the page and return to it again to update and verify the contents.</value>
+  </data>
+  <data name="sErrorTemplates4" xml:space="preserve">
+    <value>Cannot add because another trailer scheduled at this time already</value>
+  </data>
+  <data name="sErrorAssetProperties1" xml:space="preserve">
+    <value>Uknown video type</value>
+  </data>
+  <data name="sErrorAssetProperties2" xml:space="preserve">
+    <value>Error occurred while program account save</value>
+  </data>
+  <data name="sErrorAssetProperties3" xml:space="preserve">
+    <value>errors occurred while frequency of assets words occurrences get</value>
+  </data>
+  <data name="sErrorAssetProperties4" xml:space="preserve">
+    <value>cues classes information missing</value>
+  </data>
+  <data name="sErrorAssetProperties5" xml:space="preserve">
+    <value>Errors occurred while program cues markers save</value>
+  </data>
+  <data name="sErrorAssetProperties6" xml:space="preserve">
+    <value>Asset account save was successful, but errors occurred while playlist update</value>
+  </data>
+  <data name="sErrorIngest1" xml:space="preserve">
+    <value>Cannot get important information from DB about the transliteration/nProbably due to permissions problems</value>
+  </data>
+  <data name="sErrorPersonsList1" xml:space="preserve">
+    <value>Cannot delete these artists</value>
+  </data>
+  <data name="sErrorPlaylist1" xml:space="preserve">
+    <value>Impossible to continue! Adding to playlist already in process, maybe you are copying a part of the playlist</value>
+  </data>
+  <data name="sErrorPlaylist2" xml:space="preserve">
+    <value>Recalculation is impossible</value>
+  </data>
+  <data name="sErrorPlaylist3" xml:space="preserve">
+    <value>Impossible to continue! Adding to playlist already in process, maybe you pressed 'Import'</value>
+  </data>
+  <data name="sErrorPlaylist4" xml:space="preserve">
+    <value>Error occurred while recalculation</value>
+  </data>
+  <data name="sErrorPlaylist6" xml:space="preserve">
+    <value>Attention! The target range already has planned items!{0}Remove them first!</value>
+  </data>
+  <data name="sErrorPlaylist7" xml:space="preserve">
+    <value>Attention! Error occurred while item start time update!</value>
+  </data>
+  <data name="sErrorPlaylist8" xml:space="preserve">
+    <value>The deleting range has cached items. Try to refresh the playlist.</value>
+  </data>
+  <data name="sErrorPlaylist9" xml:space="preserve">
+    <value>Some items ({0}) were not deleted!</value>
+  </data>
+  <data name="sErrorRecalculate2" xml:space="preserve">
+    <value>Wait for timecodes loading...</value>
+  </data>
+  <data name="sErrorRecalculate3" xml:space="preserve">
+    <value>Load timecodes first...</value>
+  </data>
+  <data name="sNoticePlaylist1" xml:space="preserve">
+    <value>Recalculate full playlist</value>
+  </data>
+  <data name="sNoticePlaylist10" xml:space="preserve">
+    <value>Show time</value>
+  </data>
+  <data name="sNoticePlaylist11" xml:space="preserve">
+    <value>Came to cMsgDate_Closed </value>
+  </data>
+  <data name="sNoticePlaylist12" xml:space="preserve">
+    <value>Specify how many times to copy the selection to the end of the playlist.{0}A sequence of all items will be preserved,{0}but the structure of the blocks WILL BE LOST!</value>
+  </data>
+  <data name="sNoticePlaylist13" xml:space="preserve">
+    <value>Enter the exact start time from which items will be placed.{0}In the copy target range, playlist should not have any other items!{0}Before copying there will be a corresponding check,{0}however it may fail in a case if the playlist has not been recalculated{0}{0}As a result of copying the structure of the blocks will be preserved while all plugs will be removed.{0}</value>
+  </data>
+  <data name="sNoticePlaylist14" xml:space="preserve">
+    <value>You may need to refresh the playlist</value>
+  </data>
+  <data name="sNoticePlaylist15" xml:space="preserve">
+    <value>Came to _cDBI_PlaylistItemStartsSetCompleted</value>
+  </data>
+  <data name="sNoticePlaylist16" xml:space="preserve">
+    <value>Move was successful!{0}{0}To see the results, run a partial or a full recalculation of the playlist.</value>
+  </data>
+  <data name="sNoticePlaylist2" xml:space="preserve">
+    <value>Recalculate the playlist for {0} {1} starting from "{2}"?</value>
+  </data>
+  <data name="sNoticeAssetChooser1" xml:space="preserve">
+    <value>as block:</value>
+  </data>
+  <data name="sNoticeAssetChooser2" xml:space="preserve">
+    <value>Add assets to the sequence</value>
+  </data>
+  <data name="sNoticeAssetChooser3" xml:space="preserve">
+    <value>selected:</value>
+  </data>
+  <data name="sNoticeAssetChooser4" xml:space="preserve">
+    <value>NO ASSETS SELECTED</value>
+  </data>
+  <data name="sNoticeAssetsList1" xml:space="preserve">
+    <value>refresh     (F9)</value>
+  </data>
+  <data name="sNoticeArtistSearch1" xml:space="preserve">
+    <value>Artist : Song</value>
+  </data>
+  <data name="sNoticeAssetProperties1" xml:space="preserve">
+    <value>Create a name from the cues.     (CTRL + M)</value>
+  </data>
+  <data name="sNoticeAssetProperties2" xml:space="preserve">
+    <value>Make changes to playlist</value>
+  </data>
+  <data name="sNoticeAssetProperties3" xml:space="preserve">
+    <value>clip timings</value>
+  </data>
+  <data name="sNoticeAssetProperties4" xml:space="preserve">
+    <value>fragment timings</value>
+  </data>
+  <data name="sNoticeAssetProperties5" xml:space="preserve">
+    <value>chat in/out markers</value>
+  </data>
+  <data name="sNoticeAssetProperties6" xml:space="preserve">
+    <value>remove ALL markers</value>
+  </data>
+  <data name="sNoticeAssetProperties7" xml:space="preserve">
+    <value>asset last show:</value>
+  </data>
+  <data name="sNoticeGroupMoving1" xml:space="preserve">
+    <value>first item start type</value>
+  </data>
+  <data name="sNoticeGroupMoving2" xml:space="preserve">
+    <value>first item show time</value>
+  </data>
+  <data name="sNoticeGroupMoving3" xml:space="preserve">
+    <value>planned start</value>
+  </data>
+  <data name="sNoticeGroupMoving4" xml:space="preserve">
+    <value>start was</value>
+  </data>
+  <data name="sNoticeGroupMoving5" xml:space="preserve">
+    <value>Type was</value>
+  </data>
+  <data name="sNoticeGroupMoving6" xml:space="preserve">
+    <value>start will be</value>
+  </data>
+  <data name="sNoticeGroupMoving7" xml:space="preserve">
+    <value>Type will be</value>
+  </data>
+  <data name="sNoticeIngest1" xml:space="preserve">
+    <value>source file:</value>
+  </data>
+  <data name="sNoticeIngest2" xml:space="preserve">
+    <value>show:</value>
+    <comment>2</comment>
+  </data>
+  <data name="sNoticeIngest3" xml:space="preserve">
+    <value>ready for broadcast:</value>
+  </data>
+  <data name="sNoticeIngest4" xml:space="preserve">
+    <value>foreign language:</value>
+  </data>
+  <data name="sNoticeIngest5" xml:space="preserve">
+    <value>target file path:</value>
+  </data>
+  <data name="sNoticeMedia1" xml:space="preserve">
+    <value>Press:  'ESC' - Cancel,   'ENTER' - OK</value>
+  </data>
+  <data name="sNoticeMediaList1" xml:space="preserve">
+    <value>  show not more than </value>
+  </data>
+  <data name="sNoticeMediaList2" xml:space="preserve">
+    <value> items    </value>
+  </data>
+  <data name="sNoticePlaylist17" xml:space="preserve">
+    <value>on air:</value>
+  </data>
+  <data name="sNoticePlaylist20" xml:space="preserve">
+    <value>copy selected to the time...</value>
+  </data>
+  <data name="sNoticePlaylist21" xml:space="preserve">
+    <value>broadcast date and time</value>
+  </data>
+  <data name="sNoticePlaylist22" xml:space="preserve">
+    <value>move to another time</value>
+  </data>
+  <data name="sNoticePlaylist23" xml:space="preserve">
+    <value>insert assets after or add a block...</value>
+  </data>
+  <data name="sNoticePlaylist24" xml:space="preserve">
+    <value>delete ALL starting from</value>
+  </data>
+  <data name="sNoticePlaylist25" xml:space="preserve">
+    <value>recalculate next 5 hours</value>
+  </data>
+  <data name="sNoticePlaylist26" xml:space="preserve">
+    <value>copy selected to the end...</value>
+  </data>
+  <data name="sNoticePlaylist27" xml:space="preserve">
+    <value>days</value>
+  </data>
+  <data name="sNoticePlaylist28" xml:space="preserve">
+    <value>in</value>
+  </data>
+  <data name="sNoticePlaylist29" xml:space="preserve">
+    <value>planned</value>
+  </data>
+  <data name="sNoticePlaylist3" xml:space="preserve">
+    <value>Select ONE playlist item after which you want to insert asset(s)</value>
+  </data>
+  <data name="sNoticePlaylist4" xml:space="preserve">
+    <value>You can not attach items to not yet added or cached item</value>
+  </data>
+  <data name="sNoticePlaylist5" xml:space="preserve">
+    <value>groop moving</value>
+  </data>
+  <data name="sNoticePlaylist6" xml:space="preserve">
+    <value>Are you SURE you want to remove more than 10 playlist items???</value>
+  </data>
+  <data name="sNoticePlaylist7" xml:space="preserve">
+    <value>Are you SURE you want to remove ALL playlist items starting from</value>
+  </data>
+  <data name="sNoticePlaylist8" xml:space="preserve">
+    <value>Came to _ui_cmPlanned_Move</value>
+  </data>
+  <data name="sNoticePlaylist9" xml:space="preserve">
+    <value>Enter new broadcast time bellow:</value>
+  </data>
+  <data name="sNoticePlaylistImport1" xml:space="preserve">
+    <value>clips file:</value>
+  </data>
+  <data name="sNoticePlaylistImport2" xml:space="preserve">
+    <value>advertisement file:</value>
+  </data>
+  <data name="sNoticePlaylistImport3" xml:space="preserve">
+    <value>binding date:</value>
+  </data>
+  <data name="sNoticePlaylistImport4" xml:space="preserve">
+    <value>design file:</value>
+  </data>
+  <data name="sNoticePlaylistImport5" xml:space="preserve">
+    <value>merge playlists</value>
+  </data>
+  <data name="sNoticeStat1" xml:space="preserve">
+    <value>not</value>
+  </data>
+  <data name="sNoticeTemplates1" xml:space="preserve">
+    <value>png-sequence folder name</value>
+  </data>
+  <data name="sNoticeTimeCodeEnter1" xml:space="preserve">
+    <value>Press digits, enter or escape</value>
+  </data>
+  <data name="sNoticeIngest10" xml:space="preserve">
+    <value>path (local)</value>
+  </data>
+  <data name="sNoticeIngest11" xml:space="preserve">
+    <value>bad</value>
+  </data>
+  <data name="sNoticeIngest12" xml:space="preserve">
+    <value>broadcast</value>
+  </data>
+  <data name="sNoticeIngest13" xml:space="preserve">
+    <value>best</value>
+  </data>
+  <data name="sNoticeIngest6" xml:space="preserve">
+    <value>life time (monthes, 0 = forever):</value>
+  </data>
+  <data name="sNoticeIngest7" xml:space="preserve">
+    <value>expiration action:</value>
+  </data>
+  <data name="sNoticeIngest8" xml:space="preserve">
+    <value>commercial</value>
+  </data>
+  <data name="sNoticeIngest9" xml:space="preserve">
+    <value>storage</value>
+  </data>
+  <data name="sNoticeIngest14" xml:space="preserve">
+    <value>season</value>
+  </data>
+  <data name="sCampaign" xml:space="preserve">
+    <value>Campaign</value>
+  </data>
+  <data name="sCompany" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="sErrorIngest2" xml:space="preserve">
+    <value>You have to select a folder, a storage, a type and a name for a new tab</value>
+  </data>
+  <data name="sErrorIngest3" xml:space="preserve">
+    <value>The specified filename differs from the target and will not be used! Do you want to continue?</value>
+  </data>
+  <data name="sAutumn" xml:space="preserve">
+    <value>Autumn</value>
+  </data>
+  <data name="sSpring" xml:space="preserve">
+    <value>Spring</value>
+  </data>
+  <data name="sSummer" xml:space="preserve">
+    <value>Summer</value>
+  </data>
+  <data name="sWinter" xml:space="preserve">
+    <value>Winter</value>
+  </data>
+  <data name="sNoticePlaylist30" xml:space="preserve">
+    <value>before</value>
+  </data>
+  <data name="sNoticePlaylist31" xml:space="preserve">
+    <value>scheduling of advanced playlist...</value>
+  </data>
+  <data name="sNoticePlaylist32" xml:space="preserve">
+    <value>end date and time</value>
+  </data>
+</root>

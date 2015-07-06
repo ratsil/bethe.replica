@@ -1,0 +1,50 @@
+﻿body { }
+
+.green
+{
+    background-color:green
+}
+.red
+{
+    background-color:red
+}
+
+#_ui_dvProgress
+{
+    margin:0, auto;
+    padding:200px;
+}
+#_ui_dvAuthorization, #_ui_dvNavigation, #_ui_dvSocial, #_ui_dvPreferences
+{
+    display:none;
+}
+#_ui_dvAuthorization
+{
+}
+#_ui_dvNavigation
+{
+    width:100%;
+    text-align:right;
+}
+#_ui_dvSocial
+{
+}
+#_ui_dvPreferences
+{
+}
+
+span.navigation
+{
+    padding:5px;
+    cursor:pointer;
+    background-color:silver;
+    border:1px dotted gray;
+}
+
+
+/*social*/
+button.social
+{
+    display:inline;
+    padding:5px 5px 0px 5px;
+}

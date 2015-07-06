@@ -1,0 +1,118 @@
+﻿<UserControl xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"  
+        x:Class="controls.replica.sl.MediaList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+        xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:di="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data.Input"
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
+        mc:Ignorable="d"
+        d:DesignHeight="300" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+    <Grid x:Name="_ui_dgMedia" Margin="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <data:DataGrid AutoGenerateColumns="False" Name="_ui_dgStorages" SelectionChanged="_ui_dgStorages_SelectionChanged" Loaded="_ui_dgStorages_Loaded" IsReadOnly="True" HorizontalGridLinesBrush="#FFB4B4B4" AlternatingRowBackground="{x:Null}" Background="#FFFFFBEB" Grid.Row="0" Grid.Column="0" RowBackground="#FFFFFBEB" VerticalGridLinesBrush="#FFB4B4B4" GridLinesVisibility="All" VerticalAlignment="Top" SelectionMode="Single">
+            <itk:ContextMenuService.ContextMenu>
+                <itk:ContextMenu Name="_ui_cmStorages" Opened="_ui_cmStorages_Opened">
+                    <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStorage, Source={StaticResource g}}" />
+                    <itk:Separator/>
+                    <itk:MenuItem Name="_ui_cmiStorageAdd" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sAdd, Source={StaticResource g}}" />
+                    <itk:MenuItem Name="_ui_cmiStorageRefresh" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_cmiRefresh_Click" />
+                    <itk:Separator/>
+                    <itk:MenuItem Name="_ui_cmiStorageDelete" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_cmiDelete_Click" />
+                    <itk:MenuItem Name="_ui_cmiStorageProperties" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProperties, Source={StaticResource g}}" Click="_ui_cmiProperties_Click" />
+                </itk:ContextMenu>
+            </itk:ContextMenuService.ContextMenu>
+            <data:DataGrid.Columns>
+                <data:DataGridTextColumn CanUserReorder="True" CanUserResize="True" CanUserSort="True" Width="100" Binding="{Binding sName}">
+                    <data:DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="p:DataGridColumnHeader">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sName, Source={StaticResource g}}"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </data:DataGridTextColumn.HeaderStyle>
+                </data:DataGridTextColumn>
+                <data:DataGridTextColumn CanUserReorder="True" CanUserResize="True" CanUserSort="True" Width="*" Binding="{Binding cType.sName}">
+                    <data:DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="p:DataGridColumnHeader">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sType, Source={StaticResource g}}"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </data:DataGridTextColumn.HeaderStyle>
+                </data:DataGridTextColumn>
+            </data:DataGrid.Columns>
+        </data:DataGrid>
+        <StackPanel Grid.Column="1"  VerticalAlignment="Top">
+            <slc:SearchControl x:Name="_ui_Search" Height="25" Margin="0,0,0,0" />
+            <StackPanel Orientation="Horizontal" Background="#FFE5E8EB">
+                <sdk:Label FontSize="9" Content="{Binding Path=cReplica.sNoticeMediaList1, Source={StaticResource g}}" Foreground="#FF5F5F5F" />
+                <TextBox Name="_ui_tbMaxShowedFiles" Height="14" Text="70" FontSize="8" BorderThickness="1,0" FontFamily="Arial" Background="#FFFFFFB3" TextChanged="_ui_tbMaxShowedFiles_TextChanged" />
+                <sdk:Label FontSize="9" Content="{Binding Path=cReplica.sNoticeMediaList2, Source={StaticResource g}}" Foreground="#FF5F5F5F" />
+                <HyperlinkButton FontSize="9" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sApply, Source={StaticResource g}}" VerticalAlignment="Top" Click="_ui_hlbtnMaxShowedFiles_Click" />
+            </StackPanel>
+            <ScrollViewer Name="_ui_srlFiles" VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0">
+                <data:DataGrid AutoGenerateColumns="False" Name="_ui_dgFiles" SelectionChanged="_ui_dgFiles_SelectionChanged" KeyDown="_ui_dgFiles_KeyDown"  VerticalAlignment="Top" MouseRightButtonDown="_ui_dgFiles_MouseRightButtonDown" CanUserSortColumns="False" CanUserResizeColumns="False" CanUserReorderColumns="False" IsReadOnly="True" TabNavigation="Cycle" HorizontalGridLinesBrush="DimGray" GridLinesVisibility="All">   <!--Loaded="_ui_dgFiles_Loaded"-->
+                    <itk:ContextMenuService.ContextMenu>
+                        <itk:ContextMenu Name="_ui_cmFiles" Opened="_ui_cmFiles_Opened">
+                            <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sFile, Source={StaticResource g}}" />
+                            <itk:Separator/>
+                            <itk:MenuItem Name="_ui_cmiFileAdd" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sAdd, Source={StaticResource g}}" />
+                            <itk:MenuItem Name="_ui_cmiFileRefresh" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_cmiRefresh_Click" />
+                            <itk:MenuItem Name="_ui_cmiShowAll" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sShowAll, Source={StaticResource g}}" Click="_ui_cmiShowAll_Click" />
+                            <itk:Separator/>
+                            <itk:MenuItem Name="_ui_cmiFileDelete" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_cmiDelete_Click" />
+                            <itk:MenuItem Name="_ui_cmiFileProperties" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProperties, Source={StaticResource g}}" Click="_ui_cmiProperties_Click" />
+                        </itk:ContextMenu>
+                    </itk:ContextMenuService.ContextMenu>
+                    <data:DataGrid.Columns>
+                        <data:DataGridTextColumn CanUserReorder="True" CanUserResize="True" CanUserSort="True" Binding="{Binding sFilename}" Width="*">
+                            <data:DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="p:DataGridColumnHeader">
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sFilename, Source={StaticResource g}}"/>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </data:DataGridTextColumn.HeaderStyle>
+                        </data:DataGridTextColumn>
+                        <data:DataGridTextColumn CanUserReorder="True" CanUserResize="True" CanUserSort="True" Binding="{Binding dtLastEvent}" IsReadOnly="True" Width="190">
+                            <data:DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="p:DataGridColumnHeader">
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sModifiedDate, Source={StaticResource g}}"/>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </data:DataGridTextColumn.HeaderStyle>
+                        </data:DataGridTextColumn>
+                    </data:DataGrid.Columns>
+                </data:DataGrid>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
+</UserControl>

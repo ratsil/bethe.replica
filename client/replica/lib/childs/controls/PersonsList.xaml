@@ -1,0 +1,82 @@
+﻿<UserControl 
+        x:Class="controls.replica.sl.PersonsList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
+        mc:Ignorable="d"
+        d:DesignHeight="300" d:DesignWidth="450">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+
+    <Grid x:Name="LayoutRoot" Background="White">
+        <controls:TabControl x:Name="_ui_tcPersons" SelectionChanged="_ui_tcPersons_SelectionChanged" >
+            <controls:TabItem x:Name="_ui_tpArtists" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sArtists, Source={StaticResource g}}">
+                <Grid Name="_ui_grdContainer">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,5" Name="_ui_grdNew" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <slc:SearchControl x:Name="_ui_Search" />
+                    </Grid>
+                    <data:DataGrid x:Name="_ui_dgPersons" AlternatingRowBackground="Azure" GridLinesVisibility="None" SelectionMode="Extended" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="1" MouseRightButtonDown="_ui_dgPersons_MouseRightButtonDown" BeginningEdit="_ui_dgPersons_BeginningEdit" RowEditEnding="_ui_dgPersons_RowEditEnding" RowEditEnded="_ui_dgPersons_RowEditEnded">
+                        <itk:ContextMenuService.ContextMenu>
+                            <itk:ContextMenu Name="_ui_cmPersons" Opened="_ui_cmPersons_Opened">
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_cmPersons_Refresh" />
+                                <itk:Separator/>
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_cmPersons_Delete" />
+                            </itk:ContextMenu>
+                        </itk:ContextMenuService.ContextMenu>
+                        <data:DataGrid.Columns>
+                            <data:DataGridTextColumn Binding="{Binding sName}" IsReadOnly="False" Width="*">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sName, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+                            <data:DataGridTextColumn Binding="{Binding cType.sName}" IsReadOnly="True" Width="100">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sType, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+                            <data:DataGridTextColumn Binding="{Binding nID}" Header="id" IsReadOnly="True" Width="80" />
+                        </data:DataGrid.Columns>
+                    </data:DataGrid>
+                </Grid>
+            </controls:TabItem>
+        </controls:TabControl>
+    </Grid>
+</UserControl>

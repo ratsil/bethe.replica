@@ -1,0 +1,8 @@
+*.dll
+*.xap
+*.csproj.user
+.vs
+\!dlls/
+packages/
+client/webservice/App_Data/lib/
+client/webservice/bin/

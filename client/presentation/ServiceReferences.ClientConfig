@@ -1,0 +1,22 @@
+﻿<configuration>
+    <system.serviceModel>
+        <bindings>
+            <basicHttpBinding>
+                <binding name="CuesSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+                <binding name="PreferencesSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+            </basicHttpBinding>
+        </bindings>
+        <client>
+            <endpoint address="http://localhost/ig/services/Cues.asmx" binding="basicHttpBinding"
+                bindingConfiguration="CuesSoap" contract="services.cues.CuesSoap"
+                name="CuesSoap" />
+            <endpoint address="http://localhost/ig/services/Preferences.asmx"
+                binding="basicHttpBinding" bindingConfiguration="PreferencesSoap"
+                contract="services.preferences.PreferencesSoap" name="PreferencesSoap" />
+        </client>
+    </system.serviceModel>
+</configuration>

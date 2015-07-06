@@ -1,0 +1,74 @@
+﻿<navigation:Page 
+		   x:Class="replica.sl.templates" 
+	       xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"  
+	       xmlns:controlsToolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+		   xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"	
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+			xmlns:menu="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input"
+           mc:Ignorable="d"
+           xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+	       xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+           d:DesignWidth="1000" d:DesignHeight="280"
+           xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk" xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+    <ScrollViewer BorderThickness="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+		<Grid x:Name="LayoutRoot">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+            <slc:ReducePanel Grid.Row="1" x:Name="_ui_rpMessages" Title="{Binding Path=cHelper.sMessages, Source={StaticResource g}}" Margin="3,3" IsOpen="True" HorizontalContentAlignment="Stretch">
+				<StackPanel Name="_ui_spMessages" VerticalAlignment="Top" Background="#FF3B6583">
+                    <Button Content="{Binding Path=cCommon.sSave, Source={StaticResource g}}" Width="100" HorizontalAlignment="Center" Margin="0,0,0,4" Name="_ui_btnSaveMessages" VerticalAlignment="Bottom" Height="22" Click="ButtonSaveClick"  FontSize="11" FontWeight="Normal" />
+				</StackPanel>
+			</slc:ReducePanel>
+            <slc:ReducePanel Grid.Row="2" x:Name="_ui_rpCrawls" Title="{Binding Path=cHelper.sCrawls, Source={StaticResource g}}" Margin="3,3" IsOpen="False" HorizontalContentAlignment="Stretch">
+				<StackPanel Name="_ui_spCrawls" Orientation="Vertical" Background="#FF3B6583">
+                    <Button Content="{Binding Path=cCommon.sSave, Source={StaticResource g}}" Width="100" HorizontalAlignment="Center" Margin="0,0,0,4" Name="_ui_btnSaveCrawls" VerticalAlignment="Bottom" Height="22" Click="ButtonSaveClick"  FontSize="11" FontWeight="Normal" />
+				</StackPanel>
+			</slc:ReducePanel>
+            <slc:ReducePanel Grid.Row="0" x:Name="_ui_rpTrails" Title="{Binding Path=cHelper.sTrailers, Source={StaticResource g}}" Margin="3,3" IsOpen="True" HorizontalContentAlignment="Stretch">
+				<StackPanel Name="_ui_spTrails" Margin="0,0,0,0" Orientation="Vertical" Background="#FF3B6583">
+					<StackPanel Name="_ui_spAddTrail" Orientation="Horizontal" Margin="0,0,0,2" HorizontalAlignment="Center" Background="#FF3B6583">
+						<ComboBox Height="22" Name="_ui_cbTrailName" DisplayMemberPath="cTemplate.sName" Width="120" Margin="0,0,4,0" SelectionChanged="_ui_cbTrailName_SelectionChanged" />
+						<sdk:DatePicker Height="22" Width="120" Name="_ui_dpTrailStart" SelectedDateChanged="_ui_dpTrailStart_SelectedDateChanged" />
+						<toolkit:TimePicker Height="22" Width="40" Name="_ui_tpTrailStart" Margin="0,0,10,0" PopupMinutesInterval="10" ValueChanged="_ui_tpTrailStart_ValueChanged" />
+                        <CheckBox Content="{Binding Path=cCommon.sMon, Source={StaticResource g}}" Height="16" Name="_ui_cbMon" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sTue, Source={StaticResource g}}" Height="16" Name="_ui_cbTue" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sWed, Source={StaticResource g}}" Height="16" Name="_ui_cbWed" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sThu, Source={StaticResource g}}" Height="16" Name="_ui_cbThu" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sFri, Source={StaticResource g}}" Height="16" Name="_ui_cbFri" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sSat, Source={StaticResource g}}" Height="16" Name="_ui_cbSat" Margin="0,0,4,0" />
+                        <CheckBox Content="{Binding Path=cCommon.sSun, Source={StaticResource g}}" Height="16" Name="_ui_cbSun" Margin="0,0,10,0" />
+						<sdk:DatePicker Height="22" Width="120" Name="_ui_dpTrailStop" />
+						<toolkit:TimePicker Height="22" Width="40" Name="_ui_tpTrailStop" PopupMinutesInterval="10" Margin="0,0,10,0" />
+                        <Button Content="{Binding Path=cCommon.sAdd, Source={StaticResource g}}" Width="80" IsEnabled="False" HorizontalAlignment="Center" Margin="0,0,0,0" Name="_ui_btnAddTrail" VerticalAlignment="Bottom" Height="22" Click="_ui_btnAddTrail_Click"  FontSize="11" FontWeight="Normal" />
+					</StackPanel>
+					<StackPanel Name="_ui_spFolder" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Center" Background="#FF3B6583">
+                        <HyperlinkButton Content="{Binding Path=cReplica.sNoticeTemplates1, Source={StaticResource g}}" Height="19" Margin="0,3,-2,0" Name="_ui_hbTrailPath" Width="Auto" Foreground="#FFFFBAEA" IsEnabled="True" />
+						<sdk:Label Height="22" Width="Auto" Margin="0,0,4,0" Content=":" Foreground="White" />
+						<TextBox Height="22" Name="_ui_tbTrailPath" Width="546" IsReadOnly="False" TextChanged="_ui_tbTrailLines_TextChanged" />
+					</StackPanel>
+					<StackPanel Name="_ui_spLine1" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Center" Background="#FF3B6583">
+                        <sdk:Label Height="22" Width="Auto" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sLine1, Source={StaticResource g}}" Foreground="White" />
+                        <sdk:Label Height="22" Width="Auto" Margin="0,0,4,0" Content=":" Foreground="White" />
+                        <TextBox Height="22" Name="_ui_tbTrailLine1" Width="696" TextChanged="_ui_tbTrailLines_TextChanged" />
+					</StackPanel>
+					<StackPanel Name="_ui_spLine2" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Center" Background="#FF3B6583">
+                        <sdk:Label Height="22" Width="Auto" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sLine2, Source={StaticResource g}}" Foreground="White" />
+                        <sdk:Label Height="22" Width="Auto" Margin="0,0,4,0" Content=":" Foreground="White" />
+                        <TextBox Height="22" Name="_ui_tbTrailLine2" Width="696" TextChanged="_ui_tbTrailLines_TextChanged" />
+					</StackPanel>
+                    <Button Content="{Binding Path=cCommon.sSaveAllChanges, Source={StaticResource g}}" Width="170" HorizontalAlignment="Center" Margin="0,20,0,4" Name="_ui_btnSaveTrails" VerticalAlignment="Bottom" Height="22" Click="_ui_btnSaveTrails_Click"  FontSize="11" FontWeight="Normal" />
+				</StackPanel>
+			</slc:ReducePanel>
+		</Grid>
+	</ScrollViewer>
+</navigation:Page>

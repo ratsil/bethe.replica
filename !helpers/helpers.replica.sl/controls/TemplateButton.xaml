@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="controls.replica.sl.TemplateButton"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"             
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="45" d:DesignWidth="400" xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk" FontSize="11">
+
+    <Grid x:Name="LayoutRoot" MouseRightButtonDown="LayoutRoot_MouseRightButtonDown" ><!--Background="#FF456D89"-->
+		<Button Content="Button" Height="23" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_btnTemplate" Loaded="_ui_btnTemplate_Loaded" VerticalAlignment="Center" Click="_ui_btnTemplate_Click" Background="#FFEB2ACE" BorderBrush="#FF2B2B2B" BorderThickness="1" AllowDrop="False" />
+        <StackPanel Name="_ui_sp3Buttons" Orientation="Horizontal" Margin="0,0,0,0" Height="23" >
+            <Button Height="18" Name="_ui_btnPlay" Width="90" FontSize="13" Click="_ui_btnPlay_Click" FontFamily="Verdana" FontStretch="Normal" VerticalAlignment="Center" FontWeight="Bold" IsEnabled="False">
+                <Button.Content>
+                    <TextBlock Text="PLAY" Margin="0,-3,0,0" Foreground="#FF007C00" />
+                </Button.Content>
+            </Button>
+            <Button Height="18" Name="_ui_btnSkip" Width="80" FontSize="13" Click="_ui_btnSkip_Click" Margin="4,0,0,0" FontFamily="Verdana" FontStretch="Normal" VerticalAlignment="Center" FontWeight="Bold">
+                <Button.Content>
+                    <TextBlock Text="SKIP" Margin="0,-3,0,0" Foreground="#FF782FA0" />
+                </Button.Content>
+            </Button>
+            <Button Height="18" Name="_ui_btnStop" Width="80" FontSize="13" Click="_ui_btnStop_Click" Margin="4,0,0,0" FontFamily="Verdana" FontStretch="Normal" VerticalAlignment="Center" FontWeight="Bold">
+                <Button.Content>
+                    <TextBlock Text="STOP" Margin="0,-3,0,0" Foreground="#FFBA2B2B" />
+                </Button.Content>
+            </Button>
+		</StackPanel>
+    </Grid>
+</UserControl>

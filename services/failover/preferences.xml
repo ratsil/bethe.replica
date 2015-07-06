@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<preferences>
+	<replica>
+		<player fps="25" threshold="00:00:00.5" cache="d:/cache/pl/">
+			<playlist length="5" safe="00:03:00" durmin="00:00:01" />
+		</player>
+		<failover main="main.video.replica" clips="e:/storages/clips/" adjustment="00:00:05">
+			<sync margin="00:10:00" tries="5" />
+			<defaults>
+				<class id="0" name="default">
+					<binds>
+						<template path="d:/cues/logo.xml" key="start_offset" value="0" />
+					</binds>
+				</class>
+				<plug id="0" file="e:/storages/design/megamix.mov" class="design_common" />
+				<statuses>
+					<failed id="0" name="failed" />
+					<played id="1" name="played" />
+					<skipped id="2" name="skipped" />
+					<onair id="3" name="onair" />
+					<prepared id="4" name="prepared" />
+					<queued id="5" name="queued" />
+					<planned id="6" name="planned" />
+					<group name= "staled">
+						<failed />
+						<played />
+						<skipped />
+					</group>
+					<group name= "locked">
+						<onair />
+						<prepared />
+						<queued />
+					</group>
+				</statuses>
+			</defaults>
+		</failover>
+	</replica>
+	<ingenie>
+		<initiator>
+			<process name="ingenie.server" owner="replica" />
+		</initiator>
+		<userspace server="127.0.0.1" />
+		<shared port="1238" />
+	</ingenie>
+	<helpers>
+		<common>
+			<database server="db.channel.replica" port="5432" name="replica" user="replica_failover" password="" timeout="240" />
+			<logger level="debug1">
+				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
+					<targets>
+						<target level="warning">user1@example.com,user2@example.com</target>
+						<target level="error">user@example.com</target>
+						<target level="fatal">user@example.com</target>
+					</targets>
+				</mail>
+			</logger>
+		</common>
+	</helpers>
+</preferences>

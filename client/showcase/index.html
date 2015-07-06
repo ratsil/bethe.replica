@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>презентация</title>
+        <link type="text/css" href="styles.css" rel="stylesheet" />
+        <script type="text/javascript" src="showcase.js"></script>
+    </head>
+    <body>
+        <table style="width:1022px; margin:100px auto 0px auto">
+            <tr>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                БАРАБАН
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnRoll" class="action" onclick="effect_process(_oRoll);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td rowspan="3" class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                ТЕКСТ
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="action">
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td><button class="action" onclick="roll_add(_oText);">ДОБАВИТЬ<br />В БАРАБАН</button></td>
+                                        <td class="properties"><button class="properties"></button></td>
+                                        <td><button class="action" onclick="crawl_add(_oText);">ДОБАВИТЬ<br />В СТРОКУ</button></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea id="_ui_taText" rows="15" cols="10" style="width:600px;height:266px;">•низкая стоимость необходимого оборудования
+•отсутствие специфических требований к рабочим местам пользователей
+•прозрачная интеграция сторонних решений
+•поддержка всего спектра интерактивных сервисов
+•отсутствие жёстких технических требований
+•полноценное и всеобъемлющее резервирование и отказоустойчивость
+•отсутствие ограничений на графическое оформление эфира
+•гибкая система генерации отчётов и статистической информации
+•всесторонний мониторинг задействованных процессов
+•прозрачное расширение функционала
+•поддержка горизонтального масштабирования
+                                </textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                СТРОКА
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnCrawl" class="action" onclick="effect_process(_oCrawl);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                ВИДЕО
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnVideo" class="action" onclick="effect_process(_oVideo);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="action">
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td><button class="action" onclick="roll_add(_oVideo);">ДОБАВИТЬ<br />В БАРАБАН</button></td>
+                                        <td><button class="action" onclick="crawl_add(_oVideo);">ДОБАВИТЬ<br />В СТРОКУ</button></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                АНИМАЦИЯ
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnPlaque" class="action" onclick="effect_process(_oPlaque);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="action">
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td><button class="action" onclick="roll_add(_oPlaque);">ДОБАВИТЬ<br />В БАРАБАН</button></td>
+                                        <td><button class="action" onclick="crawl_add(_oPlaque);">ДОБАВИТЬ<br />В СТРОКУ</button></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                ЛОГОТИП
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnLogo" class="action" onclick="effect_process(_oLogo);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="action">
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td><button class="action" onclick="roll_add(_oLogo);">ДОБАВИТЬ<br />В БАРАБАН</button></td>
+                                        <td><button class="action" onclick="crawl_add(_oLogo);">ДОБАВИТЬ<br />В СТРОКУ</button></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="effect">
+                    <table cellpadding="0" cellspacing="0" class="effect">
+                        <tr>
+                            <td class="caption">
+                                ЧАСЫ
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td class="properties">
+                                            <button class="properties"></button>
+                                        </td>
+                                        <td colspan="2">
+                                            <button id="_ui_btnClock" class="action" onclick="effect_process(_oClock);">ПОКАЗАТЬ</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="action">
+                                <table cellpadding="0" cellspacing="0" class="action">
+                                    <tr>
+                                        <td><button class="action" onclick="roll_add(_oClock);">ДОБАВИТЬ<br />В БАРАБАН</button></td>
+                                        <td><button class="action" onclick="crawl_add(_oClock);">ДОБАВИТЬ<br />В СТРОКУ</button></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <script type="text/javascript">
+            init();
+        </script>
+    </body>
+</html>

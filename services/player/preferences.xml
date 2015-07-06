@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<preferences>
+	<replica>
+		<player fps="25" threshold="00:00:00.5" cache="d:/cache/pl/">
+			<playlist length="10" safe="00:03:00" />
+		</player>
+	</replica>
+	<ingenie>
+		<initiator>
+			<process name="ingenie.server" owner="replica" />
+		</initiator>
+		<userspace server="127.0.0.1" />
+		<shared port="1238" />
+	</ingenie>
+	<helpers>
+		<common>
+			<database server="db.channel.replica" port="5432" name="replica" user="replica_player" password="" timeout="240" />
+			<logger level="debug1">
+				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
+					<targets>
+						<target level="warning">user1@example.com,user2@example.com</target>
+						<target level="error">user@example.com</target>
+						<target level="fatal">user@example.com</target>
+					</targets>
+				</mail>
+			</logger>
+		</common>
+	</helpers>
+</preferences>

@@ -1,0 +1,163 @@
+﻿<UserControl x:Class="controls.replica.sl.AssetsList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:converter="clr-namespace:replica.sl"
+        xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
+        mc:Ignorable="d"
+        d:DesignHeight="300" d:DesignWidth="900">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+
+    <Grid x:Name="LayoutRoot" Background="White">
+        <controls:TabControl x:Name="_ui_tcAssets" SelectionChanged="_ui_tcAssets_SelectionChanged" Loaded="_ui_tcAssets_Loaded">
+            <controls:TabItem x:Name="_ui_tpAll" Header="{Binding Path=cCommon.sAll, Source={StaticResource g}}">
+                <Grid Name="_ui_grdContainer">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="_ui_btnBack" Click="_ui_btnBack_Click" Content="{Binding Path=cCommon.sBack, Source={StaticResource g}}" HorizontalAlignment="Left" Margin="0,5" Visibility="Visible" Background="#FFFFB100" />
+                        <Button Grid.Column="1" x:Name="_ui_btnAdd" Click="_ui_btnAdd_Click" Content="{Binding Path=cCommon.sAdd, Source={StaticResource g}}" HorizontalAlignment="Left" Margin="0,5" Visibility="Collapsed" />
+                        <slc:SearchControl Grid.Column="2" x:Name="_ui_Search" Height="25" Margin="6,0,0,0" />
+                    </Grid>
+                    <data:DataGrid x:Name="_ui_dgAssets" AlternatingRowBackground="Azure" SelectionChanged="_ui_dgAssets_SelectionChanged" GridLinesVisibility="All" SelectionMode="Extended" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="1" MouseRightButtonDown="_ui_dgAssets_MouseRightButtonDown" CanUserReorderColumns="False" CanUserSortColumns="True" Background="White" HorizontalGridLinesBrush="#FF939393" VerticalGridLinesBrush="White" IsReadOnly="True">
+                        <itk:ContextMenuService.ContextMenu>
+                            <itk:ContextMenu Name="_ui_cmAssets" Opened="_ui_cmAssets_Opened" Closed="_ui_cmAssets_Closed">
+                                <itk:MenuItem Header="{Binding Path=cReplica.sNoticeAssetsList1, Source={StaticResource g}}" Name="_ui_cmAssetsRefresh" Click="_ui_cmAssets_Refresh" IsEnabled="True" />
+                                <itk:Separator/>
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Name="_ui_cmAssetsDelete" Click="_ui_cmAssets_Delete" IsEnabled="False" />
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sRecalculate, Source={StaticResource g}}" Name="_ui_cmAssetsRecalculate" Click="_ui_cmAssetsRecalculate_Click" IsEnabled="False" />
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sPreview, Source={StaticResource g}}" Name="_ui_cmAssetsPreview" Click="_ui_cmAssetsPreview_Click"  IsEnabled="False" />
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sSetParent, Source={StaticResource g}}" Name="_ui_cmAssetsParentAssign" Click="_ui_cmAssetsParentAssign_Click"  IsEnabled="False" />
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sUnsetParent, Source={StaticResource g}}" Name="_ui_cmAssetsParentRemove" Click="_ui_cmAssetsParentRemove_Click"  IsEnabled="False" />
+                                <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProperties, Source={StaticResource g}}" Name="_ui_cmAssetsProperties" Click="_ui_cmAssets_Properties" IsEnabled="False" />
+                            </itk:ContextMenu>
+                        </itk:ContextMenuService.ContextMenu>
+                        <data:DataGrid.Resources>
+                            <converter:FramesConverter x:Key="FramesConverter" />
+                        </data:DataGrid.Resources>
+                        <data:DataGrid.Columns>
+                            <data:DataGridTextColumn Binding="{Binding nID}" Header="ID" IsReadOnly="True" Width="60" />
+							<data:DataGridTextColumn Binding="{Binding sName}" Header="Name" IsReadOnly="True" Width="1.5*">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=cCommon.sName, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+							<data:DataGridTextColumn Binding="{Binding sFilename}" Header="File" IsReadOnly="True" Width="*">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=cCommon.sFile, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+							<data:DataGridTextColumn Binding="{Binding sDuration}" Header="Duration" IsReadOnly="True" Width="100">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=cHelper.sDuration, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+							<data:DataGridTextColumn Binding="{Binding sVideoTypeName}" Header="Type" IsReadOnly="True" Width="80">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=cCommon.sType, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+							<data:DataGridTextColumn Binding="{Binding sClassName}" Header="Class" IsReadOnly="True" Width="auto">
+                                <data:DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="p:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Path=cHelper.sClass, Source={StaticResource g}}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </data:DataGridTextColumn.HeaderStyle>
+                            </data:DataGridTextColumn>
+                        </data:DataGrid.Columns>
+                    </data:DataGrid>
+                </Grid>
+            </controls:TabItem>
+            <controls:TabItem x:Name="_ui_tpClips" Header="{Binding Path=cHelper.sClips, Source={StaticResource g}}" />
+            <controls:TabItem x:Name="_ui_tpAdvertisement" Header="{Binding Path=cHelper.sAdvertisement, Source={StaticResource g}}" />
+            <controls:TabItem x:Name="_ui_tpPrograms" Header="{Binding Path=cHelper.sPrograms, Source={StaticResource g}}" />
+            <controls:TabItem x:Name="_ui_tpDesign" Header="{Binding Path=cHelper.sDesign, Source={StaticResource g}}" />
+			<controls:TabItem Name="_ui_tpNew" Header="  + ">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition />
+						<RowDefinition />
+					</Grid.RowDefinitions>
+
+					<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sFolder, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+
+					<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sType, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+					<ComboBox Grid.Row="0" Grid.Column="3" Name="_ui_ddlNewTypes" DisplayMemberPath="sName" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sStorage, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+					<ComboBox Grid.Row="1" Grid.Column="3" Name="_ui_ddlNewStorages" DisplayMemberPath="sName" Margin="0,10,0,10" />
+
+					<TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
+					<TextBox Grid.Row="2" Grid.Column="3" Name="_ui_tbNewCaption" Margin="0,10,0,10" />
+
+					<Button Grid.Row="3" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Padding="5" Margin="0,10,0,10" Click="TabAdd_Click" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sAdd, Source={StaticResource g}}" />
+				</Grid>
+			</controls:TabItem>
+		</controls:TabControl>
+    </Grid>
+</UserControl>

@@ -1,0 +1,62 @@
+﻿<navigation:Page
+        x:Class="scr.prompter" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:ctrls="clr-namespace:controls.replica.sl;assembly=helpers.replica.sl"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+        xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
+        mc:Ignorable="d"
+        d:DesignWidth="1100" d:DesignHeight="480">
+    <navigation:Page.Resources>
+        <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </navigation:Page.Resources>
+    <Grid x:Name="LayoutRoot" Background="#FF456D89">
+		<Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<Grid Grid.Column="0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="auto" />
+				<RowDefinition Height="auto" />
+				<RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+			</Grid.RowDefinitions>
+            <ctrls:TemplateButton Grid.Row="0" sText="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=' : ', Path=cCommon.sText, Source={StaticResource g}}" Name="_ui_ctrTB_Prompter" Height="23" Width="200" Margin="10,20,10,2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+            <Button Grid.Row="1" Name="_ui_btnPause" IsEnabled="True" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sPause, Source={StaticResource g}}" Margin="10" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="_ui_btnPause_Click" BorderBrush="#FF4B4B4B" Background="#FF27FF00"></Button>
+            <toolkit:NumericUpDown Grid.Row="2" Height="24" HorizontalAlignment="Left" Margin="123,10,0,0" Name="_ui_nudFontSize" VerticalAlignment="Center" Minimum="10" Maximum="100" Value="44" ValueChanged="_ui_nudFontSize_ValueChanged" FontSize="14" Width="46" FontWeight="Normal" Foreground="Black" BorderThickness="3" />
+            <sdk:Label Grid.Row="2" Height="22" HorizontalAlignment="Left" Margin="10,10,0,0" Name="_ui_lblFontSize" VerticalAlignment="Center" Width="117" VerticalContentAlignment="Center" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cHelper.sFontSize, Source={StaticResource g}}" Foreground="#FFDBF0FF" FontSize="11" FontWeight="Bold" />
+            <toolkit:NumericUpDown Grid.Row="3" Height="24" HorizontalAlignment="Right" Margin="0,10,40,0" Name="_ui_nudSpeed" VerticalAlignment="Center" Minimum="1" Maximum="999" Value="25" ValueChanged="_ui_nudSpeed_ValueChanged" Width="57" FontSize="14" BorderBrush="#FFDBF0FF" BorderThickness="1" />
+            <sdk:Label Grid.Row="3" Height="22" HorizontalAlignment="Left" Margin="52,10,0,0" Name="_ui_lblSpeed" VerticalAlignment="Center" Width="70" VerticalContentAlignment="Center" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cHelper.sSpeed, Source={StaticResource g}}" Foreground="#FFDBF0FF" FontWeight="Bold" />
+            <sdk:Label Grid.Row="4" Height="22" HorizontalAlignment="Left" Margin="10,10,0,0" Name="_ui_lblFontLblName" VerticalAlignment="Center" Width="170" VerticalContentAlignment="Center" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cHelper.sFontName, Source={StaticResource g}}" Foreground="#FFDBF0FF" FontSize="11" FontWeight="Bold" />
+            <sdk:Label Grid.Row="4" Height="22" HorizontalAlignment="Left" Margin="136,10,0,0" Name="_ui_lblFontName" VerticalAlignment="Center" Width="170" VerticalContentAlignment="Center" Content="Verdana" Foreground="Black" FontSize="14" FontWeight="Normal" />
+        </Grid>
+        <StackPanel Grid.Column="1"  Margin="0,4,4,0" Name="_ui_spText">
+            <RichTextBox HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="200" Name="_ui_tbText" FontSize="14" ContentChanged="_ui_tbText_ContentChanged" />
+            <sdk:DataGrid AutoGenerateColumns="False" Visibility="Collapsed" Margin="0,4,0,0" Height="268" Name="_ui_dgTextPrepared" Width="722" Background="Black" Foreground="White" HorizontalAlignment="Left" HeadersVisibility="None" HorizontalGridLinesBrush="#FF3B3B3B" RowHeight="22" HorizontalScrollBarVisibility="Disabled">
+                <sdk:DataGrid.Columns>
+                    <sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sLine}" Width="720" CanUserResize="False" FontSize="14" IsReadOnly="True">
+                        <sdk:DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="p:DataGridColumnHeader">
+                                <Setter Property="ContentTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path=cSCR.sNoticePrompter1, Source={StaticResource g}}"/>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </sdk:DataGridTextColumn.HeaderStyle>
+                    </sdk:DataGridTextColumn>
+                </sdk:DataGrid.Columns>
+            </sdk:DataGrid>
+            <RichTextBox HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="0,4,0,0" Height="268" Width="720" Name="_ui_tbTextPreView" FontSize="14" Background="#FF373758" Foreground="#FFFFFF6F" IsReadOnly="True" FontWeight="Bold" />
+        </StackPanel>
+    </Grid>
+</navigation:Page>

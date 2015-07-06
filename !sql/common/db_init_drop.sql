@@ -1,0 +1,61 @@
+﻿DROP TYPE "int_bool" CASCADE;
+DROP TYPE "text_bool" CASCADE;
+DROP TYPE "table_name" CASCADE;
+DROP TYPE "error" CASCADE;
+DROP TYPE "target" CASCADE;
+
+
+-- DROP DATABASE "replica";
+DROP SCHEMA hk CASCADE;
+DROP SCHEMA pl CASCADE;
+DROP SCHEMA media CASCADE;
+DROP SCHEMA mam CASCADE;
+DROP SCHEMA logs CASCADE;
+DROP SCHEMA adm CASCADE;
+DROP SCHEMA archive CASCADE;
+DROP SCHEMA cues CASCADE;
+DROP SCHEMA ia CASCADE;
+DROP SCHEMA scr CASCADE;
+DROP SCHEMA grid CASCADE;
+DROP SCHEMA ingest CASCADE;
+DROP TABLE "tDictionary" CASCADE;
+DROP FUNCTION "fDictionary"();
+DROP FUNCTION "fFrames"(interval);
+DROP FUNCTION "fMicrosecondsElapsed"(timestamp without time zone);
+
+REVOKE ALL ON DATABASE "replica" FROM replica_init;
+--REVOKE ALL ON TYPE int_bool FROM replica_init;
+DROP USER replica_client;
+DROP USER replica_player;
+DROP USER replica_management;
+DROP USER replica_cues;
+DROP USER replica_sync;
+DROP USER replica_failover;
+
+DROP USER replica_ingest;
+DROP USER replica_ingest_full;
+DROP USER replica_scr;
+DROP USER replica_scr_full;
+DROP USER replica_ia;
+DROP USER replica_ia_full;
+DROP USER replica_access;
+DROP USER replica_adm;
+DROP USER replica_adm_full;
+DROP USER replica_playlist;
+DROP USER replica_playlist_full;
+DROP USER replica_assets;
+DROP USER replica_assets_full;
+DROP USER replica_programs;
+DROP USER replica_programs_full;
+DROP USER replica_stat;
+DROP USER replica_rt;
+DROP USER replica_rt_full;
+DROP USER replica_grid;
+DROP USER replica_grid_full;
+DROP USER replica_templates;
+DROP USER replica_templates_full;
+DROP USER replica_init;
+
+DROP PROCEDURAL LANGUAGE plpgsql CASCADE;
+DROP FUNCTION plpgsql_call_handler();
+DROP FUNCTION plpgsql_validator(oid);

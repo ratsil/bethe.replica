@@ -1,0 +1,37 @@
+﻿<navigation:Page 
+        x:Class="replica.sl.assets" 
+        xmlns:ctrls="clr-namespace:controls.replica.sl"
+        xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+        xmlns:controlsToolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+        xmlns:data="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Data"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
+        d:DesignWidth="1240" d:DesignHeight="480" Background="Black">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+    <ScrollViewer Background="#FF456D89" BorderBrush="{x:Null}" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
+        <Grid x:Name="LayoutRoot">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <slc:ReducePanel Grid.Row="0" x:Name="_ui_rpAssets" Title="{Binding Path=cHelper.sAssets, Source={StaticResource g}}" IsOpen="True" Loaded="_ui_rpAssets_Loaded" MaxHeight="2400" Margin="0,6" >
+                <ctrls:AssetsList x:Name="_ui_al" />
+            </slc:ReducePanel>
+            <slc:ReducePanel Grid.Row="1" x:Name="_ui_rpMedia" Title="{Binding Path=cHelper.sMedia, Source={StaticResource g}}" IsOpen="True" Loaded="_ui_rpMedia_Loaded" MaxHeight="2400" Margin="0,4" >
+                <ctrls:MediaList x:Name="_ui_ml" />
+            </slc:ReducePanel>
+            <slc:ReducePanel Grid.Row="2" x:Name="_ui_rpPersons" Title="{Binding Path=cHelper.sPersons, Source={StaticResource g}}" IsOpen="True" Loaded="_ui_rpPersons_Loaded" MaxHeight="2400" Margin="0,6" >
+                <ctrls:PersonsList x:Name="_ui_pl" />
+            </slc:ReducePanel>
+        </Grid>
+    </ScrollViewer>
+</navigation:Page>

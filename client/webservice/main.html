@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>replica</title>
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <script type="text/javascript" src="js/request.js"></script>
+    <script type="text/javascript" src="js/social.js"></script>
+    <script type="text/javascript" src="js/replica.js"></script>
+</head>
+<body>
+    <div id="fb-root"></div>
+    <div id="_ui_dvFBLogin" style="display:none" class="fb-login-button" data-show-faces="false" data-width="400" data-max-rows="1" scope="publish_actions, email"></div>
+    <button id="_ui_bFBLogin" class="social" onclick="social.auth(social.scope.fb);"><img width="50" alt="facebook:login" src="images/social_fb.png" /><hr style="height:5px;" /></button>
+    <button id="_ui_bTTLogin" class="social" onclick="social.auth(social.scope.tt);"><img width="50" alt="twitter:login" src="images/social_tt.png" /><hr style="height:5px;" /></button>
+    <button id="_ui_bVKLogin" class="social" onclick="social.auth(social.scope.vk);"><img width="50" alt="vkontakte:login" src="images/social_vk.png" /><hr style="height:5px;" /></button>
+    <div id="_ui_dvProgress">
+        please wait
+    </div>
+    <div id="_ui_dvAuthorization">
+    </div>
+    <div id="_ui_dvNavigation">
+        <span target="_ui_dvSocial" caption="social"></span>
+        <span target="_ui_dvAuthorization" caption="exit"></span>
+        <span target="_ui_dvPreferences" caption="preferences"></span>
+    </div>
+    <div id="_ui_dvSocial">
+        message:<br />
+        <textarea id="_ui_taSocialMessage" rows="5" cols="20"></textarea><br />
+        <br />
+        image:<br />
+        <input id="_ui_flSocialFiles" type="file" /><br />
+        <br />
+        <button onclick="publish();">publish</button>
+    </div>
+    <div id="_ui_dvPreferences">
+    </div>
+    <script type="text/javascript">
+        init();
+    </script>
+</body>
+</html>

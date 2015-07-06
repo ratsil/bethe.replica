@@ -1,0 +1,459 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="sAutumn" xml:space="preserve">
+    <value>Осень</value>
+  </data>
+  <data name="sCampaign" xml:space="preserve">
+    <value>Кампания</value>
+  </data>
+  <data name="sCompany" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="sErrorAssetProperties1" xml:space="preserve">
+    <value>Неизвестный тип видеоматериала</value>
+  </data>
+  <data name="sErrorAssetProperties2" xml:space="preserve">
+    <value>Сохранение паспорта программы произошло с ошибками</value>
+  </data>
+  <data name="sErrorAssetProperties3" xml:space="preserve">
+    <value>во время получения частоты вхождения слов в ассетах произошли ошибки</value>
+  </data>
+  <data name="sErrorAssetProperties4" xml:space="preserve">
+    <value>информация о классах титрования отсутствует</value>
+  </data>
+  <data name="sErrorAssetProperties5" xml:space="preserve">
+    <value>Сохранение точек титрования программы произошло с ошибками</value>
+  </data>
+  <data name="sErrorAssetProperties6" xml:space="preserve">
+    <value>Сохранение паспорта было удачным, но внесение изменений в плейлист произошло с ошибками</value>
+  </data>
+  <data name="sErrorAssetsList1" xml:space="preserve">
+    <value>Родители этих ассетов были удалены или не найдены, попробуйте назначить им новых родителей! Они будут в корневом списке и выделены красным.</value>
+  </data>
+  <data name="sErrorAssetsList2" xml:space="preserve">
+    <value>невозможно определить активную вкладку</value>
+  </data>
+  <data name="sErrorAssetsList3" xml:space="preserve">
+    <value>во время удаления ассета произошли ошибки</value>
+  </data>
+  <data name="sErrorAssetsList4" xml:space="preserve">
+    <value>при изменении этих ассетов произошли ошибки!</value>
+  </data>
+  <data name="sErrorAssetsList6" xml:space="preserve">
+    <value>Во время назначения родителя для ассетов произошли ошибки!</value>
+  </data>
+  <data name="sErrorAssetsList8" xml:space="preserve">
+    <value>Нельзя удалять Ассеты (например, {1}),{0}у которых еще есть дети (например, {2}){0}{0}В начале отвяжите ассеты от их родителей или удалите.</value>
+  </data>
+  <data name="sErrorAssetsList9" xml:space="preserve">
+    <value>Вы уверены, что хотите отвязать родителей у этих ассетов?</value>
+  </data>
+  <data name="sErrorIngest1" xml:space="preserve">
+    <value>Не получена важная информация из БД о транслитерации/nВозможно из-за проблем с правами доступа</value>
+  </data>
+  <data name="sErrorIngest2" xml:space="preserve">
+    <value>Необходимо указать папку, хранилище, тип и название для новой вкладки</value>
+  </data>
+  <data name="sErrorIngest3" xml:space="preserve">
+    <value>Указанное имя файла отличается от целевого и не будет использовано! Вы хотите продолжить?</value>
+  </data>
+  <data name="sErrorPersonsList1" xml:space="preserve">
+    <value>Этих исполнителей удалить не удалось</value>
+  </data>
+  <data name="sErrorPlaylist1" xml:space="preserve">
+    <value>Невозможно продолжить! Добавление в плейлист уже идёт, возможно вы копируете часть плейлиста</value>
+  </data>
+  <data name="sErrorPlaylist2" xml:space="preserve">
+    <value>Пересчет невозможен</value>
+  </data>
+  <data name="sErrorPlaylist3" xml:space="preserve">
+    <value>Невозможно продолжить! Добавление в плейлист уже идёт, возможно вы нажимали 'Импорт'</value>
+  </data>
+  <data name="sErrorPlaylist4" xml:space="preserve">
+    <value>Произошла ошибка пересчета</value>
+  </data>
+  <data name="sErrorPlaylist6" xml:space="preserve">
+    <value>Внимание! В целевом диапазоне уже есть запланированные элементы!{0}Сначала удалите их!</value>
+  </data>
+  <data name="sErrorPlaylist7" xml:space="preserve">
+    <value>Внимание! Изменение времени старта элемента произошло с ошибкой!</value>
+  </data>
+  <data name="sErrorPlaylist8" xml:space="preserve">
+    <value>Удаляемый диапазон содержит закэшированные элементы. Попробуйте обновить плейлист.</value>
+  </data>
+  <data name="sErrorPlaylist9" xml:space="preserve">
+    <value>Во время удаления некоторые элементы ({0}) не были удалены!</value>
+  </data>
+  <data name="sErrorPlaylistImport1" xml:space="preserve">
+    <value>не найден один или несколько из указанных файлов</value>
+  </data>
+  <data name="sErrorRecalculate2" xml:space="preserve">
+    <value>Дождитесь сначала загрузки тайм-кодов...</value>
+  </data>
+  <data name="sErrorRecalculate3" xml:space="preserve">
+    <value>Cначала загрузите тайм-коды...</value>
+  </data>
+  <data name="sErrorTemplates1" xml:space="preserve">
+    <value>Не удалось получить информацию о cues.tTemplate</value>
+  </data>
+  <data name="sErrorTemplates2" xml:space="preserve">
+    <value>Добавление изменений невозможно.</value>
+  </data>
+  <data name="sErrorTemplates3" xml:space="preserve">
+    <value>Возможно, некоторые шаблоны не были сохранены!/nПокиньте страницу и вернитесь на нее снова, для обновления содержимого и проверки.</value>
+  </data>
+  <data name="sErrorTemplates4" xml:space="preserve">
+    <value>Добавление невозможно, т.к. в это время уже заверстан другой анонс</value>
+  </data>
+  <data name="sNoticeArtistSearch1" xml:space="preserve">
+    <value>Исполнитель : Название песни</value>
+  </data>
+  <data name="sNoticeAssetChooser1" xml:space="preserve">
+    <value>как блок:</value>
+  </data>
+  <data name="sNoticeAssetChooser2" xml:space="preserve">
+    <value>Добавить ассеты в последовательность</value>
+  </data>
+  <data name="sNoticeAssetChooser3" xml:space="preserve">
+    <value>выбрано:</value>
+  </data>
+  <data name="sNoticeAssetChooser4" xml:space="preserve">
+    <value>НЕ ВЫБРАНО НИ ОДНОГО АССЕТА</value>
+  </data>
+  <data name="sNoticeAssetProperties1" xml:space="preserve">
+    <value>Создать имя на основе титров.     (CTRL + M)</value>
+  </data>
+  <data name="sNoticeAssetProperties2" xml:space="preserve">
+    <value>Внести изменения и в плейлист</value>
+  </data>
+  <data name="sNoticeAssetProperties3" xml:space="preserve">
+    <value>хр-ж клипа</value>
+  </data>
+  <data name="sNoticeAssetProperties4" xml:space="preserve">
+    <value>хр-ж фрагмента</value>
+  </data>
+  <data name="sNoticeAssetProperties5" xml:space="preserve">
+    <value>точки входа/выхода чата</value>
+  </data>
+  <data name="sNoticeAssetProperties6" xml:space="preserve">
+    <value>удалить ВСЕ точки</value>
+  </data>
+  <data name="sNoticeAssetProperties7" xml:space="preserve">
+    <value>последний показ ассета:</value>
+  </data>
+  <data name="sNoticeAssetsList1" xml:space="preserve">
+    <value>обновить     (F9)</value>
+  </data>
+  <data name="sNoticeGroupMoving1" xml:space="preserve">
+    <value>тип старта первого элемента</value>
+  </data>
+  <data name="sNoticeGroupMoving2" xml:space="preserve">
+    <value>время выхода первого элемента</value>
+  </data>
+  <data name="sNoticeGroupMoving3" xml:space="preserve">
+    <value>старт планируемый</value>
+  </data>
+  <data name="sNoticeGroupMoving4" xml:space="preserve">
+    <value>старт был</value>
+  </data>
+  <data name="sNoticeGroupMoving5" xml:space="preserve">
+    <value>Тип был</value>
+  </data>
+  <data name="sNoticeGroupMoving6" xml:space="preserve">
+    <value>старт будет</value>
+  </data>
+  <data name="sNoticeGroupMoving7" xml:space="preserve">
+    <value>Тип будет</value>
+  </data>
+  <data name="sNoticeIngest1" xml:space="preserve">
+    <value>исходный файл:</value>
+  </data>
+  <data name="sNoticeIngest10" xml:space="preserve">
+    <value>путь (локально)</value>
+  </data>
+  <data name="sNoticeIngest11" xml:space="preserve">
+    <value>плохое</value>
+  </data>
+  <data name="sNoticeIngest12" xml:space="preserve">
+    <value>эфирное</value>
+  </data>
+  <data name="sNoticeIngest13" xml:space="preserve">
+    <value>отличное</value>
+  </data>
+  <data name="sNoticeIngest14" xml:space="preserve">
+    <value>сезон</value>
+  </data>
+  <data name="sNoticeIngest2" xml:space="preserve">
+    <value>концертная запись:</value>
+  </data>
+  <data name="sNoticeIngest3" xml:space="preserve">
+    <value>готово к эфиру:</value>
+  </data>
+  <data name="sNoticeIngest4" xml:space="preserve">
+    <value>на иностранном языке:</value>
+  </data>
+  <data name="sNoticeIngest5" xml:space="preserve">
+    <value>путь целевого файла:</value>
+  </data>
+  <data name="sNoticeIngest6" xml:space="preserve">
+    <value>время жизни (в месяцах, 0 = бесконечно):</value>
+  </data>
+  <data name="sNoticeIngest7" xml:space="preserve">
+    <value>действие по истечению:</value>
+  </data>
+  <data name="sNoticeIngest8" xml:space="preserve">
+    <value>коммерция</value>
+  </data>
+  <data name="sNoticeIngest9" xml:space="preserve">
+    <value>путь (сервер)</value>
+  </data>
+  <data name="sNoticeMedia1" xml:space="preserve">
+    <value>Нажимайте:  'ESC' - Cancel,   'ENTER' - OK</value>
+  </data>
+  <data name="sNoticeMediaList1" xml:space="preserve">
+    <value>  отображать не более </value>
+  </data>
+  <data name="sNoticeMediaList2" xml:space="preserve">
+    <value> позиций    </value>
+  </data>
+  <data name="sNoticePlaylist1" xml:space="preserve">
+    <value>Пересчитать весь плейлист</value>
+  </data>
+  <data name="sNoticePlaylist10" xml:space="preserve">
+    <value>Время выхода</value>
+  </data>
+  <data name="sNoticePlaylist11" xml:space="preserve">
+    <value>Вошли в cMsgDate_Closed </value>
+  </data>
+  <data name="sNoticePlaylist12" xml:space="preserve">
+    <value>Укажите сколько раз скопировать выделенное в конец плейлиста.{0}В результате копирования последовательность роликов будет сохранена,{0}но структура блоков БУДЕТ УТЕРЯНА!</value>
+  </data>
+  <data name="sNoticePlaylist13" xml:space="preserve">
+    <value>Введите точное время начиная с которого располагать ролики.{0}В диапазоне копирования в плейлисте не должно быть других роликов!{0}Перед началом копирования будет произведена соответствующая проверка,{0}однако, если плейлист не был пересчитан, то она может быть неудачной{0}{0}В результате копирования структура блоков будет сохранена, а заглушки (plugs) будут убраны.{0}</value>
+  </data>
+  <data name="sNoticePlaylist14" xml:space="preserve">
+    <value>Рекомендуется обновить плейлист</value>
+  </data>
+  <data name="sNoticePlaylist15" xml:space="preserve">
+    <value>Вошли в _cDBI_PlaylistItemStartsSetCompleted</value>
+  </data>
+  <data name="sNoticePlaylist16" xml:space="preserve">
+    <value>Перемещено успешно!{0}{0}Чтобы увидеть результаты перемещения, сделайте частичный или полный пересчет ПЛ.</value>
+  </data>
+  <data name="sNoticePlaylist17" xml:space="preserve">
+    <value>сейчас в эфире:</value>
+  </data>
+  <data name="sNoticePlaylist2" xml:space="preserve">
+    <value>Пересчитать плейлист на {0} {1} начиная с "{2}"?</value>
+  </data>
+  <data name="sNoticePlaylist20" xml:space="preserve">
+    <value>копировать выделенное на время...</value>
+  </data>
+  <data name="sNoticePlaylist21" xml:space="preserve">
+    <value>дата и время выхода</value>
+  </data>
+  <data name="sNoticePlaylist22" xml:space="preserve">
+    <value>передвинуть на другое время</value>
+  </data>
+  <data name="sNoticePlaylist23" xml:space="preserve">
+    <value>вставить ассеты после или добавить блок...</value>
+  </data>
+  <data name="sNoticePlaylist24" xml:space="preserve">
+    <value>удалить ВСЁ начиная с</value>
+  </data>
+  <data name="sNoticePlaylist25" xml:space="preserve">
+    <value>пересчитать на 5 часов вперед</value>
+  </data>
+  <data name="sNoticePlaylist26" xml:space="preserve">
+    <value>копировать выделенное в конец...</value>
+  </data>
+  <data name="sNoticePlaylist27" xml:space="preserve">
+    <value>дня</value>
+  </data>
+  <data name="sNoticePlaylist28" xml:space="preserve">
+    <value>через</value>
+  </data>
+  <data name="sNoticePlaylist29" xml:space="preserve">
+    <value>запланировано</value>
+  </data>
+  <data name="sNoticePlaylist3" xml:space="preserve">
+    <value>Выберите ЕДИНСТВЕННЫЙ элемент плейлиста после которого хотите вставить ассет(ы)</value>
+  </data>
+  <data name="sNoticePlaylist30" xml:space="preserve">
+    <value>назад</value>
+  </data>
+  <data name="sNoticePlaylist31" xml:space="preserve">
+    <value>Вёрстка первоочередного плей-листа...</value>
+  </data>
+  <data name="sNoticePlaylist32" xml:space="preserve">
+    <value>дата и время завершения</value>
+  </data>
+  <data name="sNoticePlaylist4" xml:space="preserve">
+    <value>Нельзя прикрепить элементы к еще не добавленному или находящемуся в кэше элементу</value>
+  </data>
+  <data name="sNoticePlaylist5" xml:space="preserve">
+    <value>групповое перемещение</value>
+  </data>
+  <data name="sNoticePlaylist6" xml:space="preserve">
+    <value>Вы УВЕРЕНЫ, что хотите удалить более 10-ти элементов плейлиста???</value>
+  </data>
+  <data name="sNoticePlaylist7" xml:space="preserve">
+    <value>Вы УВЕРЕНЫ, что хотите удалить ВСЕ элементы плейлиста начиная с</value>
+  </data>
+  <data name="sNoticePlaylist8" xml:space="preserve">
+    <value>Вошли в _ui_cmPlanned_Move</value>
+  </data>
+  <data name="sNoticePlaylist9" xml:space="preserve">
+    <value>Введите новое время выхода ниже:</value>
+  </data>
+  <data name="sNoticePlaylistImport1" xml:space="preserve">
+    <value>файл клипов:</value>
+  </data>
+  <data name="sNoticePlaylistImport2" xml:space="preserve">
+    <value>файл рекламы:</value>
+  </data>
+  <data name="sNoticePlaylistImport3" xml:space="preserve">
+    <value>дата привязки:</value>
+  </data>
+  <data name="sNoticePlaylistImport4" xml:space="preserve">
+    <value>файл оформления:</value>
+  </data>
+  <data name="sNoticePlaylistImport5" xml:space="preserve">
+    <value>объединить плейлисты</value>
+  </data>
+  <data name="sNoticeStat1" xml:space="preserve">
+    <value>не </value>
+  </data>
+  <data name="sNoticeTemplates1" xml:space="preserve">
+    <value>название папки с png-секвенцией</value>
+  </data>
+  <data name="sNoticeTimeCodeEnter1" xml:space="preserve">
+    <value>Нажмите цифры, enter или escape</value>
+  </data>
+  <data name="sSpring" xml:space="preserve">
+    <value>Весна</value>
+  </data>
+  <data name="sSummer" xml:space="preserve">
+    <value>Лето</value>
+  </data>
+  <data name="sWinter" xml:space="preserve">
+    <value>Зима</value>
+  </data>
+</root>

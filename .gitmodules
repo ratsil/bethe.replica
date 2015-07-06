@@ -1,0 +1,9 @@
+[submodule "!submodules/helpers"]
+	path = !submodules/helpers
+	url = https://github.com/ratsil/bethe.helpers
+[submodule "!submodules/btl"]
+	path = !submodules/btl
+	url = https://github.com/ratsil/bethe.btl
+[submodule "!submodules/ingenie"]
+	path = !submodules/ingenie
+	url = https://github.com/ratsil/bethe.ingenie

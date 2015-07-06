@@ -1,0 +1,60 @@
+﻿body 
+{
+    background-color:black;
+}
+textarea
+{
+    background-color:silver;
+}
+table.effect
+{
+    width:100%;
+    border:1px solid silver;
+    padding:0;
+    margin:0;
+    vertical-align:top;
+}
+td.effect
+{
+    width:200px;
+    vertical-align:top;
+}
+td.caption
+{
+    background-color:#404040;
+    text-align:center;
+    height:30px;
+    color:silver;
+}
+td.properties
+{
+    width:40px;
+}
+td.action
+{
+    white-space:nowrap;
+    text-align:center;
+}
+table.action, button.properties
+{
+    height:30px;
+    width:100%;
+}
+button.action, button.properties
+{
+    width:100%;
+    height:50px;
+    text-align:center;
+    background-color:#808080;
+    color:white;
+}
+button.properties
+{
+    background-image:url('images/properties.png');
+    background-repeat:no-repeat;
+    background-position:center center;
+}
+button.action:hover, button.properties:hover
+{
+    background-color:#A0A0A0;
+}

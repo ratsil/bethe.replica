@@ -1,0 +1,38 @@
+﻿<configuration>
+  <system.serviceModel>
+    <bindings>
+      <basicHttpBinding>
+        <binding name="IngenieSoapPrompter" maxBufferSize="2147483647"
+          maxReceivedMessageSize="2147483647">
+          <security mode="None" />
+        </binding>
+        <binding name="CuesSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+          <security mode="None" />
+        </binding>
+        <binding name="PlayerSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+          <security mode="None" />
+        </binding>
+        <binding name="PrompterSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+          <security mode="None" />
+        </binding>
+        <binding name="PreferencesSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647">
+          <security mode="None" />
+        </binding>
+      </basicHttpBinding>
+    </bindings>
+    <client>
+      <endpoint address="http://cues.scr.replica/ig/services/Cues.asmx"
+        binding="basicHttpBinding" bindingConfiguration="CuesSoap" contract="services.ingenie.cues.CuesSoap"
+        name="CuesSoap" />
+      <endpoint address="http://player.scr.replica/ig/services/Player.asmx"
+        binding="basicHttpBinding" bindingConfiguration="PlayerSoap"
+        contract="services.ingenie.player.PlayerSoap" name="PlayerSoap" />
+      <endpoint address="http://preferences.scr.replica/ig/services/Preferences.asmx"
+        binding="basicHttpBinding" bindingConfiguration="PreferencesSoap"
+        contract="services.preferences.PreferencesSoap" name="PreferencesSoap" />
+      <endpoint address="http://prompter.scr.replica/ig/services/Prompter.asmx"
+        binding="basicHttpBinding" bindingConfiguration="PrompterSoap"
+        contract="services.ingenie.prompter.PrompterSoap" name="PrompterSoap" />
+    </client>
+  </system.serviceModel>
+</configuration>

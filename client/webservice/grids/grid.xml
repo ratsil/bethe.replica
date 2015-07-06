@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<grid>
+	<monday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</monday>
+	<tuesday>
+		<record name="program 1" time="00:23" />
+		<record name="clips" time="03:44" />
+		<record name="program 2" time="05:23" />
+	</tuesday>
+	<wednesday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</wednesday>
+	<thursday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</thursday>
+	<friday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</friday>
+	<saturday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</saturday>
+	<sunday>
+		<record name="program 1" time="00:00" />
+		<record name="clips" time="00:23" />
+	</sunday>
+</grid>

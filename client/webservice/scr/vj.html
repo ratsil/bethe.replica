@@ -1,0 +1,377 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>vj panel</title>
+	<meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
+	<meta http-equiv="EXPIRES" content="Mon, 28 Aug 1978 03:00:00 GMT" />
+	<meta http-equiv="PRAGMA" content="NO-CACHE" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<style type="text/css">
+		body, html
+		{
+			width: 100%;
+			height: 100%;
+			padding: 0px;
+			margin: 0px;
+			font-size: 100%;
+			background-color: black;
+			color: white;
+		}
+		button.subject
+		{
+			width: 100%;
+			height: 40px;
+			font-size: 180%;
+			background-color: #323232;
+			color: white;
+		}
+		button.menu, button.flash
+		{
+			margin: 0px 10px 0px 10px;
+			width: 99%;
+			height: 60px;
+			font-size: 240%;
+			background-color: #323232;
+			color: white;
+		}
+		button.flash
+		{
+			height: 10px;
+			background-color: #B2D3FF;
+			visibility: collapse;
+		}
+		.message_odd, .message_even, .marked_odd, .marked_even
+		{
+			font-size: 280%;
+			color: white;
+		}
+		.message_odd
+		{
+			background-color: #3D3D3D;
+		}
+		.message_even
+		{
+			background-color: #1E1E1E;
+		}
+		.marked_odd
+		{
+			background-color: #3855FF;
+		}
+		.marked_even
+		{
+			background-color: #1835DF;
+		}
+	</style>
+</head>
+<body>
+	<div id="_ui_dvProgress" style="color: white; margin: 0px; text-align: center; padding: 150px 0px 0px 0px;
+		position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 100;
+		display: none; background-color: #000000; font-size: 180%; filter: alpha(opacity=70);
+		-moz-opacity: 0.7; opacity: 0.7;">
+		<b>UPDATING DATA<br />
+			<br />
+			please wait</b>
+	</div>
+	<div style="width: 100%; text-align: center;">
+		<button id="_ui_btnSubject" class="subject" disabled="disabled">
+			subject: (no broadcast)</button><br />
+		<br />
+		<table align="center" style="width: 100%;" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<button id="_ui_btnMessages" onclick="_ui_btnMessages_Click()" class="menu">
+						messages</button>
+				</td>
+				<td>
+					<button id="_ui_btnAnnouncements" onclick="_ui_btnAnnouncements_Click();" class="menu">
+						announcements</button>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<button id="_ui_btnMessagesFlash" onclick="_ui_btnMessages_Click()" class="flash">
+					</button>
+				</td>
+				<td>
+					<button id="_ui_btnAnnouncementsFlash" onclick="_ui_btnAnnouncements_Click();" class="flash">
+					</button>
+				</td>
+			</tr>
+		</table>
+		<hr />
+		<div id="_ui_dvAnnouncements" style="display: none;">
+			<table id="_ui_tblAnnouncements" style="width: 100%;" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="_ui_dvMessages">
+			<table style="width: 100%;" cellspacing="0" cellpadding="0">
+				<tr>
+					<td>
+						<button style="width: 100%; height: 40px; margin: 10px 0px 0px 0px; font-size: 180%;"
+							disabled="disabled">
+							<b>MARKED</b></button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<table id="_ui_tblMessagesMarked" style="width: 100%;" cellpadding="0" cellspacing="0">
+							<tr>
+								<td>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button style="width: 100%; height: 40px; margin: 10px 0px 0px 0px; font-size: 180%;"
+							disabled="disabled">
+							<b>QUEUE</b></button>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<table id="_ui_tblMessages" style="width: 100%;" cellpadding="0" cellspacing="0">
+							<tr>
+								<td>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<script type="text/javascript">
+    <!--
+		var _ui_dvProgress = document.getElementById('_ui_dvProgress');
+
+		var _ui_btnSubject = document.getElementById('_ui_btnSubject');
+
+		var _ui_dvMessages = document.getElementById('_ui_dvMessages');
+		var _ui_btnMessages = document.getElementById('_ui_btnMessages');
+		var _ui_btnMessagesFlash = document.getElementById('_ui_btnMessagesFlash');
+		var _ui_tblMessagesMarked = document.getElementById('_ui_tblMessagesMarked');
+		var _ui_tblMessages = document.getElementById('_ui_tblMessages');
+
+		var _ui_dvAnnouncements = document.getElementById('_ui_dvAnnouncements');
+		var _ui_btnAnnouncements = document.getElementById('_ui_btnAnnouncements');
+		var _ui_btnAnnouncementsFlash = document.getElementById('_ui_btnAnnouncementsFlash');
+		var _ui_tblAnnouncements = document.getElementById('_ui_tblAnnouncements');
+
+		var _sSubject = '';
+		var _bSubjectNew = false;
+		var _aMessages = new Array();
+		var _aMessagesMarked = new Array();
+		var _aAnnouncements = new Array();
+
+		function ProgressShow() {
+			if (null != _ui_dvProgress) {
+				document.body.style.overflow = 'hidden';
+				document.body.style.position = 'fixed';
+				_ui_dvProgress.style.display = 'block';
+				_ui_dvProgress.onfocusout = function (event) {
+					if (null != _ui_dvProgress)
+						_ui_dvProgress.focus();
+				}
+				_ui_dvProgress.focus();
+			}
+		}
+		function ProgressHide() {
+			if (null != _ui_dvProgress)
+				_ui_dvProgress.style.display = 'none';
+			document.body.style.overflow = '';
+			document.body.style.position = '';
+			window.onfocusout = '';
+		}
+
+		function Check() {
+			var script = document.createElement('script');
+			script.src = 'vj.aspx?request=check&cacheprevent=' + (new Date()).getTime();
+			script.id = '_srtCheck';
+			var srtOld = document.getElementById('_srtCheck');
+			if (srtOld)
+				document.body.replaceChild(script, srtOld);
+			else
+				document.body.appendChild(script);
+			window.setTimeout('Check()', 5000);
+		}
+
+		function AlertSubject() {
+
+			var sColor = null;
+			var nR = 0x34, nG = 0x91, nB = 0x31;
+			if (_ui_btnSubject.nRed) {
+				if (255 < (nR = _ui_btnSubject.nRed + 10))
+					nR = 255;
+				if (255 < (nG = _ui_btnSubject.nGreen + 10))
+					nG = 255;
+				if (255 < (nB = _ui_btnSubject.nBlue + 10))
+					nB = 255;
+			}
+			if (255 > nR && 255 > nR && 255 > nR) {
+				sColor = '#' + nR.toString(16) + nG.toString(16) + nB.toString(16);
+				window.setTimeout('AlertSubject()', 3000);
+			}
+			else
+				sColor = null;
+			_ui_btnSubject.style.backgroundColor = sColor;
+			_ui_btnSubject.nRed = nR;
+			_ui_btnSubject.nGreen = nG;
+			_ui_btnSubject.nBlue = nB;
+		}
+		function UpdateSubject() {
+			if (!_ui_btnSubject.sValue || _ui_btnSubject.sValue != _sSubject) {
+				_ui_btnSubject.innerHTML = 'subject: ' + _sSubject;
+				_ui_btnSubject.sValue = _sSubject;
+				window.setTimeout('AlertSubject()', 5000);
+			}
+		}
+
+		function AlertMessages() {
+			_ui_btnMessages.style.backgroundColor = '#349131';
+		}
+		function UpdateMessages() {
+			_ui_btnMessages.style.backgroundColor = '';
+
+			var ui_tr, ui_td, bOdd = true;
+			while (0 < _ui_tblMessagesMarked.rows.length)
+				_ui_tblMessagesMarked.deleteRow(0);
+			for (var nIndx = 0; _aMessagesMarked.length > nIndx; nIndx++) {
+				ui_tr = _ui_tblMessagesMarked.insertRow(_ui_tblMessagesMarked.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'marked_odd';
+				else
+					ui_td.className = 'marked_even';
+				ui_td.innerHTML = "<hr />";
+				ui_tr = _ui_tblMessagesMarked.insertRow(_ui_tblMessagesMarked.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'marked_odd';
+				else
+					ui_td.className = 'marked_even';
+				ui_td.innerHTML = _aMessagesMarked[nIndx];
+				bOdd = !bOdd;
+			}
+
+			while (0 < _ui_tblMessages.rows.length)
+				_ui_tblMessages.deleteRow(0);
+			bOdd = true;
+			for (var nIndx = 0; _aMessages.length > nIndx; nIndx++) {
+				ui_tr = _ui_tblMessages.insertRow(_ui_tblMessages.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'message_odd';
+				else
+					ui_td.className = 'message_even';
+				ui_td.innerHTML = "<hr />";
+				ui_tr = _ui_tblMessages.insertRow(_ui_tblMessages.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'message_odd';
+				else
+					ui_td.className = 'message_even';
+				ui_td.innerHTML = _aMessages[nIndx];
+				bOdd = !bOdd;
+			}
+		}
+		function _ui_btnMessages_Click() {
+			ProgressShow();
+			_ui_dvMessages.style.display = 'block';
+			_ui_btnMessagesFlash.style.visibility = 'visible';
+			_ui_dvAnnouncements.style.display = 'none';
+			_ui_btnAnnouncementsFlash.style.visibility = 'collapse';
+			var script = document.createElement('script');
+			script.src = 'vj.aspx?request=update&target=messages&cacheprevent=' + (new Date()).getTime();
+			script.id = '_srtMessages';
+			var srtOld = document.getElementById('_srtMessages');
+			if (srtOld)
+				document.body.replaceChild(script, srtOld);
+			else
+				document.body.appendChild(script);
+		}
+
+		function AlertAnnouncements() {
+			_ui_btnAnnouncements.style.backgroundColor = '#349131';
+		}
+		function UpdateAnnouncements() {
+			_ui_btnAnnouncements.style.backgroundColor = '';
+
+			var ui_tr, ui_td, bOdd = true;
+			while (0 < _ui_tblAnnouncements.rows.length)
+				_ui_tblAnnouncements.deleteRow(0);
+			for (var nIndx = 0; _aAnnouncements.length > nIndx; nIndx++) {
+				ui_tr = _ui_tblAnnouncements.insertRow(_ui_tblAnnouncements.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'marked_odd';
+				else
+					ui_td.className = 'marked_even';
+				ui_td.innerHTML = "<hr />";
+				ui_tr = _ui_tblAnnouncements.insertRow(_ui_tblAnnouncements.rows.length);
+				ui_td = ui_tr.insertCell(0);
+				if (bOdd)
+					ui_td.className = 'marked_odd';
+				else
+					ui_td.className = 'marked_even';
+				ui_td.innerHTML = _aAnnouncements[nIndx];
+				bOdd = !bOdd;
+			}
+		}
+		function _ui_btnAnnouncements_Click() {
+			_ui_dvMessages.style.display = 'none';
+			_ui_btnMessagesFlash.style.visibility = 'collapse';
+			_ui_dvAnnouncements.style.display = 'block';
+			_ui_btnAnnouncementsFlash.style.visibility = 'visible';
+			ProgressShow();
+			var script = document.createElement('script');
+			script.src = 'vj.aspx?request=update&target=announcments&cacheprevent=' + (new Date()).getTime();
+			script.id = '_srtAnnouncments';
+			var srtOld = document.getElementById('_srtAnnouncments');
+			if (srtOld)
+				document.body.replaceChild(script, srtOld);
+			else
+				document.body.appendChild(script);
+		}
+
+		//своеобразная реализация евентов:
+		var _aEventHandlers = new Array();
+		function Handler(eEventType, fCallback, bOnce) {
+			this.eEventType = eEventType;
+			this.fCallback = fCallback;
+			this.bOnce = bOnce;
+		}
+		EventType = {
+			updated: 0,
+			checked: 1
+		}
+		function EventHandlerAdd(eEventType, fCallback, bOnce) {
+			_aEventHandlers[_aEventHandlers.length] = new Handler(eEventType, fCallback, bOnce);
+		}
+
+		function OnEvent(eEventType) {
+			aHandlers = new Array();
+			for (var nIndx = 0; _aEventHandlers.length > nIndx; nIndx++) {
+				if (eEventType == _aEventHandlers[nIndx].eEventType && _aEventHandlers[nIndx].fCallback) {
+					_aEventHandlers[nIndx].fCallback();
+					if (_aEventHandlers[nIndx].bOnce)
+						continue;
+				}
+				aHandlers[aHandlers.length] = _aEventHandlers[nIndx];
+			}
+			_aEventHandlers = aHandlers;
+		}
+		//*******************************/
+		ProgressShow();
+		EventHandlerAdd(EventType.checked, _ui_btnMessages_Click, true);
+		EventHandlerAdd(EventType.updated, ProgressHide, false);
+		Check();
+    //-->
+	</script>
+</body>
+</html>

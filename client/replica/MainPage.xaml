@@ -1,0 +1,79 @@
+﻿<UserControl
+    x:Class="replica.sl.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation" 
+    xmlns:uriMapper="clr-namespace:System.Windows.Navigation;assembly=System.Windows.Controls.Navigation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="480">
+    <UserControl.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </UserControl.Resources>
+    <Grid x:Name="LayoutRoot" Style="{StaticResource LayoutRootGridStyle}">
+        <Border x:Name="ContentBorder" Style="{StaticResource ContentBorderStyle}">
+
+            <navigation:Frame x:Name="ContentFrame" 
+                              Source="/auth" Navigating="ContentFrame_Navigating" NavigationFailed="ContentFrame_NavigationFailed" 
+                              Background="#FF456D89" BorderThickness="0" BorderBrush="#FF456D89">
+                <!--Style="{StaticResource ContentFrameStyle}"-->
+                <navigation:Frame.UriMapper>
+                    <uriMapper:UriMapper>
+                        <uriMapper:UriMapping Uri="" MappedUri="/Views/auth.xaml" />
+                        <uriMapper:UriMapping Uri="/{pageName}" MappedUri="/Views/{pageName}.xaml" />
+                    </uriMapper:UriMapper>
+                </navigation:Frame.UriMapper>
+            </navigation:Frame>
+        </Border>
+
+        <Grid x:Name="NavigationGrid" Style="{StaticResource NavigationGridStyle}">
+
+            <Border x:Name="BrandingBorder" Style="{StaticResource BrandingBorderStyle}">
+                <StackPanel x:Name="BrandingStackPanel" Style="{StaticResource BrandingStackPanelStyle}">
+
+                    <ContentControl Style="{StaticResource LogoIcon}" />
+                    <TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" 
+                               Text="replica" />
+
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="LinksBorder" Style="{StaticResource LinksBorderStyle}">
+                <StackPanel x:Name="_ui_spLinks" Style="{StaticResource LinksStackPanelStyle}" Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/grid" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sGrid, Source={StaticResource g}}" />
+                        <Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+						<HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/ingest" TargetName="ContentFrame" Content="{Binding Path=cHelper.sCheckPoint, Source={StaticResource g}}" />
+                        <Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/playlist" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sPlaylist, Source={StaticResource g}}" />
+						<Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/assets" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sAssets, Source={StaticResource g}}" />
+						<Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+					<StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/templates" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sTemplates, Source={StaticResource g}}" />
+						<Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/stat" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStatistics, Source={StaticResource g}}" />
+						<Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/sms" TargetName="ContentFrame" Content="SMS" />
+                        <Rectangle Style="{StaticResource DividerStyle}" />
+                    </StackPanel>
+                    <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/profile" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProfile, Source={StaticResource g}}" />
+					<Rectangle Style="{StaticResource DividerStyle}" />
+                    <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/auth" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sExit, Source={StaticResource g}}" />
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Grid>
+
+</UserControl>

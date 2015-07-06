@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<publishData>
+  <publishProfile publishUrl="c:\projects\!publish\!current\" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="replica-local" publishMethod="FileSystem" replaceMatchingFiles="True" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
+    <file relUrl="main.css" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="request.aspx" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="bin/helpers.common.globalization.dll" publishTime="02/17/2015 02:28:55" />
+    <file relUrl="scr/vj.html" publishTime="01/30/2015 22:09:08" />
+    <file relUrl="ia/cliporder.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="ClientBin/replica.xap" publishTime="06/02/2015 17:11:43" />
+    <file relUrl="ia/message.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="services/Preferences.asmx" publishTime="04/20/2012 18:28:45" />
+    <file relUrl="bin/IKVM.Runtime.dll" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="social.aspx" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="bin/Facebook.xml" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="ia/pl.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="ia/grids.aspx" publishTime="09/24/2012 17:54:30" />
+    <file relUrl="bin/IKVM.OpenJDK.Core.dll" publishTime="05/14/2011 10:35:46" />
+    <file relUrl="bin/IKVM.OpenJDK.Util.dll" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="bin/helpers.common.dll" publishTime="06/02/2015 16:27:07" />
+    <file relUrl="images/social_tt.png" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="bin/helpers.db.dll" publishTime="06/02/2015 17:10:01" />
+    <file relUrl="bin/Mono.Security.dll" publishTime="09/01/2014 13:48:30" />
+    <file relUrl="crossdomain.xml" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="bin/ru-RU/webservice.resources.dll" publishTime="06/02/2015 17:10:11" />
+    <file relUrl="ia/messages.aspx" publishTime="12/25/2014 17:59:56" />
+    <file relUrl="main.html" publishTime="01/30/2015 22:09:08" />
+    <file relUrl="images/social_vk.png" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="App_Data/lib/org.apache.poi.dll" publishTime="05/14/2011 10:35:46" />
+    <file relUrl="bin/ru-RU/helpers.common.globalization.resources.dll" publishTime="02/17/2015 02:28:55" />
+    <file relUrl="current.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="bin/helpers.replica.dll" publishTime="06/02/2015 17:10:08" />
+    <file relUrl="js/replica.js" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="ia/current.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="images/social_fb.png" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="scr/vj.aspx" publishTime="03/05/2012 17:34:41" />
+    <file relUrl="packages.config" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="grids/grid.xml" publishTime="09/24/2012 17:54:30" />
+    <file relUrl="index.html" publishTime="02/07/2012 03:23:13" />
+    <file relUrl="bin/webservice.dll" publishTime="06/02/2015 17:10:11" />
+    <file relUrl="ia/clips.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="bin/ru-RU/helpers.replica.resources.dll" publishTime="06/02/2015 17:10:08" />
+    <file relUrl="Silverlight.js" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="bin/Npgsql.dll" publishTime="09/01/2014 13:48:30" />
+    <file relUrl="bin/org.apache.poi.dll" publishTime="05/14/2011 10:35:46" />
+    <file relUrl="js/social.js" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="clientaccesspolicy.xml" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="Web.config" publishTime="10/03/2013 13:01:10" />
+    <file relUrl="services/DBInteract.asmx" publishTime="11/28/2011 14:30:00" />
+    <file relUrl="bin/LinqToTwitter.dll" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="index.aspx" publishTime="01/21/2012 09:53:43" />
+    <file relUrl="ia/vjstatus.aspx" publishTime="02/02/2012 14:05:21" />
+    <file relUrl="NearestAdvertsBlock.aspx" publishTime="01/16/2014 15:11:24" />
+    <file relUrl="js/request.js" publishTime="04/15/2014 16:49:58" />
+    <file relUrl="App_Data/lib/IKVM.OpenJDK.Util.dll" publishTime="05/14/2011 10:35:45" />
+    <file relUrl="bin/Facebook.dll" publishTime="04/15/2014 16:49:58" />
+  </publishProfile>
+</publishData>
