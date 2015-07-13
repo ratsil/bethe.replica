@@ -43,7 +43,7 @@ FOR %%G IN (sql 2.sql) DO (
 		echo  	%%T
 		echo @@@@%%T >  logs\%%T.log
 		FOR %%L IN (. 2.) DO (
-			FOR %%F IN (!sql/%%T/db_init_%%T%%L%%G !sql/%%T/db_init_%%T_tables%%L%%G !sql/%%T/db_init_%%T_functions%%L%%G !sql/%%T/db_init_%%T_views%%L%%G !sql/%%T/db_fill_%%T%%L%%G) DO (
+			FOR %%F IN (!sql/%%T/db_init_%%T%%L%%G !sql/%%T/db_init_%%T_tables%%L%%G !sql/%%T/db_init_%%T_functions%%L%%G !sql/%%T/db_init_%%T_views%%L%%G !sql/%%T/db_init_%%T_types%%L%%G !sql/%%T/db_fill_%%T%%L%%G) DO (
 				IF EXIST %%F (
 					echo  	  	[%%F] >>  logs\%%T.log
 					StreepBOM %%F | !bin\psql -h %pghost% -U user %pgdb% 1> NUL 2>> logs\%%T.log

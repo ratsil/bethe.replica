@@ -24,6 +24,10 @@ CREATE TYPE text_bool AS ("sValue" text, "bValue" boolean);
 CREATE TYPE table_name AS ("sSchema" text, "sName" text);
 CREATE TYPE error AS ENUM ('unknown', 'missed');
 CREATE TYPE target AS ENUM ('add', 'get');
+CREATE TYPE tINP AS ( --IdNamePair
+	id integer,
+	"sName" name
+);
 
 CREATE OR REPLACE FUNCTION "typeof"(stTable table_name, sColumnName text) RETURNS text AS
 $$
@@ -68,7 +72,7 @@ BEGIN
 		sValue := aColumnValues[nValIndx][2]::text;
 		IF sColumn IS NOT NULL THEN
 			sType := typeof(stTable,sColumn);
-			IF 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
+			IF 'name'=sType OR 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
 				sValue := quote_literal(sValue);
 			END IF;
 			sSQL:=sSQL || ' AND ' || quote_ident(sColumn) || COALESCE(' = '||sValue,' IS NULL');
@@ -180,6 +184,20 @@ END;
 $$
 LANGUAGE plpgsql VOLATILE;
 
+CREATE OR REPLACE FUNCTION "fTableGet"(oTable table_name, aColumnValues anyarray, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	oRetVal int_bool;
+BEGIN
+	oRetVal := "fTableGetID"(oTable, aColumnValues);
+	IF bException AND NOT oRetVal."bValue" THEN
+		RAISE EXCEPTION 'CANNOT FIND SPECIFIED RECORD [%][%]', oTable, aColumnValues;
+	END IF;
+	RETURN oRetVal."nValue";
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
 CREATE OR REPLACE FUNCTION "fTableAdd"(stTable table_name, aColumnValues anyarray, bForceAdd boolean) RETURNS int_bool AS
 $$
 DECLARE
@@ -217,7 +235,7 @@ BEGIN
 				nID := sValue::integer;
 			ELSE
 				sType := typeof(stTable,sColumn);
-				IF 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
+				IF 'name'=sType OR 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
 					sValue := quote_literal(sValue);
 				END IF;
 			END IF;
@@ -228,6 +246,9 @@ BEGIN
 	sSQL:=sSQL || sSQLColumns || ') VALUES(DEFAULT' || sSQLValues || ')';
 	EXECUTE sSQL || ' RETURNING id' INTO nID;
 	--RAISE NOTICE 'FUNCTION "fTableAdd" [nID:%] [sSQL: %] [sSQLColumns: %] [sSQLValues: %] [currval:%]', nID,  sSQL, sSQLColumns, sSQLValues, currval(stTable."sSchema"||'."'||stTable."sName"||'_id_seq"');
+	IF nID IS NULL AND EXISTS (SELECT c.oid FROM pg_trigger t, pg_class c, pg_proc p, pg_namespace n WHERE t.tgrelid=c.oid AND t.tgfoid=p.oid AND p.proname='fDictionary' AND c.relnamespace = n.oid AND stTable."sSchema"=n.nspname AND stTable."sName"=c.relname) THEN
+		SELECT "nValue" INTO nID FROM "fTableGet"(stTable,aColumnValues);
+	END IF;
 	IF nID IS NOT NULL THEN
 		IF 0 > nID THEN
 			nID = currval(stTable."sSchema"||'."'||stTable."sName"||'_id_seq"');
@@ -238,6 +259,19 @@ BEGIN
 		stRetVal."bValue" := false;
 	END IF;
 	RETURN stRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+CREATE OR REPLACE FUNCTION "fTableAdd"(oTable table_name, aColumnValues anyarray, bForceAdd boolean, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	oRetVal int_bool;
+BEGIN
+	oRetVal := "fTableAdd"(oTable, aColumnValues, bForceAdd);
+	IF bException AND NOT oRetVal."bValue" THEN
+		RAISE EXCEPTION 'CANNOT ADD RECORD TO TABLE [%][%]', oTable, aColumnValues;
+	END IF;
+	RETURN oRetVal."nValue";
 END;
 $$
 LANGUAGE plpgsql VOLATILE;
@@ -279,7 +313,7 @@ BEGIN
 		sValue := aColumnValues[nValIndx][2]::text;
 		IF sColumn IS NOT NULL THEN
 			sType := typeof(stTable,sColumn);
-			IF 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
+			IF 'name'=sType OR 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
 				sValue := quote_literal(sValue);
 			END IF;
 			sSQL := sSQL || ' AND ' || quote_ident(sColumn) || COALESCE(' = '||sValue,' IS NULL');
@@ -495,33 +529,161 @@ CREATE OR REPLACE FUNCTION "fDictionary"() RETURNS trigger AS
 $Dictionary$
 DECLARE
 	sTableName text;
-	stRecord RECORD;
+	sValue text;
+	sType text;
+	oRecord RECORD;
 BEGIN
 	sTableName := quote_ident(TG_TABLE_SCHEMA)||'.'||quote_ident(TG_TABLE_NAME);
 	IF (TG_OP = 'DELETE') THEN
-		IF 1 > OLD."nReferencesQty" THEN
-			RETURN OLD;
+		IF 'cues' = TG_TABLE_SCHEMA THEN
+			IF NOT EXISTS(SELECT id FROM cues."vBinds" WHERE OLD.id="nValue" AND TG_TABLE_SCHEMA=("oTableTarget")."sSchema" AND TG_TABLE_NAME=("oTableTarget")."sName") THEN
+				RETURN OLD;
+			END IF;
 		END IF;
-		EXECUTE 'UPDATE '||sTableName||' SET "nReferencesQty"="nReferencesQty" - 1 WHERE id='||OLD.id::text;
 		RETURN NULL;
 	ELSIF (TG_OP = 'UPDATE') THEN
-		IF OLD."sValue" = NEW."sValue" THEN
+		IF OLD."oValue" = NEW."oValue" THEN
 			RETURN NEW;
 		END IF;
-		NEW."nReferencesQty" := OLD."nReferencesQty";
-		IF 1 > OLD."nReferencesQty" THEN
-			RETURN NEW;
+		sType := typeof(ROW(TG_TABLE_SCHEMA,TG_TABLE_NAME),'oValue');
+		sValue := NEW."oValue";
+		IF 'name'=sType OR 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType THEN
+			sValue := quote_literal(sValue);
 		END IF;
-		EXECUTE 'INSERT INTO '||sTableName||' ("sValue") VALUES ('||quote_literal(NEW."sValue")||') RETURNING *' INTO stRecord;
-		RETURN stRecord;
+		EXECUTE 'INSERT INTO '||sTableName||' ("oValue") VALUES ('||sValue||') RETURNING *' INTO oRecord;
+		RETURN oRecord;
 	ELSIF (TG_OP = 'INSERT') THEN
-		EXECUTE 'SELECT * FROM '||sTableName||' WHERE "sValue"='||quote_literal(NEW."sValue") INTO stRecord;
-		--RAISE NOTICE '%', stRecord;
-		IF stRecord.id IS NULL THEN
+		sType := typeof(ROW(TG_TABLE_SCHEMA,TG_TABLE_NAME),'oValue');
+		sValue := NEW."oValue";
+		IF 'name'=sType OR 'varchar'=sType OR 'bpchar'=sType OR 'text'=sType OR 'timestamp'=left(sType, 9) THEN
+			sValue := quote_literal(sValue);
+		END IF;
+		EXECUTE 'SELECT * FROM '||sTableName||' WHERE "oValue"='||sValue INTO oRecord;
+		IF oRecord.id IS NULL THEN
+			IF 'cues' = TG_TABLE_SCHEMA THEN
+				EXECUTE 'DELETE FROM '||sTableName||' WHERE id NOT IN (SELECT DISTINCT "nValue" FROM cues."vBinds" WHERE '||quote_literal(TG_TABLE_SCHEMA)||'=("oTableTarget")."sSchema" AND '||quote_literal(TG_TABLE_NAME)||'=("oTableTarget")."sName" AND "nValue" IS NOT NULL)';
+			END IF;
 			RETURN NEW;
 		END IF;
-		EXECUTE 'UPDATE '||sTableName||' SET "nReferencesQty"="nReferencesQty" + 1 WHERE id='||stRecord.id::text;
 	END IF;
 	RETURN NULL;
 END;
 $Dictionary$ LANGUAGE 'plpgsql' VOLATILE;
+
+------------------------------------ Binds
+CREATE OR REPLACE FUNCTION "fBindTypeGet"(oTableSource table_name, oTableTarget table_name, sName name, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	oTable table_name;
+	aColumns text[][];
+	nRetVal bigint;
+BEGIN
+	oTable."sSchema":=oTableSource."sSchema";
+	oTable."sName":='tBindTypes';
+	aColumns := '{{idTableSource,'||hk."fRegisteredTableGet"(oTableSource, bException)::text||'},{idTableTarget,0},{sName,0}}';
+	IF oTableTarget IS NULL THEN
+		aColumns[2][2] := NULL;
+	ELSE
+		aColumns[2][2] := hk."fRegisteredTableGet"(oTableTarget, bException)::text;
+	END IF;
+	aColumns[3][2] := COALESCE(sName::text,'NULL');
+	nRetVal := "fTableGet"(oTable, aColumns, bException);
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+CREATE OR REPLACE FUNCTION "fBindAdd"(oTableSource table_name, idSource bigint, oTableTarget table_name, sName name, nValue bigint, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	idBindTypes integer;
+	oTable table_name;
+	aColumns text[][];
+	nRetVal bigint;
+BEGIN
+	idBindTypes := "fBindTypeGet"(oTableSource, oTableTarget, sName, bException);
+	IF idBindTypes IS NULL THEN
+		IF bException THEN
+			RAISE EXCEPTION 'fBindAdd:Wrong bind type';
+		END IF;
+		RETURN -1;
+	END IF;
+	oTable."sSchema":=oTableSource."sSchema";
+	oTable."sName":='tBinds';
+	aColumns := '{{idBindTypes,'||idBindTypes::text||'},{idSource,'||idSource::text||'},{nValue,'||COALESCE(nValue::text,'NULL')||'}}';
+	nRetVal := "fTableAdd"(oTable, aColumns, true, bException);
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION "fBindGet"(oTableSource table_name, idSource bigint, oTableTarget table_name, sName name, nValue bigint, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	idBindTypes integer;
+	oTable table_name;
+	aColumns text[][];
+	nRetVal bigint;
+BEGIN
+	idBindTypes := "fBindTypeGet"(oTableSource, oTableTarget, sName, bException);
+	oTable."sSchema":=oTableSource."sSchema";
+	oTable."sName":='tBinds';
+	aColumns := '{{idBindTypes,'||idBindTypes::text||'},{idSource,'||idSource::text||'},{nValue,'||COALESCE(nValue::text,'NULL')||'}}';
+	nRetVal := "fTableGet"(oTable, aColumns, bException);
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION "fBindGet"(oTableSource table_name, idSource bigint, sName name, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	idBindTypes integer;
+	oTable table_name;
+	aColumns text[][];
+	nRetVal bigint;
+BEGIN
+	idBindTypes := "fBindTypeGet"(oTableSource, null, sName, bException);
+	oTable."sSchema":=oTableSource."sSchema";
+	oTable."sName":='tBinds';
+	aColumns := '{{idBindTypes,'||idBindTypes::text||'},{idSource,'||idSource::text||'}}';
+	nRetVal := "fTableGet"(oTable, aColumns, bException);
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION "fBindSet"(oTableSource table_name, idSource bigint, oTableTarget table_name, sName name, nValue bigint, bException boolean) RETURNS bigint AS
+$$
+DECLARE
+	nRetVal bigint;
+BEGIN
+	nRetVal := "fBindGet"(oTableSource, idSource, oTableTarget, sName, nValue, false);
+	IF nRetVal IS NOT NULL THEN
+		EXECUTE 'UPDATE "' || oTableSource."sSchema" || '"."tBinds" SET "nValue"='||COALESCE(nValue::text,'NULL')||' WHERE id='||nRetVal::text;
+	ELSE
+		nRetVal := "fBindAdd"(oTableSource, idSource, oTableTarget, sName, nValue, bException);
+	END IF;
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION "fBindValueGet"(oTable table_name, sValuesTableColumn character varying, nValuesTableID integer, idTables integer,  sKey character varying) RETURNS bigint AS
+$$
+DECLARE
+	idBindTypes integer;
+	oTable table_name;
+	aColumns text[][];
+	nRetVal bigint;
+BEGIN
+	idBindTypes := "fBindTypeGet"(oTableSource, oTableTarget, sName, bException);
+	oTable."sSchema":=oTableSource."sSchema";
+	oTable."sName":='tBinds';
+	aColumns := '{{idBindTypes,'||idBindTypes::text||'},{idSource,'||idSource::text||'},{nValue,'||COALESCE(nValue::text,'NULL')||'}}';
+	nRetVal := "fTableGet"(oTable, aColumns, bException);
+
+	EXECUTE 'SELECT "nValue" FROM "tTables" WHERE id='||nRetVal::text INTO nRetVal;
+	RETURN nRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;

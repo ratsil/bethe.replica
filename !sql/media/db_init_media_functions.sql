@@ -271,9 +271,9 @@ DECLARE
 	stRetVal int_bool;
 	idRegisteredTables integer;
 BEGIN
-	stRetVal := hk."fRegisteredTableGet"('media', 'tDictionary');
+	stRetVal := hk."fRegisteredTableGet"('media', 'tStrings');
 	IF NOT stRetVal."bValue" THEN
-		RAISE EXCEPTION 'CANNOT GET A REGISTERED TABLE ENTRY FOR media."tDictionary"';
+		RAISE EXCEPTION 'CANNOT GET A REGISTERED TABLE ENTRY FOR media."tStrings"';
 	END IF;
 	idRegisteredTables := stRetVal."nValue";
 	stRetVal := media."fFileAttributeGet"(idFiles, idRegisteredTables, sKey);
@@ -284,8 +284,8 @@ BEGIN
 		END IF;
 		stRetVal := media."fFileAttributeAdd"(idFiles, idRegisteredTables, sKey, stRetVal."nValue");
 	ELSE
-		UPDATE media."tDictionary" SET "sValue"=sValue WHERE id=stRetVal."nValue";
-		stRetVal."bValue":=true;
+		UPDATE media."tStrings" SET "oValue"=sValue WHERE id=stRetVal."nValue";
+		stRetVal."bValue" := true;
 	END IF;
 	RETURN stRetVal;
 END;
@@ -377,7 +377,7 @@ END;
 $$
 LANGUAGE plpgsql VOLATILE;
 
-/********************************** media."tDictionary" ***********************************/
+----------------------------------- media."tStrings"
 CREATE OR REPLACE FUNCTION media."fDictionary"(eTarget target, sValue text) RETURNS int_bool AS
 $$
 DECLARE
@@ -386,11 +386,11 @@ DECLARE
 	stRetVal int_bool;
 BEGIN
 	stTable."sSchema":='media';
-	stTable."sName":='tDictionary';
-	aColumns := '{{sValue,0}}';
+	stTable."sName":='tStrings';
+	aColumns := '{{oValue,0}}';
 	aColumns[1][2] := COALESCE(sValue::text,'NULL'); --чтобы не морочиться с экранированием
 	IF 'add' = eTarget THEN 
-		stRetVal := "fTableAdd"(stTable, aColumns,true);
+		stRetVal := "fTableAdd"(stTable, aColumns, true);
 		IF NOT stRetVal."bValue" AND stRetVal."nValue" IS NULL THEN
 			stRetVal := "fTableGet"(stTable, aColumns);
 		END IF;
@@ -434,12 +434,12 @@ DECLARE
 	stRecord RECORD;
 	stRetVal int_bool;
 BEGIN
-	stRetVal := hk."fRegisteredTableGet"('media','tDictionary');
+	stRetVal := hk."fRegisteredTableGet"('media','tStrings');
 	IF NOT stRetVal."bValue" THEN
-		RAISE EXCEPTION 'CANNOT GET A REGISTERED TABLE ENTRY FOR media."tDictionary"';
+		RAISE EXCEPTION 'CANNOT GET A REGISTERED TABLE ENTRY FOR media."tStrings"';
 	END IF;
 	idRegisteredTables := stRetVal."nValue";
-	DELETE FROM media."tDictionary" WHERE id NOT IN (SELECT d.id FROM media."tFileAttributes" ta, media."tDictionary" d WHERE idRegisteredTables = ta."idRegisteredTables" AND d.id = ta."nValue");
+	DELETE FROM media."tStrings" WHERE id NOT IN (SELECT d.id FROM media."tFileAttributes" ta, media."tStrings" d WHERE idRegisteredTables = ta."idRegisteredTables" AND d.id = ta."nValue");
 	stRetVal."bValue" := true;
 	RETURN stRetVal;
 END;

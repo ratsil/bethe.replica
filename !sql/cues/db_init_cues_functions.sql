@@ -647,3 +647,139 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE;
+
+----------------------------------- cues."tPlugins"
+CREATE OR REPLACE FUNCTION cues."fPluginPlaylistItemSave"(oPLI cues.tPluginPlaylistItem, bException bool) RETURNS cues.tPluginPlaylistItem AS
+$BODY$
+DECLARE
+	nValue bigint;
+	nID bigint;
+	oRetVal cues.tPluginPlaylistItem;
+BEGIN
+	SELECT "oItem" INTO oRetVal FROM cues."vPluginPlaylistItems" WHERE oPLI.id=("oItem").id;
+	IF oRetVal IS NULL THEN
+		IF bException THEN
+			RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST ITEM [%]', oPLI.id;
+		END IF;
+		RETURN NULL;
+	END IF;
+	IF oRetVal."oStatus" <> oPLI."oStatus" OR (oRetVal."oStatus").id <> (oPLI."oStatus").id THEN
+		IF EXISTS(SELECT b.id INTO nID FROM cues."vBinds" b WHERE oPLI.id = b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'pl' = (i."oTableTarget")."sSchema" AND 'tStatuses' = (i."oTableTarget")."sName" AND 'status'=b."sName") THEN
+			UPDATE cues."tBinds" SET "nValue"=(oPLI."oStatus").id WHERE nID=id;
+		ELSIF oPLI."oStatus" IS NOT NULL THEN
+			PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('pl','tStatuses'), 'status', (oPLI."oStatus").id, true);
+		END IF;
+	END IF;
+	IF oRetVal."oAsset" <> oPLI."oAsset" OR (oRetVal."oAsset").id <> (oPLI."oAsset").id THEN
+		SELECT b.id INTO nID FROM cues."vBinds" b WHERE oPLI.id=b.id;
+		IF FOUND THEN
+			UPDATE cues."tBinds" SET "nValue"=(oPLI."oAsset").id WHERE nID=id;
+		ELSIF oPLI."oStatus" IS NOT NULL THEN
+			PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+		END IF;
+	END IF;
+	IF oRetVal."dtStarted" <> oPLI."dtStarted" THEN
+		IF EXISTS(SELECT b.id INTO nID FROM cues."vBindTimestamps" b WHERE oPLI.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'started'=b."sName") THEN
+			nValue := NULL;
+			IF oPLI."dtStarted" IS NOT NULL THEN
+				nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPLI."dtStarted") || '}}')::text[][], true, false);
+			END IF;
+			UPDATE cues."tBinds" SET "nValue"=nValue WHERE nID=id;
+		ELSE
+			IF oPLI."dtStarted" IS NOT NULL THEN
+				nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPLI."dtStarted") || '}}')::text[][], true, false);
+				PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('cues','tTimestamps'), 'started', nValue, true);
+			END IF;
+		END IF;
+	END IF;
+	SELECT * INTO oRetVal FROM cues."vPluginPlaylistItems" WHERE oPLI.id=("oItem").id;
+	RETURN oRetVal;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+CREATE OR REPLACE FUNCTION cues."fPluginPlaylistSave"(oPlaylist cues.tPluginPlaylist, bException bool) RETURNS cues.tPluginPlaylist AS
+$BODY$
+DECLARE
+	oTable table_name;
+	nValue bigint;
+	oValue record;
+	oPLI cues.tPluginPlaylistItem;
+BEGIN
+	
+	oTable := ROW('cues','tBinds');
+	IF oPlaylist.id IS NOT NULL THEN
+		SELECT * INTO oValue FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+		oValue := oValue."oPlaylist";
+		IF oValue IS NULL THEN
+			IF bException THEN
+				RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST [%]', ROW(oPlaylist.id, oPlaylist."sName");
+			END IF;
+			RETURN NULL;
+		END IF;
+		IF oPlaylist."sName" <> oValue."sName" THEN
+			nValue := "fTableAdd"(ROW('cues','tStrings'), ('{{oValue, ' || oPlaylist."sName" || '}}')::text[][], true, false);
+			UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindStrings" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'name'=b."sName");
+		END IF;
+		IF oPlaylist."dtStart" <> oValue."dtStart" THEN
+			nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStart") || '}}')::text[][], true, false);
+			UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindTimestamps" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'start'=b."sName");
+		END IF;
+		IF oPlaylist."dtStop" <> oValue."dtStop" THEN
+			nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStop") || '}}')::text[][], true, false);
+			UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindTimestamps" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'stop'=b."sName");
+		END IF;
+		FOR oPLI IN SELECT * FROM unnest(oValue."aItems") ac WHERE ac.id NOT IN (SELECT an.id FROM unnest(oPlaylist."aItems") an) LOOP
+			DELETE FROM cues."tBinds" WHERE oPLI.id=id OR id IN(SELECT b.id FROM cues."vBinds" b WHERE oPLI.id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName");
+		END LOOP;
+		FOR oPLI IN SELECT * FROM unnest(oPlaylist."aItems") ac WHERE ac.id NOT IN (SELECT an.id FROM unnest(oValue."aItems") an) LOOP
+			oPLI.id := "fBindAdd"(oTable, oPlaylist.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+		END LOOP;
+	ELSIF EXISTS(SELECT "oPlaylist" FROM cues."vPluginPlaylists" WHERE oPlaylist."sName"=("oPlaylist")."sName") THEN
+		IF bException THEN
+			RAISE EXCEPTION 'PLUGIN PLAYLIST WITH SPECIFIED NAME ALREADY EXISTS [%]', oPlaylist."sName";
+		END IF;
+		RETURN NULL;
+	ELSE
+		nValue := "fTableGet"(ROW('cues','tPlugins'), '{{sName, "playlist"}}'::text[][], true);
+		oPlaylist.id := "fBindAdd"(ROW('cues','tPlugins'), nValue, NULL, 'instance', NULL, true);
+		nValue := "fTableAdd"(ROW('cues','tStrings'), ('{{oValue, ' || oPlaylist."sName" || '}}')::text[][], true, false);
+		PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tStrings'), 'name', nValue, true);
+		nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStart") || '}}')::text[][], true, false);
+		PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tTimestamps'), 'start', nValue, true);
+		nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, "' || quote_literal(oPlaylist."dtStop") || '"}}')::text[][], true, false);
+		PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tTimestamps'), 'stop', nValue, true);
+		FOR oPLI IN SELECT * FROM unnest(oPlaylist."aItems") a LOOP
+			oPLI.id := "fBindAdd"(oTable, oPlaylist.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+		END LOOP;
+	END IF;
+
+	FOR oPLI IN SELECT * FROM unnest(oPlaylist."aItems") LOOP
+		PERFORM cues."fPluginPlaylistItemSave"(oPLI, true);
+	END LOOP;
+
+	SELECT * INTO oValue FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+	RETURN oValue."oPlaylist";
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+CREATE OR REPLACE FUNCTION cues."fPluginPlaylistDelete"(oPlaylist cues.tPluginPlaylist, bException bool) RETURNS VOID AS
+$BODY$
+DECLARE
+	oValue record;
+BEGIN
+	SELECT * INTO oValue FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+	IF oValue IS NULL THEN
+		IF bException THEN
+			RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST [id:%]',oPlaylist.id;
+		END IF;
+		RETURN;
+	END IF;
+	oPlaylist := oValue."oPlaylist";
+	DELETE FROM cues."tBinds" WHERE id IN(
+			SELECT b.id FROM unnest(oPlaylist."aItems") as i, cues."vBinds" b WHERE (i).id=b.id OR ((i).id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName")
+			UNION
+			SELECT b.id FROM cues."vBinds" b WHERE oPlaylist.id=b.id OR (oPlaylist.id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName")
+		);
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;

@@ -14,7 +14,7 @@ CREATE TRIGGER "HKManagement"
   ON cues."tTemplates"
   FOR EACH ROW
   EXECUTE PROCEDURE hk."fManagement"();
-/********************************** cues."tClassAndTemplateBinds" **********************/
+/********************************** cues."tClassAndTemplateBinds" *************************/
 CREATE TABLE cues."tClassAndTemplateBinds"
 (
   id serial PRIMARY KEY,
@@ -35,7 +35,7 @@ CREATE TRIGGER "HKManagement"
   ON cues."tClassAndTemplateBinds"
   FOR EACH ROW
   EXECUTE PROCEDURE hk."fManagement"();
-/********************************** cues."tTemplatesSchedule" **************************/
+/********************************** cues."tTemplatesSchedule" *****************************/
 CREATE TABLE cues."tTemplatesSchedule"
 (
   id serial PRIMARY KEY,
@@ -54,7 +54,7 @@ CREATE TRIGGER "HKManagement"
   ON cues."tTemplatesSchedule"
   FOR EACH ROW
   EXECUTE PROCEDURE hk."fManagement"();
-/********************************** cues."tDictionary" *********************************/
+/********************************** cues."tDictionary" ************************************/
 CREATE TABLE cues."tDictionary"
 (
   id serial PRIMARY KEY,
@@ -83,6 +83,61 @@ CREATE TABLE cues."tChatInOuts"
       ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT "tChatInOuts_check" CHECK (("nFrameOut" - "nFrameIn") > (25 * 20))
 )
-WITH (
-  OIDS=FALSE
-);
+WITHOUT OIDS;
+
+
+------------------------------------ cues."tBindTypes"
+CREATE TABLE cues."tBindTypes"
+(
+  id serial PRIMARY KEY,
+  "idTableSource" integer NOT NULL,  -- ссылка на таблицу привязки
+  "idTableTarget" integer,  -- ссылка на таблицу значений
+  "bUnique" boolean NOT NULL DEFAULT false,
+  "sName" name,
+  UNIQUE("idTableSource", "sName")
+) 
+WITHOUT OIDS;
+------------------------------------ cues."tBinds"
+CREATE TABLE cues."tBinds"
+(
+  id bigserial PRIMARY KEY,
+  "idBindTypes" integer NOT NULL,
+  "idSource" bigint NOT NULL,
+  "nValue" bigint,
+  FOREIGN KEY ("idBindTypes") REFERENCES cues."tBindTypes" (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+) 
+WITHOUT OIDS;
+------------------------------------ cues."tStrings"
+CREATE TABLE cues."tStrings"
+(
+  id bigserial PRIMARY KEY,
+  "nQty" bigint NOT NULL DEFAULT 0,
+  "oValue" text UNIQUE
+) 
+WITHOUT OIDS;
+CREATE TRIGGER "cues_tStrings_fDictionary"
+  BEFORE INSERT OR UPDATE OR DELETE
+  ON cues."tStrings"
+  FOR EACH ROW
+  EXECUTE PROCEDURE "fDictionary"();
+
+------------------------------------ cues."tTimestamps"
+CREATE TABLE cues."tTimestamps"
+(
+  id bigserial PRIMARY KEY,
+  "nQty" bigint NOT NULL DEFAULT 0,
+  "oValue" timestamp with time zone UNIQUE
+) 
+WITHOUT OIDS;
+CREATE TRIGGER "cues_tTimestamps_fDictionary"
+  BEFORE INSERT OR UPDATE OR DELETE
+  ON cues."tTimestamps"
+  FOR EACH ROW
+  EXECUTE PROCEDURE "fDictionary"();
+----------------------------------- cues."tPlugins"
+CREATE TABLE cues."tPlugins"
+(
+	id serial PRIMARY KEY,
+	"sName" name UNIQUE
+) 
+WITHOUT OIDS;

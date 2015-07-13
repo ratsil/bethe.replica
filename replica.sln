@@ -23,7 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hk", "hk", "{C9DDF937-DB5F-
 		!sql\hk\db_init_hk_functions.sql = !sql\hk\db_init_hk_functions.sql
 		!sql\hk\db_init_hk_functions2.sql = !sql\hk\db_init_hk_functions2.sql
 		!sql\hk\db_init_hk_tables.sql = !sql\hk\db_init_hk_tables.sql
-		!sql\hk\db_init_hk_tables2.sql = !sql\hk\db_init_hk_tables2.sql
 		!sql\hk\db_init_hk_views.sql = !sql\hk\db_init_hk_views.sql
 	EndProjectSection
 EndProject
@@ -48,6 +47,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cues", "cues", "{D246DD8E-8
 		!sql\cues\db_fill_cues.sql = !sql\cues\db_fill_cues.sql
 		!sql\cues\db_init_cues_functions.sql = !sql\cues\db_init_cues_functions.sql
 		!sql\cues\db_init_cues_tables.sql = !sql\cues\db_init_cues_tables.sql
+		!sql\cues\db_init_cues_types.sql = !sql\cues\db_init_cues_types.sql
+		!sql\cues\db_init_cues_views.2.sql = !sql\cues\db_init_cues_views.2.sql
 		!sql\cues\db_init_cues_views.sql = !sql\cues\db_init_cues_views.sql
 	EndProjectSection
 EndProject
@@ -212,6 +213,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "helpers.common.globalization.sl", "!submodules\helpers\common\helpers.common.globalization.sl\helpers.common.globalization.sl.csproj", "{513A5E9C-1870-4984-A46B-982A091033B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "voting", "!submodules\ingenie\!plugins\voting\voting.csproj", "{68124BAC-83E4-4DB2-AF7D-32A0F092B9BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "playlist", "!submodules\ingenie\!plugins\playlist\playlist.csproj", "{58C92878-4667-41BE-AD4D-10CC32B3D7B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -757,6 +760,22 @@ Global
 		{68124BAC-83E4-4DB2-AF7D-32A0F092B9BE}.Release|x64.ActiveCfg = Release|Any CPU
 		{68124BAC-83E4-4DB2-AF7D-32A0F092B9BE}.Release|x64.Build.0 = Release|Any CPU
 		{68124BAC-83E4-4DB2-AF7D-32A0F092B9BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|x64.ActiveCfg = Debug|x64
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|x64.Build.0 = Debug|x64
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Debug|x86.Build.0 = Debug|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|x64.ActiveCfg = Release|x64
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|x64.Build.0 = Release|x64
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -814,5 +833,6 @@ Global
 		{3231FCF5-FC39-47EC-A1C5-FDA5467075DB} = {B686B583-FF18-4121-B159-AD492BF8BB84}
 		{513A5E9C-1870-4984-A46B-982A091033B3} = {B686B583-FF18-4121-B159-AD492BF8BB84}
 		{68124BAC-83E4-4DB2-AF7D-32A0F092B9BE} = {54C45C06-AEB1-42E5-AE60-09493D2D1521}
+		{58C92878-4667-41BE-AD4D-10CC32B3D7B0} = {54C45C06-AEB1-42E5-AE60-09493D2D1521}
 	EndGlobalSection
 EndGlobal

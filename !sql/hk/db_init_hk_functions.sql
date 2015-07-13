@@ -408,8 +408,8 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql VOLATILE;
-/********************************** hk."tHouseKeeping" ************************************/
-/********************************** hk."tRegisteredTables" ********************************/
+----------------------------------- hk."tHouseKeeping"
+----------------------------------- hk."tRegisteredTables"
 CREATE OR REPLACE FUNCTION hk."fRegisteredTableGet"(stTargetTable table_name) RETURNS int_bool AS
 $$
 DECLARE
@@ -439,6 +439,31 @@ BEGIN
 	stTargetTable."sName":=sName;
 	stRetVal := hk."fRegisteredTableGet"(stTargetTable);
 	RETURN stRetVal;
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION hk."fRegisteredTableGet"(oTargetTable table_name, bException boolean) RETURNS integer AS
+$$
+DECLARE
+	oRetVal int_bool;
+BEGIN
+	oRetVal := hk."fRegisteredTableGet"(oTargetTable);
+	IF bException AND NOT oRetVal."bValue" THEN
+		RAISE EXCEPTION 'CANNOT FIND SPECIFIED TABLE [%]', oTargetTable;
+	END IF;
+	RETURN oRetVal."nValue";
+END;
+$$
+LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION hk."fRegisteredTableGet"(sSchema name, sName name, bException boolean) RETURNS integer AS
+$$
+DECLARE
+	nRetVal integer;
+BEGIN
+	nRetVal := hk."fRegisteredTableGet"(ROW(sSchema, sName), bException);
+	RETURN nRetVal;
 END;
 $$
 LANGUAGE plpgsql VOLATILE;

@@ -36,7 +36,7 @@ SELECT hk."fRegisteredTableAdd"('hk', 'tWebPages');
 SELECT hk."fRegisteredTableAdd"('hk', 'tAccessRoles');
 SELECT hk."fRegisteredTableAdd"('hk', 'tAccessPermissions');
 
-SELECT hk."fRegisteredTableAdd"('media', 'tDictionary');
+SELECT hk."fRegisteredTableAdd"('media', 'tStrings');
 SELECT hk."fRegisteredTableAdd"('media', 'tStorageTypes');
 SELECT hk."fRegisteredTableAdd"('media', 'tStorages');
 SELECT hk."fRegisteredTableAdd"('media', 'tFiles');
@@ -45,9 +45,6 @@ SELECT hk."fRegisteredTableAdd"('pl', 'tClasses');
 SELECT hk."fRegisteredTableAdd"('pl', 'tItems');
 SELECT hk."fRegisteredTableAdd"('pl', 'tItemAttributes');
 SELECT hk."fRegisteredTableAdd"('pl', 'tItemDTEvents');
-
-SELECT hk."fRegisteredTableAdd"('interactive', 'tSMSs');
-SELECT hk."fRegisteredTableAdd"('interactive', 'tSMSAttributes');
 
 SELECT hk."fRegisteredTableAdd"('logs', 'tPlaylistLog');
 SELECT hk."fRegisteredTableAdd"('logs', 'tPlaylistLogAttributes');
@@ -77,6 +74,11 @@ SELECT hk."fRegisteredTableAdd"('cues', 'tTemplates');
 SELECT hk."fRegisteredTableAdd"('cues', 'tClassAndTemplateBinds');
 SELECT hk."fRegisteredTableAdd"('cues', 'tTemplatesSchedule');
 SELECT hk."fRegisteredTableAdd"('cues', 'tDictionary');
+SELECT hk."fRegisteredTableAdd"('cues', 'tBindTypes');
+SELECT hk."fRegisteredTableAdd"('cues', 'tBinds');
+SELECT hk."fRegisteredTableAdd"('cues', 'tStrings');
+SELECT hk."fRegisteredTableAdd"('cues', 'tTimestamps');
+SELECT hk."fRegisteredTableAdd"('cues', 'tPlugins');
 
 SELECT hk."fRegisteredTableAdd"('ia', 'tMessages');
 SELECT hk."fRegisteredTableAdd"('ia', 'tBinds');

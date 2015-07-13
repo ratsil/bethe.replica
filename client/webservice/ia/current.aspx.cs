@@ -53,7 +53,7 @@ namespace webservice.ia
 				else
 					sXML += " />" + Environment.NewLine;
 				Response.Write(sXML);
-				//Response.StatusCode = 503; // ������ ���������� (��������)
+				//Response.StatusCode = 503; // служба недоступна (временно)
 			}
 		}
 	}

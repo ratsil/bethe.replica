@@ -1362,6 +1362,94 @@ namespace helpers.replica.cues
 			: this(ahDBRow["id"].ToID(), ahDBRow["idTarget"].ToID(), ahDBRow["sKey"].ToString(), ahDBRow["sValue"].ToString(), ahDBRow["idRegisteredTables"].ToID())
 		{ }
 	}
+	namespace plugins
+	{
+		static internal class x
+		{
+			static public Playlist PlaylistGet(this DBInteract cDBI, long nID)
+			{
+				return cDBI.PlaylistsGet(nID + "=id").FirstOrDefault();
+			}
+			static public Playlist[] PlaylistsGet(this DBInteract cDBI)
+			{
+				return cDBI.PlaylistsGet("");
+			}
+			static public Playlist[] PlaylistsGet(this DBInteract cDBI, string sWhere)
+			{
+				return cDBI.RowsGet("SELECT * FROM cues.`vPluginPlaylists` " + (sWhere.IsNullOrEmpty() ? "" : "WHERE " + sWhere)).Select(o => new Playlist(o)).ToArray();
+			}
+			static public void PlaylistStarted(this DBInteract cDBI, Playlist cPlaylist, pl.PlaylistItem cPLI)
+			{
+				cDBI.Perform("SELECT * FROM cues.`fPluginPlaylistSave`(" + cPlaylist.nID + ", " + cPLI.nID + ")");
+			}
+		}
+		[Serializable]
+		public class PlaylistItem
+		{
+			public long nID;
+			public IdNamePair oStatus;
+			public DateTime dtStarted;
+			public mam.Asset oAsset;
+
+			public PlaylistItem()
+			{
+				nID = extensions.x.ToID(null);
+				dtStarted = DateTime.MaxValue;
+			}
+			public PlaylistItem(Hashtable ahDBRow)
+				: this()
+			{
+				nID = ahDBRow["id"].ToID();
+				dtStarted = ahDBRow["dtStarted"].ToDT();
+				oStatus = new IdNamePair(ahDBRow["idStatuses"], ahDBRow["sStatusName"]);
+				oAsset = new mam.Asset() { };
+			}
+		}
+		[Serializable]
+		public class Playlist
+		{
+			static private Dictionary<long, Playlist> _aLoadCache;
+			static public Playlist Load(long nID)
+			{
+				if (null == _aLoadCache)
+					_aLoadCache = new Dictionary<long, Playlist>();
+				if (!_aLoadCache.ContainsKey(nID))
+				{
+					Playlist cPlaylist = DBInteract.cCache.PlaylistGet(nID);
+					_aLoadCache.Add(cPlaylist.nID, cPlaylist);
+				}
+				return _aLoadCache[nID];
+			}
+			static public Playlist[] Get()
+			{
+				return DBInteract.cCache.PlaylistsGet();
+			}
+
+			public long nID;
+			public string sName;
+			public DateTime dtStart;
+			public DateTime dtStop;
+			public IdNamePair oStatus;
+			public helpers.replica.mam.Asset[] aAssets;
+
+			public Playlist()
+			{
+				nID = extensions.x.ToID(null);
+				sName = "";
+				dtStart = DateTime.MaxValue;
+				dtStop = DateTime.MaxValue;
+			}
+			public Playlist(Hashtable ahDBRow)
+				: this()
+			{
+				nID = ahDBRow["id"].ToID();
+				sName = ahDBRow["sName"].ToString();
+				dtStart = ahDBRow["dtStartPlanned"].ToDT();
+				dtStop = ahDBRow["dtStartReal"].ToDT();
+				oStatus = new IdNamePair(ahDBRow["idStatuses"], ahDBRow["sStatusName"]);
+			}
+		}
+	}
 }
 namespace helpers.replica.ia
 {

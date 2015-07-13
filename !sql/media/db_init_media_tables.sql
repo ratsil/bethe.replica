@@ -71,23 +71,16 @@ CREATE TRIGGER "HKManagement"
   ON media."tFileAttributes"
   FOR EACH ROW
   EXECUTE PROCEDURE hk."fManagement"();
-/********************************** media."tDictionary" ***********************************/
-CREATE TABLE media."tDictionary"
+----------------------------------- media."tStrings"
+CREATE TABLE media."tStrings"
 (
   id bigserial PRIMARY KEY,
-  "idHK" integer NOT NULL,
-  "sValue" text UNIQUE, 
-  "nReferencesQty" bigint NOT NULL DEFAULT 0,
-  FOREIGN KEY ("idHK") REFERENCES hk."tHouseKeeping" (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+  "nQty" bigint NOT NULL DEFAULT 0,
+  "oValue" text UNIQUE
 ) 
 WITHOUT OIDS;
-CREATE TRIGGER "Dictionary"
+CREATE TRIGGER "media_tStrings_fDictionary"
   BEFORE INSERT OR UPDATE OR DELETE
-  ON media."tDictionary"
+  ON cues."tStrings"
   FOR EACH ROW
   EXECUTE PROCEDURE "fDictionary"();
-CREATE TRIGGER "HKManagement"
-  BEFORE INSERT OR UPDATE OR DELETE
-  ON media."tDictionary"
-  FOR EACH ROW
-  EXECUTE PROCEDURE hk."fManagement"();
