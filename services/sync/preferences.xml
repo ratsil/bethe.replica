@@ -3,13 +3,24 @@
 	<replica>
 		<sync affinity="C0C0">
 			<commands sleep="00:00:00.3" />
-			<cache sleep="00:01:00" folder="d:/cache/player/" depth="50" age="12:00:00" />
+			<cache db_readonly="false" sleep="00:01:00" folder="/path" depth="80" age="12:00:00" slow_copy="true" slow_copy_period="00:00:00.1" slow_copy_delay="00:00:00.5" ignor_files="megamix.mov" ignor_storages="primer" rewrite_minimum="01:00:00" alert_space="100" />   <!-- depth in minutes!!   ignor_list="megamix.mov,plug.mov"  ignor_storages="primer"  -->
+			<storage move_folder="/path" trash_folder="WillDelete" add_free_files="true" use_ffmpeg="true" file_replace_mail="user@example.com">				<!-- del_move_timeout in days     file_replace_mail="adr1@ru; adr2@ru"  -->
+				<del_move_timeouts default="10">
+					<timeout storage="реклама" days="400" />
+					<timeout storage="оформление" days="400" />
+					<timeout storage="анонсы" days="400" />
+				</del_move_timeouts>
+			</storage>
+			<preview sleep="00:01:00" folder="previews">
+				<video width="180" height="144" pixels="yuv420p" codec="h264" />
+				<audio rate="48000" channels="2" bits="s16p" codec="mp3" />
+			</preview>
 		</sync>
 	</replica>
 	<helpers>
 		<common>
 			<database server="db.channel.replica" port="5432" name="replica" user="replica_sync" password="" timeout="240" />
-			<logger level="debug1">
+			<logger>
 				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
 					<targets>
 						<target level="warning">user1@example.com,user2@example.com</target>

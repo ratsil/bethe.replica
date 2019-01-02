@@ -55,33 +55,6 @@ CREATE OR REPLACE VIEW pl."vItemTimings" AS
 			LEFT JOIN pl."vItemDTEvents" dts_tupdate ON itm.id=dts_tupdate."idItems" AND 'timings_update' = dts_tupdate."sTypeName"
 			LEFT JOIN pl."vItemDTEvents" dts_qstart ON itm.id=dts_qstart."idItems" AND 'start_queued' = dts_qstart."sTypeName";
 
-CREATE OR REPLACE VIEW pl."vPlayListResolved" AS
-	SELECT itm.*, 
-			sts."sName" as "sStatusName", CASE WHEN 'planned' = sts."sName" THEN false ELSE true END as "bLocked",
-			c."sName" as "sClassName", f."idStorages", f."idStorageTypes", f."sStorageTypeName", f."sPath", f."sStorageName", 
-			f."bStorageEnabled", f."sFilename", f."dtLastFileEvent", f."eError" as "eFileError",
-			"nFrameStart", "nFrameStop", t."nFramesQty",
-			"dtStartReal", "dtStopReal", "dtStartPlanned", "dtStart" + ("nLength"::text || ' millisecond')::interval as "dtStopPlanned", 
-			"dtStartQueued", "dtStartHard", "dtStartSoft", "dtTimingsUpdate", "dtStart", 
-			COALESCE("dtStop", "dtStart" + ("nLength"::text || ' millisecond')::interval) as "dtStop", 
-			CASE WHEN plgs.id IS NULL THEN false ELSE true END as "bPlug",
-			ia_asset."nValue" as "idAssets", ia_beepadv."nValue" as "nBeepAdvBlockID", ia_beeppl."nValue" as "nBeepClipBlockID"
-		FROM 
-			pl."tItems" itm
-			LEFT JOIN pl."tClasses" c ON c.id=itm."idClasses"
-			LEFT JOIN pl."tStatuses" sts ON sts.id=itm."idStatuses"
-			LEFT JOIN media."vFiles" f ON f.id=itm."idFiles"
-			LEFT JOIN pl."vItemTimings" t ON itm.id=t.id
-			
-			LEFT JOIN pl."tItemAttributes" ia_asset ON ia_asset."idItems"=itm.id AND 'asset'=ia_asset."sKey"
-			LEFT JOIN pl."tItemAttributes" ia_beepadv ON ia_beepadv."idItems"=itm.id AND 'nBeepAdvBlockID'=ia_beepadv."sKey"
-			LEFT JOIN pl."tItemAttributes" ia_beeppl ON ia_beeppl."idItems"=itm.id AND 'nBeepClipBlockID'=ia_beeppl."sKey"
-
- 			LEFT JOIN pl."tPlugs" plgs ON f.id=plgs."idFiles";
-
-CREATE OR REPLACE VIEW pl."vPlayListResolvedOrdered" AS
-	SELECT * FROM pl."vPlayListResolved" ORDER BY "dtStart";
-
 CREATE OR REPLACE VIEW pl."vTimedItemCurrent" AS 
  	SELECT id, "dtStart", ("dtStart" + ("nLength" || ' milliseconds')::interval) as "dtStop", "fFrames"(now() - "dtStart") + "nFrameStart" AS "nFrameCurrent"
 		FROM pl."vItemTimings"
@@ -99,15 +72,6 @@ CREATE OR REPLACE VIEW pl."vItemsLeft" AS
 	SELECT count(*) AS "nQty"
 		FROM pl."vItemTimings"
 		WHERE now() < "dtStart" AND id NOT IN (SELECT id FROM pl."vItemTimings" WHERE "dtStopReal" IS NOT NULL);
-  
-CREATE OR REPLACE VIEW pl."vComingUp" AS 
-	SELECT plr.*, CASE WHEN plr.id=tic.id THEN tic."nFrameCurrent" ELSE NULL END AS "nFrameCurrent"
-		FROM pl."vPlayListResolved" plr, pl."vTimedItemCurrent" tic
-		WHERE plr."sStatusName"<>'played' AND (plr.id = tic.id OR plr."dtStartPlanned" >= tic."dtStart");
-
-CREATE OR REPLACE VIEW pl."vPlaylistFramesQty" AS 
-	SELECT CASE WHEN sum("nFramesQty") IS NULL THEN 0 ELSE sum("nFramesQty") END AS "nDuration"
-		FROM pl."vComingUp";
 
 CREATE OR REPLACE VIEW pl."vItemsInserted" AS 
 	SELECT pi."idItems" as id, pi."nValue" as "nPrecedingID", po."nValue" as "nPrecedingOffset"

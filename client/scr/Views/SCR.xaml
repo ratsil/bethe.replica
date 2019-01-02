@@ -11,13 +11,13 @@
         xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
         xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
         mc:Ignorable="d"
-        d:DesignWidth="1244" d:DesignHeight="800">
+        d:DesignWidth="1444" d:DesignHeight="800">
     <navigation:Page.Resources>
         <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
     </navigation:Page.Resources>
     <ScrollViewer Background="#FF456D89" BorderBrush="{x:Null}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">   <!--MaxWidth="1364"-->
         <!--FF456D89-->
-        <Grid x:Name="LayoutRoot" Width="1230" >
+        <Grid x:Name="LayoutRoot" MinWidth="1230" Width="1430" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -26,8 +26,11 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <slc:ReducePanel Grid.Row="0" x:Name="_ui_rpCommon" IsOpen="True" Title="{Binding Path=cSCR.sNotice22, Source={StaticResource g}}" Margin="9,5,3,5" FontSize="16" FontWeight="Bold" Foreground="#FF456D89">
-                <Grid MaxHeight="300" Width="1200" Height="40" Background="#FF65829D">
-                    <StackPanel Orientation="Horizontal"  Background="#FF65829D" VerticalAlignment="Center">
+                <Grid Name="_ui_gCommon" MaxHeight="300" Height="40" Background="#FF65829D">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
                         <ctrls:TemplateButton sText="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': ', Path=cHelper.sLogo, Source={StaticResource g}}" Name="_ui_ctrTB_Logo" Margin="16,2,0,2" Width="160" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" />
                         <ctrls:TemplateButton sText="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': ', Path=cHelper.sCues, Source={StaticResource g}}" Name="_ui_ctrTB_Credits" Margin="16,2,0,2" Width="160" Height="23"  VerticalAlignment="Top" HorizontalAlignment="Left" />
                         <ctrls:TemplateButton sText="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter='1: ', Path=cHelper.sChannel, Source={StaticResource g}}" Name="_ui_ctrTB_Channel1" Margin="16,2,0,2" Width="160" Height="23"  VerticalAlignment="Top" HorizontalAlignment="Left" />
@@ -45,7 +48,7 @@
                 <slc:ReducePanel IsOpen="True" MinWidth="772" Grid.Column="0" x:Name="_ui_rpAir" Title="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sLive, Source={StaticResource g}}" Margin="9,5,3,5" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" Foreground="#FF456D89">
                     <sdk:TabControl TabStripPlacement="Top" HorizontalAlignment="Left" Margin="0,0,0,0" Name="_ui_tcAirTemplates" SelectionChanged="_ui_tcAirTemplates_SelectionChanged" VerticalAlignment="Top" Background="#FF65829D">
                         <sdk:TabItem Header="{Binding Path=cSCR.sNotice23, Source={StaticResource g}}" Name="_ui_tiChoose" FontSize="12" Foreground="#FF456D89" Tag="default">
-                            <Grid Width="1000"/>
+                            <Grid Name="_ui_gTabHeader" Width="980"/>
                         </sdk:TabItem>
                         <sdk:TabItem Header="{Binding Path=cSCR.sNotice24, Source={StaticResource g}}" Name="_ui_tiOrderDesk" FontSize="12">
                             <Grid Name="_ui_gTemplate">
@@ -60,8 +63,8 @@
                                         <Button Height="64" Name="_ui_btnStartAir" Width="110" Click="_ui_btnStartAir_Click" Margin="0,0,0,-12" HorizontalContentAlignment="Center">
                                             <Button.Content>
                                                 <Grid>
-													<ProgressBar Height="30" Name="_ui_btnStartAirProgress" Width="90" IsIndeterminate="True" Visibility="Collapsed" VerticalAlignment="Center" Margin="0,-10,0,0" />
-													<StackPanel Name="_ui_btnStartAirText" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-10,0,0">
+                                                    <ProgressBar Height="30" Name="_ui_btnStartAirProgress" Width="90" IsIndeterminate="True" Visibility="Collapsed" VerticalAlignment="Center" Margin="0,-10,0,0" />
+                                                    <StackPanel Name="_ui_btnStartAirText" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-10,0,0">
                                                         <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=U, Path=cSCR.sNotice11, Source={StaticResource g}}" Name="_ui_btnStartAirText1" Margin="0,0,0,0" Foreground="#FF007C00" TextWrapping="Wrap" HorizontalAlignment="Center" />
                                                         <TextBlock Text="{Binding Path=cSCR.sNotice27, Source={StaticResource g}}" Name="_ui_btnStartAirText2" Margin="0,-6,0,0" Foreground="#FF007C00" TextWrapping="Wrap" HorizontalAlignment="Center" />
                                                     </StackPanel>
@@ -253,6 +256,7 @@
                         <sdk:DataGrid Grid.Row="1" MaxHeight="250" Margin="2,0,2,0" AutoGenerateColumns="False" Name="_ui_dgClipsSCR" FontSize="11" LoadingRow="_ui_dgClipsSCR_LoadingRow" IsReadOnly="True" SelectionChanged="_ui_dgClipsSCR_SelectionChanged" TabIndex="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="0" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Extended" MouseRightButtonDown="_ui_dgClipsSCR_MouseRightButtonDown">
                             <itk:ContextMenuService.ContextMenu>
                                 <itk:ContextMenu Name="_ui_cmClipsSCR" Opened="_ui_cmClipsSCR_Opened">
+									<itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': l', Path=cCommon.sAdd, Source={StaticResource g}}" Name="_ui_cmClipsSCRToCache" Click="_ui_cmClipsSCRToCache_Click" IsEnabled="False" />
                                     <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': l', Path=cCommon.sAdd, Source={StaticResource g}}" Name="_ui_cmClipsSCRAdd" Click="_ui_cmClipsSCRAdd_Click" IsEnabled="False" />
                                     <!--<itk:Separator/>-->
                                     <!--<itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefreshTheList, Source={StaticResource g}}" Click="_ui_cmPL_Refresh" IsEnabled="True" />-->
@@ -331,8 +335,11 @@
                         <HyperlinkButton Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sClip, Source={StaticResource g}}" Grid.Row="1" Height="18" HorizontalAlignment="Left" Margin="2,4,0,0" FontSize="12" Name="_ui_hlbtnAddClip" Click="_ui_hlbtnAddClip_Click" VerticalAlignment="Center" VerticalContentAlignment="Bottom" ClickMode="Press" Foreground="#FFFEF3DB" />
                         <sdk:Label Height="18" Content="{Binding Path=cSCR.sNotice40, Source={StaticResource g}}" Name="_ui_lblClipChoosed" Width="270" Foreground="#FF51FF41" Margin="2,4,4,0" FontSize="10" FontWeight="Normal" />
                     </StackPanel>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="740,0,0,0" Height="24">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="670,0,0,0" Height="24">
 						<ctrls:TemplateButton sText="3" Name="_ui_ctrTB_PlayList" Margin="0,0,0,0" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                        <CheckBox x:Name="_ui_cbPlayTop" Content="{Binding Path=cSCR.sNotice42, Source={StaticResource g}}" FontSize="10" Foreground="#FF2A434E"  Height="16" Margin="10,0,0,0"/>
+                        <CheckBox x:Name="_ui_cbPlayWith" Content="{Binding Path=cSCR.sNotice43, Source={StaticResource g}}" FontSize="10" Foreground="#FF2A434E"  Height="16" Margin="10,0,0,0"/>
+						<HyperlinkButton Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sCached, Source={StaticResource g}}" Height="18" HorizontalAlignment="Left" Margin="10,0,20,0" FontSize="12" Name="_ui_hlbtnCached" Click="_ui_hlbtnCached_Click" VerticalAlignment="Center" VerticalContentAlignment="Bottom" ClickMode="Press" Foreground="#FFFEF3DB" />
                     </StackPanel>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0" Height="24">
                         <HyperlinkButton Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sShowDetails, Source={StaticResource g}}" Height="18" HorizontalAlignment="Right" Margin="2,4,10,0" FontSize="12" Name="_ui_hlbtnDetales" Click="_ui_hlbtnDetales_Click" VerticalAlignment="Center" VerticalContentAlignment="Bottom" ClickMode="Press" Foreground="#FFFFA545" IsTabStop="False" />

@@ -13,8 +13,9 @@ namespace replica.sl
 {
 	public partial class Authorization : Page
 	{
+        private string sCurrentVersion;
 		private System.Windows.Threading.DispatcherTimer _cTimerFor_ui_hlbtnSave;
-		Progress _dlgProgress;
+        Progress _dlgProgress;
 		DBInteract _cDBI;
 
 		public Authorization()
@@ -22,11 +23,13 @@ namespace replica.sl
 			InitializeComponent();
 
             Title = g.Common.sAuthorization;
-            _ui_lbVersion.Content = g.Common.sVersion.ToLower() + " " + (new System.Reflection.AssemblyName(System.Reflection.Assembly.GetExecutingAssembly().FullName)).Version.ToString();  // менять в свойствах проекта или в Properties/AssemblyInfo.cs; описание: <major version>.<minor version>.<build number>.<revision>; revision has autoincrement
-			_cTimerFor_ui_hlbtnSave = new System.Windows.Threading.DispatcherTimer();
+            sCurrentVersion = (new System.Reflection.AssemblyName(System.Reflection.Assembly.GetExecutingAssembly().FullName)).Version.ToString();
+            _ui_lbVersion.Content = g.Common.sVersion.ToLower() + " " + sCurrentVersion;  // менять в свойствах проекта или в Properties/AssemblyInfo.cs; описание: <major version>.<minor version>.<build number>.<revision>; revision has autoincrement
+			_cTimerFor_ui_hlbtnSave = new System.Windows.Threading.DispatcherTimer();   
 			_cTimerFor_ui_hlbtnSave.Tick += new EventHandler(SavedBack);
 			_cTimerFor_ui_hlbtnSave.Interval = new System.TimeSpan(0, 0, 0, 0, 800);  // период индикации нажатия на кнопки "сохранить"
-			_dlgProgress = new Progress();
+
+            _dlgProgress = new Progress();
 			_cDBI = new DBInteract();
 			_cDBI.InitCompleted += new EventHandler<InitCompletedEventArgs>(_cDBI_InitCompleted);
 			_cDBI.AccessScopesGetCompleted += new EventHandler<AccessScopesGetCompletedEventArgs>(_cDBI_AccessScopesGetCompleted);
@@ -36,6 +39,10 @@ namespace replica.sl
                 _ui_tbUserName.Text = Preferences.sUser;
             if (null != Preferences.sPassword)
                 _ui_pswbPassword.Password = Preferences.sPassword;
+
+#if DEBUG
+			_ui_tbDebug.Text = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings["testurl"].ToString();
+#endif
 		}
 
 		// Executes when the user navigates to this page.
@@ -45,11 +52,11 @@ namespace replica.sl
 		private void _ui_btnOK_Click(object sender, RoutedEventArgs e)
 		{
 			_dlgProgress.Show();
-			_cDBI.InitAsync(_ui_tbUserName.Text, _ui_pswbPassword.Password);
+			_cDBI.InitAsync(_ui_tbUserName.Text, _ui_pswbPassword.Password, sCurrentVersion);
 		}
 		private void _ui_hlbtnLogin_Click(object sender, RoutedEventArgs e)
 		{
-            _ui_hlbtnLogin.Content = g.Common.sOk.ToLower();
+			_ui_hlbtnLogin.Content = g.Common.sOk.ToLower();
 			_cTimerFor_ui_hlbtnSave.Start();
 			_ui_tbUserName.Focus();
             Preferences.sUser = _ui_tbUserName.Text;
@@ -66,13 +73,15 @@ namespace replica.sl
 			_cTimerFor_ui_hlbtnSave.Stop();
             _ui_hlbtnPass.Content = _ui_hlbtnLogin.Content = g.Common.sSave.ToLower();
 		}
-		void _cDBI_InitCompleted(object sender, InitCompletedEventArgs e)
-		{
-			_cDBI.InitSessionAsync();
-			if (null == e.Error && e.Result)
+        void _cDBI_InitCompleted(object sender, InitCompletedEventArgs e)
+        {
+            if (null == e.Error && e.Result == null)
+            {
+				_cDBI.InitSessionAsync();
 				_cDBI.AccessScopesGetAsync();
+			}
 			else
-				ErrorShow();
+				ErrorShow(e.Result);
 		}
 		void _cDBI_AccessScopesGetCompleted(object sender, AccessScopesGetCompletedEventArgs e)
 		{
@@ -89,7 +98,7 @@ namespace replica.sl
 				catch { }
 			}
 			else
-				ErrorShow();
+				ErrorShow("access scopes are incorrect");
 
 		}
 		void _cDBI_ProfileGetCompleted(object sender, ProfileGetCompletedEventArgs e)
@@ -103,9 +112,11 @@ namespace replica.sl
 			}
 			catch { }
 		}
-		void ErrorShow()
-		{
-			_ui_txtError.Visibility = Visibility.Visible;
+		void ErrorShow(string sError)
+        {
+            _ui_txtError.Text = g.Common.sError + " [" + ((sError == null || sError == "") ? "unknown error" : sError) + "]";
+
+            _ui_txtError.Visibility = Visibility.Visible;
 			_dlgProgress.Close();
 		}
 

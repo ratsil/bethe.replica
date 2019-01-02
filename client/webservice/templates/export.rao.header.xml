@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+    <Author>ЗАО &quot;Мьюзик Один&quot;</Author>
+    <Version>1.0</Version>
+  </DocumentProperties>
+  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+    <WindowHeight>7320</WindowHeight>
+    <WindowWidth>9720</WindowWidth>
+    <WindowTopX>120</WindowTopX>
+    <WindowTopY>120</WindowTopY>
+    <ProtectStructure>False</ProtectStructure>
+    <ProtectWindows>False</ProtectWindows>
+    <DisplayInkNotes>False</DisplayInkNotes>
+  </ExcelWorkbook>
+  <Styles>
+    <Style ss:ID="caption_top">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Bottom" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14" ss:Bold="1"/>
+    </Style>
+    <Style ss:ID="caption_middle">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Bottom" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14"/>
+    </Style>
+    <Style ss:ID="caption_middle_bold">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Bottom" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14" ss:Bold="1"/>
+    </Style>
+    <Style ss:ID="header_left">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14" ss:Bold="1"/>
+    </Style>
+    <Style ss:ID="header_middle">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14" ss:Bold="1"/>
+    </Style>
+    <Style ss:ID="header_right">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14" ss:Bold="1"/>
+    </Style>
+    <Style ss:ID="cell_left">
+      <Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14"/>
+    </Style>
+    <Style ss:ID="cell_middle">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14"/>
+    </Style>
+    <Style ss:ID="cell_right">
+      <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+      </Borders>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="14"/>
+    </Style>
+    <Style ss:ID="table_footer">
+      <Borders>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+      </Borders>
+    </Style>
+    <Style ss:ID="sign">
+      <Alignment ss:Horizontal="Justify" ss:Vertical="Bottom" ss:WrapText="1"/>
+      <Font ss:FontName="Times New Roman" x:CharSet="204" x:Family="Roman"
+       ss:Size="12" ss:Bold="1"/>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="РАО">
+    <Table>
+      <Column ss:AutoFitWidth="0" ss:Width="119.25"/>
+      <Column ss:AutoFitWidth="0" ss:Width="166.5"/>
+      <Column ss:AutoFitWidth="0" ss:Width="140.25"/>
+			<Column ss:AutoFitWidth="0" ss:Width="90"/>
+			<Column ss:AutoFitWidth="0" ss:Width="120"/>
+			<Column ss:AutoFitWidth="0" ss:Width="90"/>
+      <Column ss:AutoFitWidth="0" ss:Width="150"/>
+			<Column ss:AutoFitWidth="0" ss:Width="150"/>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_top">
+          <Data ss:Type="String">Приложение  № 1</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle_bold">
+          <Data ss:Type="String">к Лицензионному Договору </Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
+          <Data ss:Type="String">от 30.06.09г. № 563-09/КТВ-тк</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
+          <Data ss:Type="String">Между РАО и ЗАО &quot;Мьюзик Один&quot;</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle"/>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle_bold">
+          <Data ss:Type="String">ОТЧЕТ</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
+          <Data ss:Type="String">об использованных аудиовизуальных произведениях на телеканале</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
+          <Data ss:Type="String">с {%DATE_START%} по {%DATE_STOP%}</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:StyleID="header_left">
+          <Data ss:Type="String">Исполнитель</Data>
+        </Cell>
+        <Cell ss:StyleID="header_middle">
+          <Data ss:Type="String">Название музыкального произведения</Data>
+        </Cell>
+        <Cell ss:StyleID="header_middle">
+          <Data ss:Type="String">Продолжительность звучания</Data>
+        </Cell>
+				<Cell ss:StyleID="header_middle">
+					<Data ss:Type="String">Количество повторов</Data>
+				</Cell>
+				<Cell ss:StyleID="header_middle">
+					<Data ss:Type="String">Общий хронометраж</Data>
+				</Cell>
+				<Cell ss:StyleID="header_middle">
+					<Data ss:Type="String">Жанр</Data>
+				</Cell>
+				<Cell ss:StyleID="header_middle">
+          <Data ss:Type="String">Автор музыки</Data>
+        </Cell>
+				<Cell ss:StyleID="header_right">
+					<Data ss:Type="String">Автор слов</Data>
+				</Cell>   
+			</Row>

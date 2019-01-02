@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -15,7 +15,7 @@ using System.ServiceProcess;
 
 namespace replica.management
 {
-	public class DBInteract : helpers.replica.DBInteract   // TODO убрать public (поставил для теста извне)
+	public class DBInteract : helpers.replica.DBInteract   //TODO СѓР±СЂР°С‚СЊ public (РїРѕСЃС‚Р°РІРёР» РґР»СЏ С‚РµСЃС‚Р° РёР·РІРЅРµ)
 	{
 		private struct COMMAND_FILE_UPDATE_INFO
 		{
@@ -44,7 +44,7 @@ namespace replica.management
 				try
 				{
                     Queue<Hashtable> aqFileUpdateCommands = new Queue<Hashtable>();
-					Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('asset_file_update','playlist_item_duration_update','asset_duration_update','file_duration_get', 'service_start', 'service_stop') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE сделать нормальную обработку символьных имен команд через Preferences
+					Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('asset_file_update','playlist_item_duration_update','asset_duration_update','file_duration_get', 'service_start', 'service_stop') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РёРјРµРЅ РєРѕРјР°РЅРґ С‡РµСЂРµР· Preferences
 					if (null == aqDBValues)
 						return;
 					Hashtable ahRow = null;
@@ -54,30 +54,30 @@ namespace replica.management
 						{
 							ahRow = aqDBValues.Dequeue();
 							sCommandName = ahRow["sCommandName"].ToString();
-							(new Logger()).WriteNotice("Начало выполнения команды [" + sCommandName + "]");
+							(new Logger()).WriteNotice("РќР°С‡Р°Р»Рѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "]");
 							nCommandQueueID = ahRow["id"].ToID();
 							_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=2 WHERE id=" + nCommandQueueID);
 							switch (sCommandName)
 							{
 								case "playlist_item_duration_update":
-									long nPLIID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idItems'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+									long nPLIID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idItems'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 									PlaylistItemDurationUpdate(nPLIID);
 									nCommandStatusID = 4;
 									break;
 								case "asset_duration_update":
-									long nAssetID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idAssets'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+									long nAssetID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idAssets'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 									AssetDurationUpdate(nAssetID);
 									nCommandStatusID = 4;
 									break;
                                 case "file_duration_get":
-                                    long nFileID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE `sKey`='idFiles' AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+                                    long nFileID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE `sKey`='idFiles' AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
                                     File cFile = File.Load(nFileID);
                                     nCommandStatusID = 3;
                                     if (null != cFile)
                                     {
                                         ulong nFramesQty = FileDurationGet(cFile.sFile);
                                         if (0 < nFramesQty)
-                                        {                        //select adm."fCommandParameterAdd" (31,'nFramesQty','1200');
+                                        {
                                             int nN = _cDB.Perform("SELECT adm.`fCommandParameterAdd` (" + nCommandQueueID + ", 'nFramesQty', '" + nFramesQty + "')");
                                             nCommandStatusID = 4;
                                             if (int.MinValue == nN)
@@ -88,11 +88,11 @@ namespace replica.management
                                     }
 									break;
 								case "service_start":
-									if (ServiceStart(_cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'sServiceName'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID))) //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+									if (ServiceStart(_cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'sServiceName'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID))) //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 										nCommandStatusID = 4;
 									break;
 								case "service_stop":
-									if (ServiceStop(_cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'sServiceName'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID))) //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+									if (ServiceStop(_cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'sServiceName'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID))) //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 										nCommandStatusID = 4;
 									break;
 								case "asset_file_update":
@@ -101,7 +101,7 @@ namespace replica.management
                                     sCommandName = null;
                                     break;
 								default:
-									throw new Exception("неизвестная команда [" + sCommandName + "]");
+									throw new Exception("РЅРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР° [" + sCommandName + "]");
 							}
 						}
 						catch (Exception ex)
@@ -118,11 +118,10 @@ namespace replica.management
 							(new Logger()).WriteError(ex);
 						}
 						if (null != sCommandName)
-							(new Logger()).WriteNotice("Завершение выполнения команды [" + sCommandName + "]");
+							(new Logger()).WriteNotice("Р—Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "]");
 					}
                     if(0 < aqFileUpdateCommands.Count)
                         FileUpdate(aqFileUpdateCommands);
-					//_cDB.Perform("SELECT pl.`fBeepFileSet`(" + cPLI.nID + ",'" + cPLI.cBeepInfo.sFile + "')");
 				}
 				catch (Exception ex)
 				{
@@ -159,12 +158,12 @@ namespace replica.management
 							ahRow = aqFileUpdateCommands.Dequeue();
 							sCommandName = ahRow["sCommandName"].ToString();
 							nCommandQueueID = ahRow["id"].ToID();
-							(new Logger()).WriteNotice("начало выполнения команды [" + sCommandName + "][" + nCommandQueueID + "]");
+							(new Logger()).WriteNotice("РЅР°С‡Р°Р»Рѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "][" + nCommandQueueID + "]");
 							_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=2 WHERE id=" + nCommandQueueID);
 							nID = -1;
 							sFile = null;
 							bForce = false;
-							aqParams = _cDB.Select("SELECT `sKey`,`sValue` FROM adm.`tCommandParameters` WHERE `idCommandsQueue`=" + nCommandQueueID); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+							aqParams = _cDB.Select("SELECT `sKey`,`sValue` FROM adm.`tCommandParameters` WHERE `idCommandsQueue`=" + nCommandQueueID); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 							while (0 < aqParams.Count)
 							{
 								ahParam = aqParams.Dequeue();
@@ -184,7 +183,7 @@ namespace replica.management
 							if (0 > nID || null == sFile)
 							{
 								_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=3 WHERE id=" + nCommandQueueID);
-								(new Logger()).WriteNotice("ошибочное (некорректные параметры) завершение выполнения команды [" + nCommandQueueID + "]");
+								(new Logger()).WriteNotice("РѕС€РёР±РѕС‡РЅРѕРµ (РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹) Р·Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + nCommandQueueID + "]");
 								break;
 							}
 							if (!aFileBinds.ContainsKey(sFile))
@@ -204,7 +203,7 @@ namespace replica.management
 										aFileBinds[sFile].aAssetCommandBinds.Add(nID, nCommandQueueID);
 									break;
 								default:
-									throw new Exception("Неизвестная команда");
+									throw new Exception("РќРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°");
 							}
 						}
 						catch (Exception ex)
@@ -230,7 +229,7 @@ namespace replica.management
 								sStatus = _cDB.GetValue("SELECT `sCommandStatus` FROM adm.`vCommandsQueue` WHERE id=" + aFileBinds[sBeepFile].nID);
 								if ("succeed" == sStatus)
 								{
-									nFileID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idFiles'=`sKey` AND `idCommandsQueue`=" + aFileBinds[sBeepFile].nID).ToID(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
+									nFileID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'idFiles'=`sKey` AND `idCommandsQueue`=" + aFileBinds[sBeepFile].nID).ToID(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
 									foreach (long nAssetID in aFileBinds[sBeepFile].aAssetCommandBinds.Keys)
 									{
 										try
@@ -250,13 +249,13 @@ namespace replica.management
 												}
 											}
 											_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=4 WHERE id=" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID]);
-											(new Logger()).WriteNotice("Завершение выполнения команды [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
+											(new Logger()).WriteNotice("Р—Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
 										}
 										catch (Exception ex)
 										{
 											(new Logger()).WriteError(ex);
 											_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=3 WHERE id=" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID]);
-											(new Logger()).WriteNotice("Ошибочное завершение выполнения команды [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
+											(new Logger()).WriteNotice("РћС€РёР±РѕС‡РЅРѕРµ Р·Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
 										}
 									}
 									aFileDone[sBeepFile] = true;
@@ -267,7 +266,7 @@ namespace replica.management
 									foreach (long nAssetID in aFileBinds[sBeepFile].aAssetCommandBinds.Keys)
 									{
 										_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=3 WHERE id=" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID]);
-										(new Logger()).WriteNotice("Ошибочное (по загрузке файла) завершение выполнения команды [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
+										(new Logger()).WriteNotice("РћС€РёР±РѕС‡РЅРѕРµ (РїРѕ Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»Р°) Р·Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
 									}
 									aFileDone[sBeepFile] = true;
 								}
@@ -276,7 +275,7 @@ namespace replica.management
 									foreach (long nAssetID in aFileBinds[sBeepFile].aAssetCommandBinds.Keys)
 									{
 										_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=3 WHERE id=" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID]);
-										(new Logger()).WriteNotice("Ошибочное (по таймауту загрузки) завершение выполнения команды [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
+										(new Logger()).WriteNotice("РћС€РёР±РѕС‡РЅРѕРµ (РїРѕ С‚Р°Р№РјР°СѓС‚Сѓ Р·Р°РіСЂСѓР·РєРё) Р·Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + aFileBinds[sBeepFile].aAssetCommandBinds[nAssetID] + "]");
 									}
 									aFileDone[sBeepFile] = true;
 								}
@@ -307,7 +306,7 @@ namespace replica.management
 		}
 		public bool ServiceStart(string sServiceName)
 		{
-			(new Logger()).WriteWarning("запуск службы [" + sServiceName + "]");//TODO LANG
+			(new Logger()).WriteWarning("Р·Р°РїСѓСЃРє СЃР»СѓР¶Р±С‹ [" + sServiceName + "]");//TODO LANG
 			ServiceController cCues = new ServiceController(sServiceName);
 			try
 			{
@@ -315,7 +314,7 @@ namespace replica.management
 
 				cCues.Start();
 				cCues.WaitForStatus(ServiceControllerStatus.Running, tsTimeout);
-				(new Logger()).WriteWarning("служба запущена [" + sServiceName + "]");//TODO LANG
+				(new Logger()).WriteWarning("СЃР»СѓР¶Р±Р° Р·Р°РїСѓС‰РµРЅР° [" + sServiceName + "]");//TODO LANG
 			}
 			catch (Exception ex)
 			{
@@ -326,7 +325,7 @@ namespace replica.management
 		}
 		public bool ServiceStop(string sServiceName)
 		{
-			(new Logger()).WriteWarning("остановка службы [" + sServiceName + "]");//TODO LANG
+			(new Logger()).WriteWarning("РѕСЃС‚Р°РЅРѕРІРєР° СЃР»СѓР¶Р±С‹ [" + sServiceName + "]");//TODO LANG
 			ServiceController cCues = new ServiceController(sServiceName);
 			try
 			{
@@ -334,7 +333,7 @@ namespace replica.management
 
 				cCues.Stop();
 				cCues.WaitForStatus(ServiceControllerStatus.Stopped, tsTimeout);
-				(new Logger()).WriteWarning("служба остановлена [" + sServiceName + "]");//TODO LANG
+				(new Logger()).WriteWarning("СЃР»СѓР¶Р±Р° РѕСЃС‚Р°РЅРѕРІР»РµРЅР° [" + sServiceName + "]");//TODO LANG
 			}
             catch (Exception ex)
             {
@@ -363,7 +362,7 @@ namespace replica.management
 				}
 				catch (Exception ex)
 				{
-					throw new Exception("ffmpeg.net.File.Input(sFile): ошибка обработки файла: " + sFile, ex);
+					throw new Exception("ffmpeg.net.File.Input(sFile): РѕС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё С„Р°Р№Р»Р°: " + sFile, ex);
 				}
 				finally
 				{
@@ -374,12 +373,12 @@ namespace replica.management
 					}
 					catch (Exception ex)
 					{
-						throw new Exception("cFile.Dispose(): ошибка обработки файла: " + sFile, ex);
+						throw new Exception("cFile.Dispose(): РѕС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё С„Р°Р№Р»Р°: " + sFile, ex);
 					}
 				}
 			}
 			else
-				throw new System.IO.FileNotFoundException("не найден файл: " + sFile); //TODO LANG
+				throw new System.IO.FileNotFoundException("РЅРµ РЅР°Р№РґРµРЅ С„Р°Р№Р»: " + sFile); //TODO LANG
 			return nRetVal;
         }
 		public ulong AssetDurationUpdate(Asset cAsset)
@@ -420,12 +419,12 @@ namespace replica.management
 			return AssetDurationUpdate(Asset.Load(nAssetID));
 		}
 		public Dictionary<long, DateTime> ArchiveLastPlayedAssetsGet()
-        {        //  nAssetID, dtLastPlayed
+        {
 			Dictionary<long, DateTime> ahLastPlayed = new Dictionary<long, DateTime>();
+			long nID;
             try
             {
                 Queue<Hashtable> aqDBValues = _cDB.Select("SELECT max(`dtStartReal`) as `dtLastPlayed`, `idAssets` FROM archive.`pl.tItems` group by `idAssets`");
-                                                         //SELECT max("dtStartReal") as "dtLastPlayed", "idAssets" FROM archive."pl.tItems" group by "idAssets"    
 				Hashtable ahRow;
                 while (null != aqDBValues && 0 < aqDBValues.Count)
                 {
@@ -433,28 +432,41 @@ namespace replica.management
                     if (null != ahRow && null != ahRow["idAssets"] && null != ahRow["dtLastPlayed"])
 						ahLastPlayed.Add(ahRow["idAssets"].ToID(), ahRow["dtLastPlayed"].ToDT());
                 }
-            }
-            catch (Exception ex)
+				aqDBValues = _cDB.Select("SELECT max(`dtStartPlanned`) as `dtLastPlayed`, `idAssets` from pl.`vPlayListResolved`  group by `idAssets`");
+				while (null != aqDBValues && 0 < aqDBValues.Count)
+				{
+					ahRow = aqDBValues.Dequeue();
+					if (null != ahRow && null != ahRow["idAssets"] && null != ahRow["dtLastPlayed"])
+					{
+						nID = ahRow["idAssets"].ToID();
+                        if (!ahLastPlayed.ContainsKey(nID))
+							ahLastPlayed.Add(nID, ahRow["dtLastPlayed"].ToDT());
+						else
+							ahLastPlayed[nID] = ahRow["dtLastPlayed"].ToDT();
+                    }
+				}
+			}
+			catch (Exception ex)
             {
                 ahLastPlayed = null;
                 (new Logger()).WriteError(ex);
             }
             return ahLastPlayed;
         }
-		public string LastPlannedArtistIDGet()   // TODO. ЭТО ВРЕМЯНКА!
+		public string LastPlannedAssetNameGet(string sNameBeginning)
 		{
-			//select max("dtStartPlanned") as "dtLastPlanned", "sName" from pl."vPlayListResolved" where "sStorageName"='Оформление' and "sName" not in ('Отбивка №1', 'Отбивка №2','Отбивка №3') group by "sName" order by "dtLastPlanned" desc limit 1
-			Hashtable ahRow = _cDB.GetRow("select max(`dtStartPlanned`) as `dtLastPlanned`, `sName` from pl.`vPlayListResolved` where `sStorageName`='Оформление' and `sName` not in ('Отбивка №1', 'Отбивка №2','Отбивка №3') group by `sName` order by `dtLastPlanned` desc limit 1");
-			return ahRow["sName"].ToString();
+			Hashtable ahRow = _cDB.GetRow("select max(`dtStartPlanned`) as `dtLastPlanned`, `sName` from pl.`vPlayListResolved` where `sStorageName`='РѕС„РѕСЂРјР»РµРЅРёРµ' and `sName` like '"+ sNameBeginning + "%' group by `sName` order by `dtLastPlanned` desc limit 1");
+			if (null != ahRow && ahRow.Count > 0)
+				return ahRow["sName"].ToString();
+			return null;
 		}
-        public Queue<Clip> ClipsForPlaylistGet()
+		public Queue<Clip> ClipsForPlaylistGet()
         {
             Queue<Clip> aqRetVal = new Queue<Clip>();
             try
             {
-                Queue<Hashtable> aqDBValues = _cDB.Select("SELECT DISTINCT * FROM mam.`vAssetsResolved` WHERE 'clip'=`sVideoTypeName` AND `idRotations`<>6 ORDER BY `dtLastPlayed` NULLS FIRST, `dtLastFileEvent`");
-                                                        // SELECT DISTINCT * FROM mam."vAssetsResolved" WHERE 'clip'="sVideoTypeName" AND "idRotations"<>6 ORDER BY "dtLastPlayed" NULLS FIRST, "dtLastFileEvent"
-                while (null != aqDBValues && 0 < aqDBValues.Count)
+                Queue<Hashtable> aqDBValues = _cDB.Select("SELECT DISTINCT * FROM mam.`vAssetsResolved` WHERE 'clip'=`sVideoTypeName` AND `sRotationName`<>'СЃС‚РѕРї' ORDER BY `dtLastPlayed` NULLS FIRST, `dtLastFileEvent`");
+				while (null != aqDBValues && 0 < aqDBValues.Count)
                     aqRetVal.Enqueue(new Clip(aqDBValues.Dequeue()));
             }
             catch (Exception ex)
@@ -470,7 +482,7 @@ namespace replica.management
 		}
 		public int RotationClipsQtyGet(DateTime dtHour)
 		{
-			return _cDB.GetValueInt("SELECT count(*) FROM pl.`vPlayListResolved` plr, mam.`vAssetsResolved` ar WHERE plr.`idAssets`=ar.id AND plr.`dtStart` >= '" + dtHour.ToString("yyyy-MM-dd HH:00:00zzz") + "' AND plr.`dtStart` <= '" + dtHour.ToString("yyyy-MM-dd HH:59:59zzz") + "' AND `sRotationName`='Первая'");
+			return _cDB.GetValueInt("SELECT count(*) FROM pl.`vPlayListResolved` plr, mam.`vAssetsResolved` ar WHERE plr.`idAssets`=ar.id AND plr.`dtStart` >= '" + dtHour.ToString("yyyy-MM-dd HH:00:00zzz") + "' AND plr.`dtStart` <= '" + dtHour.ToString("yyyy-MM-dd HH:59:59zzz") + "' AND `sRotationName`='РџРµСЂРІР°СЏ'");
 		}
 		public int ItemsMoveToArchive()
 		{
@@ -479,28 +491,32 @@ namespace replica.management
 				if (DayOfWeek.Tuesday == DateTime.Now.DayOfWeek)
 				{
 					string sDate = DateTime.Now.ToString("yyMMdd");
-					_cDB.TransactionBegin();
-					_cDB.Perform(
-						"CREATE TABLE archive.`tHouseKeeping_" + sDate + "` " +
-						"(" +
-						  "id integer NOT NULL DEFAULT nextval('archive.`tHouseKeeping_id_seq`'::regclass) PRIMARY KEY," +
-						  "dt timestamp with time zone NOT NULL DEFAULT now()," +
-						  "`idHouseKeeping` integer NOT NULL," +
-						  "`idUsers` integer NOT NULL," +
-						  "`sUsername` character varying(256) NOT NULL," +
-						  "`idDTEventTypes` integer NOT NULL," +
-						  "`sDTEventTypeName` character varying(64) NOT NULL," +
-						  "`sTG_OP` character(6)," +
-						  "`dtEvent` timestamp with time zone NOT NULL," +
-						  "`sNote` text" +
-						")" +
-						"WITH (OIDS=FALSE);"
-					);
-					_cDB.Perform("GRANT SELECT, INSERT ON TABLE archive.`tHouseKeeping_" + sDate + "` TO replica_management;");
-					_cDB.Perform("ALTER TABLE archive.`tHouseKeeping_" + sDate + "` RENAME TO `tHouseKeeping_" + sDate + "_sync`;");
-					_cDB.Perform("ALTER TABLE archive.`tHouseKeeping` RENAME TO `tHouseKeeping_" + sDate + "`;");
-					_cDB.Perform("ALTER TABLE archive.`tHouseKeeping_" + sDate + "_sync` RENAME TO `tHouseKeeping`;");
-					_cDB.TransactionCommit();
+					string sTableName = _cDB.GetValue("SELECT table_name FROM information_schema.tables WHERE table_name = 'tHouseKeeping_" + sDate + "'");
+					if (sTableName.IsNullOrEmpty())
+					{
+						_cDB.TransactionBegin();
+						_cDB.Perform(
+							"CREATE TABLE archive.`tHouseKeeping_" + sDate + "` " +
+							"(" +
+							  "id integer NOT NULL DEFAULT nextval('archive.`tHouseKeeping_id_seq`'::regclass) PRIMARY KEY," +
+							  "dt timestamp with time zone NOT NULL DEFAULT now()," +
+							  "`idHouseKeeping` integer NOT NULL," +
+							  "`idUsers` integer NOT NULL," +
+							  "`sUsername` character varying(256) NOT NULL," +
+							  "`idDTEventTypes` integer NOT NULL," +
+							  "`sDTEventTypeName` character varying(64) NOT NULL," +
+							  "`sTG_OP` character(6)," +
+							  "`dtEvent` timestamp with time zone NOT NULL," +
+							  "`sNote` text" +
+							")" +
+							"WITH (OIDS=FALSE);"
+						);
+						_cDB.Perform("GRANT SELECT, INSERT ON TABLE archive.`tHouseKeeping_" + sDate + "` TO replica_management;");
+						_cDB.Perform("ALTER TABLE archive.`tHouseKeeping_" + sDate + "` RENAME TO `tHouseKeeping_" + sDate + "_sync`;");
+						_cDB.Perform("ALTER TABLE archive.`tHouseKeeping` RENAME TO `tHouseKeeping_" + sDate + "`;");
+						_cDB.Perform("ALTER TABLE archive.`tHouseKeeping_" + sDate + "_sync` RENAME TO `tHouseKeeping`;");
+						_cDB.TransactionCommit();
+					}
 				}
 			}
 			catch //(Exception ex)
@@ -514,7 +530,7 @@ namespace replica.management
 			int nTimeout = _cDB.TimeoutGet();
 			try
 			{
-				_cDB.TimeoutSet(60 * 15); //15 минут
+				_cDB.TimeoutSet(60 * 15); //15 РјРёРЅСѓС‚
 				while (true)
 				{
 					_cDB.TransactionBegin();
@@ -554,107 +570,4 @@ namespace replica.management
 		}
 	}
 }
-/*
-			try
-			{
-				string sDTNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:sszzz");
-				string sDTStart = DateTime.MinValue.ToString("yyyy-MM-dd HH:mm:sszzz");
-				aqDBValues = _cDB.Select("SELECT * FROM pl.`vPlayListResolved` WHERE `dtStartPlanned` < '" + sDTStart + "' ORDER BY `dtStart`");
-				if (null != aqDBValues && 0 < aqDBValues.Count)
-				{
-					sInsertPrefix = "INSERT INTO archive.`pl.tItems` (dt, id, `sName`, `sNote`, `idStatuses`, `sStatusName`, `idClasses`, `sClassName`, ";
-					sInsertPrefix += "`idStorageTypes`, `sStorageTypeName`, `idStorages`, `bStorageEnabled`, `sStorageName`, `sPath`, `idFiles`, `sFilename`, `dtLastFileEvent`, ";
-					sInsertPrefix += "`nFrameStart`, `nFrameStop`, `nFramesQty`, `dtStartHard`, `dtStartSoft`, `dtStartPlanned`, `dtStartQueued`, `dtStartReal`, `dtStopReal`, ";
-					sInsertPrefix += "`dtTimingsUpdate`, `bPlug`, `idAssets`, `nBeepAdvBlockID`, `nBeepClipBlockID`) VALUES (";
-					_cDB.TransactionBegin();
-					while (0 < aqDBValues.Count)
-					{
-						try
-						{
-							ahRow = aqDBValues.Dequeue();
 
-							sSQL = sInsertPrefix;
-							sSQL += "'" + sDTNow + "',";
-							sSQL += ahRow["id"] + ",";
-							sSQL += "'" + ahRow["sName"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += (null == ahRow["sNote"] ? "NULL" : "'" + ahRow["sNote"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "'") + ",";
-							sSQL += ahRow["idStatuses"] + ",";
-							sSQL += "'" + ahRow["sStatusName"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += ahRow["idClasses"] + ",";
-							sSQL += "'" + ahRow["sClassName"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += ahRow["idStorageTypes"] + ",";
-							sSQL += "'" + ahRow["sStorageTypeName"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += ahRow["idStorages"] + ",";
-							sSQL += (null == ahRow["bStorageEnabled"] ? "NULL" : ahRow["bStorageEnabled"]) + ",";
-							sSQL += "'" + ahRow["sStorageName"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += "'" + ahRow["sPath"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += ahRow["idFiles"] + ",";
-							sSQL += "'" + ahRow["sFilename"].ToString().Replace("'", "''").Replace("\\", "\\\\") + "',";
-							sSQL += (null == ahRow["dtLastFileEvent"] ? "NULL" : "'" + ((DateTime)ahRow["dtLastFileEvent"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["nFrameStart"] ? "NULL" : ahRow["nFrameStart"]) + ",";
-							sSQL += (null == ahRow["nFrameStop"] ? "NULL" : ahRow["nFrameStop"]) + ",";
-							sSQL += (null == ahRow["nFramesQty"] ? "NULL" : ahRow["nFramesQty"]) + ",";
-							sSQL += (null == ahRow["dtStartHard"] ? "NULL" : "'" + ((DateTime)ahRow["dtStartHard"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtStartSoft"] ? "NULL" : "'" + ((DateTime)ahRow["dtStartSoft"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtStartPlanned"] ? "NULL" : "'" + ((DateTime)ahRow["dtStartPlanned"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtStartQueued"] ? "NULL" : "'" + ((DateTime)ahRow["dtStartQueued"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtStartReal"] ? "NULL" : "'" + ((DateTime)ahRow["dtStartReal"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtStopReal"] ? "NULL" : "'" + ((DateTime)ahRow["dtStopReal"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["dtTimingsUpdate"] ? "NULL" : "'" + ((DateTime)ahRow["dtTimingsUpdate"]).ToString("yyyy-MM-dd HH:mm:sszzz") + "'") + ",";
-							sSQL += (null == ahRow["bPlug"] ? "NULL" : ahRow["bPlug"]) + ",";
-							sSQL += (null == ahRow["idAssets"] ? "NULL" : ahRow["idAssets"]) + ",";
-							sSQL += (null == ahRow["nBeepAdvBlockID"] ? "NULL" : ahRow["nBeepAdvBlockID"]) + ",";
-							sSQL += (null == ahRow["nBeepClipBlockID"] ? "NULL" : ahRow["nBeepClipBlockID"]);
-							sSQL += ")";
-							switch (ahRow["sStatusName"].ToString())
-							{
-								case "played":
-									break;
-								case "skipped":
-									break;
-								case "failed":
-									break;
-								default:
-									(new Logger()).WriteNotice("ВОЗМОЖНО ПРЕЖДЕВРЕМЕННАЯ АРХИВАЦИЯ! [sDTStartPlanned:" + sDTStart + "][sql:" + sSQL + "]");
-									break;
-							}
-
-
-							_cDB.Perform(sSQL);
-
-							//sSQL = "DELETE FROM pl.`tItemDTEvents` WHERE `idItems` = " + ahRow["id"] + ";DELETE FROM pl.`tItemAttributes` WHERE `idItems` = " + ahRow["id"] + ";DELETE FROM pl.`tItems` WHERE id = " + ahRow["id"] + ";";
-							//sSQL += "DELETE FROM pl.`tItemAttributes` WHERE `idItems` = " + ahRow["id"] + ";DELETE FROM pl.`tItems` WHERE id = " + ahRow["id"] + ";";
-							//sSQL += "DELETE FROM pl.`tItems` WHERE id = " + ahRow["id"] + ";";
-
-							//_cDB.Perform(sSQL);
-
-							if (0 > (nTransactionPeriod--))
-							{
-								_cDB.TransactionCommit();
-								nTransactionPeriod = 50;
-								nRetVal += nCount;
-								nCount = 0;
-								_cDB.TransactionBegin();
-							}
-							nCount++;
-						}
-						catch (Exception ex)
-						{
-							(new Logger()).WriteError(ex);
-							_cDB.TransactionRollBack();
-							nTransactionPeriod = 50;
-							nCount = 0;
-							_cDB.TransactionBegin();
-						}
-					}
-					_cDB.TransactionCommit();
-					nRetVal += nCount;
-				}
-			}
-			catch (Exception ex)
-			{
-				(new Logger()).WriteError(ex);
-				_cDB.TransactionRollBack();
-			}
-
-*/

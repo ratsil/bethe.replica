@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,11 @@ namespace helpers.replica
 			public override void CredentialsSet(Credentials cDBCredentials)
 			{
 				base.CredentialsSet(cDBCredentials);
-				access.scopes.init(aAccessScopes = Select("SELECT * FROM hk.`fUserAccessScopeGet`()").Select(o => new access.types.AccessScope(o)).ToArray());
+				Queue<Hashtable> ahRows = Select("SELECT * FROM hk.`fUserAccessScopeGet`()");
+				//(new Logger("CredentialsSet")).WriteDebug2("scopes got: [count=" + (ahRows == null ? "null" : "" + ahRows.Count) + "]<br>" + ahRows.ToString());
+				aAccessScopes = ahRows.Select(o => new access.types.AccessScope(o)).ToArray();
+				//(new Logger("CredentialsSet")).WriteDebug2("scopes array: [count=" + (aAccessScopes == null ? "null" : "" + aAccessScopes.Length) + "]<br>" + aAccessScopes.ToString());
+				access.scopes.init(aAccessScopes);
 			}
 		}
         public enum SearchMask
@@ -42,8 +46,16 @@ namespace helpers.replica
 		{
 			get
 			{
-				if(null == _cCache)
-					return (DBInteract)AppDomain.CurrentDomain.GetData(System.Threading.Thread.CurrentThread.ManagedThreadId + ":" + typeof(DBInteract).ToString());
+				if (null == _cCache)
+				{
+					object oDBI = AppDomain.CurrentDomain.GetData(System.Threading.Thread.CurrentThread.ManagedThreadId + ":" + typeof(DBInteract).ToString());
+					if (null == oDBI)
+					{
+						(new Logger()).WriteNotice("ERROR IN CACHE!! DBInteract object has not been got from current domain<br>[thread_id=" + System.Threading.Thread.CurrentThread.ManagedThreadId + "]");
+						throw new Exception("DBInteract object has not been got from current domain");
+					}
+                    return (DBInteract)oDBI;
+				}
 				return _cCache;
 			}
 		}
@@ -102,13 +114,29 @@ namespace helpers.replica
         {
             return _cDB.Select(sSQL);
         }
-        internal string ValueGet(string sSQL)
+		internal Queue<Hashtable> RowsGet(string sSQL, Dictionary<string, object> ahParams)
+		{
+			return _cDB.Select(sSQL, ahParams);
+		}
+		internal bool BoolGet(string sSQL)
+		{
+			return _cDB.GetValueBool(sSQL);
+		}
+		internal long LongGet(string sSQL)
+		{
+			return _cDB.GetValueLong(sSQL);
+		}
+		internal string ValueGet(string sSQL)
         {
             return _cDB.GetValue(sSQL);
         }
+		internal void Perform(string sSQL, Dictionary<string, object> ahParams)
+		{
+			_cDB.Perform(sSQL, ahParams);
+		}
 		internal void Perform(string sSQL)
 		{
-			_cDB.Perform(sSQL);
+			_cDB.Perform(sSQL, null);
 		}
 
 		#region hk
@@ -138,15 +166,13 @@ namespace helpers.replica
 			}
 			return cRetVal;
 		}
-		private Queue<RegisteredTable> RegisteredTablesGet(string sWhere)
+		public Queue<RegisteredTable> RegisteredTablesGet(string sWhere)
 		{
 			Queue<RegisteredTable> aqRetVal = new Queue<RegisteredTable>();
-			if (null == sWhere)
-				sWhere = "";
 			try
 			{
 				Queue<Hashtable> aqDBValues = null;
-				if (null != (aqDBValues = _cDB.Select("SELECT * FROM hk.`tRegisteredTables`" + (0 < sWhere.Length ? " WHERE " + sWhere : "") + " ORDER BY `sName`")))
+				if (null != (aqDBValues = _cDB.Select("SELECT * FROM hk.`tRegisteredTables`" + (!sWhere.IsNullOrEmpty() ? " WHERE " + sWhere : "") + " ORDER BY `sName`")))
 					while (0 < aqDBValues.Count)
 						aqRetVal.Enqueue(new RegisteredTable(aqDBValues.Dequeue()));
 			}
@@ -180,16 +206,46 @@ namespace helpers.replica
 		{						   //select * from pl."vPlayListResolvedOrdered" where "dtStartPlanned" < (select "dtStartPlanned" from pl."vPlayListResolvedOrdered" where id=1703412) order by "dtStartPlanned" desc limit 1;
 			return PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE id = (SELECT `nValue` FROM pl.`fItemPreviousGet`(" + cPLI.nID + "))").Dequeue();
 		}
+		private bool OnAirCheck(Queue<PlaylistItem> aqPLIs)
+		{
+			if (null == aqPLIs || 0 == aqPLIs.Count || DateTime.MaxValue == aqPLIs.Last().dtStartReal)
+				return false;
+			return true;
+		}
 		public PlaylistItem PlaylistItemOnAirGet()
 		{
 			PlaylistItem cRetVal = null;
 			Queue<PlaylistItem> aqPLIs = PlaylistItemsGet(new IdNamePair("onair"));
-			if (null != aqPLIs)
+
+			if (!OnAirCheck(aqPLIs))
 			{
-				if (1 < aqPLIs.Count)
-					(new Logger()).WriteWarning("dbi", "pli:onair:get: got more than one onair PLIs");
-				while (0 < aqPLIs.Count)
-					cRetVal = aqPLIs.Dequeue();
+				(new Logger()).WriteNotice("dbi", "pli:onair:get: got NO onair PLIs. Will try reget next 2 seconds... [aqplis=" + (null == aqPLIs ? "null" : "" + aqPLIs.Count) + "]");
+				DateTime dtStop = DateTime.Now.AddSeconds(2);
+				do
+				{
+					System.Threading.Thread.Sleep(0);
+					aqPLIs = PlaylistItemsGet(new IdNamePair("onair"));
+				}
+				while (DateTime.Now < dtStop && !OnAirCheck(aqPLIs));
+			}
+			List<PlaylistItem> aPLIs = (!OnAirCheck(aqPLIs)) ? null : aqPLIs.OrderBy(o=>o.dtStart).ToList();
+			if (null != aPLIs)
+			{
+				if (2 < aPLIs.Count)
+					(new Logger()).WriteError("dbi", new Exception("pli:onair:get: got more than TWO (!!!) onair PLIs! [" + aPLIs.Count + "]"));
+				else if (2 == aPLIs.Count)
+				{
+					if (Math.Abs(aPLIs[1].dtStartReal.Subtract(aPLIs[0].dtStartReal).Subtract(TimeSpan.FromMilliseconds(aPLIs[0].nDuration * 40)).TotalSeconds) < 10)  // within normal limits
+						(new Logger()).WriteNotice("dbi", "pli:onair:get: got TWO onair PLIs, but not critical yet");
+					else
+					{
+						(new Logger()).WriteError("dbi", new Exception("pli:onair:get: got TWO onair PLIs, standing too far from each other! Try to fix... [id0=" + aPLIs[0].nID + "][id1=" + aPLIs[1].nID + "]"));
+						IdNamePair cPlayed = PlaylistItemsStatusesGet().FirstOrDefault(o => o.sName == "failed");
+						if (null!=cPlayed)
+							Perform("UPDATE pl.`tItems` SET `idStatuses`=" + cPlayed.nID + " WHERE id = " + aPLIs[0].nID);
+					}
+				}
+				cRetVal = aPLIs[aPLIs.Count - 1];
 			}
 			return cRetVal;
 		}
@@ -197,7 +253,11 @@ namespace helpers.replica
 		{
 			return PlaylistItemsGet(new IdNamePair("prepared"));
 		}
-		public Queue<PlaylistItem> PlaylistItemsPreparedAndQueuedGet()
+        public Queue<PlaylistItem> PlaylistItemsOnairPreparedQueuedGet()
+        {
+            return PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolved` WHERE `sStatusName` IN ('prepared', 'queued', 'onair') ORDER BY `dtStart`;");
+        }
+        public Queue<PlaylistItem> PlaylistItemsPreparedAndQueuedGet()
 		{
 			return PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolved` WHERE `sStatusName` IN ('prepared', 'queued') ORDER BY `dtStart`;");
 		}
@@ -205,15 +265,15 @@ namespace helpers.replica
 		{
 			return PlaylistItemsGet(new IdNamePair("queued"));
 		}
-		public void PlaylistItemAdd(Queue aqAssetsIDs)
+		public void PlaylistItemsAdd(Queue aqAssetsIDs)
 		{
-			//_cDB.RoleSet("replica_playlist_full");
+			//_cDB.RoleSet("replica_playlist_full");fPlaylistItemOnAirGet
 			while (null != aqAssetsIDs && 0 < aqAssetsIDs.Count)
 			{
 				string sSQL = "";
 				int nIndex = 0;
-				while (0 < aqAssetsIDs.Count && 20 > nIndex)   // попытка бить на сотни, т.к. заливка целого дня (>500) частенько дает таймауты (4 минуты) ((... выяснил - это потому что 1 добавляется 3.5 - 4.5 секунды!!!!
-				{                                              // приходится по 20-ке...
+				while (0 < aqAssetsIDs.Count && 20 > nIndex)   // РїРѕРїС‹С‚РєР° Р±РёС‚СЊ РЅР° СЃРѕС‚РЅРё, С‚.Рє. Р·Р°Р»РёРІРєР° С†РµР»РѕРіРѕ РґРЅСЏ (>500) С‡Р°СЃС‚РµРЅСЊРєРѕ РґР°РµС‚ С‚Р°Р№РјР°СѓС‚С‹ (4 РјРёРЅСѓС‚С‹) ((... РІС‹СЏСЃРЅРёР» - СЌС‚Рѕ РїРѕС‚РѕРјСѓ С‡С‚Рѕ 1 РґРѕР±Р°РІР»СЏРµС‚СЃСЏ 3.5 - 4.5 СЃРµРєСѓРЅРґС‹!!!!
+				{                                              // РїСЂРёС…РѕРґРёС‚СЃСЏ РїРѕ 20-РєРµ...
 					nIndex++;
 					sSQL += "SELECT `nValue` as id, `bValue` as `bStatus` FROM pl.`fItemAddAsAsset`(" + aqAssetsIDs.Dequeue() + ");";
 				}
@@ -271,9 +331,9 @@ namespace helpers.replica
 						sSQL += " FROM ";
 
 					if (null == cPLI.cAsset)
-						sSQL += "pl.`fItemAddAsFile`(" + cPLI.cFile.nID + ", " + cPLI.nFramesQty + ",'" + cPLI.cClass.sName + "'" + sStart + ");";
+						sSQL += "pl.`fItemAddAsFile`(" + cPLI.cFile.nID + "," + cPLI.nFramesQty + "," + cPLI.cAsset.aClasses.ToNamesArrayForDB() + sStart + ");";
 					else
-						sSQL += "pl.`fItemAddAsAsset`(" + cPLI.cAsset.nID + "," + cPLI.cAsset.cClass.nID + sStart + ");";
+						sSQL += "pl.`fItemAddAsAsset`(" + cPLI.cAsset.nID + "," + cPLI.cAsset.aClasses.ToIdsArrayForDB() + sStart + ");";
 					_cDB.Cache(sSQL);
 				}
 				_cDB.TransactionCommit();
@@ -304,7 +364,17 @@ namespace helpers.replica
 		{
 			return _cDB.GetValueBool("SELECT `bValue` FROM pl.`fItemRemove`(" + nItemID + ")");
 		}
-		protected Queue<PlaylistItem> PlaylistItemsGet(string sSQLQuery)
+        public bool PlaylistItemUncahe(long nItemID)
+        {
+            //delete from pl."tItemsCached" where "idItems"=332134
+            return _cDB.GetValueBool("DELETE FROM pl.`tItemsCached` WHERE `idItems`=" + nItemID );
+        }
+        public DateTime PlaylistFirstPlannedDateGet()
+        {
+            //select "dtStartPlanned" from pl."vPlayListResolvedOrdered" where "sStatusName" = 'planned' limit 1
+            return _cDB.GetValue("SELECT `dtStartPlanned` FROM pl.`vPlayListResolvedOrdered` WHERE `sStatusName` = 'planned' LIMIT 1").ToDT();
+        }
+        protected Queue<PlaylistItem> PlaylistItemsGet(string sSQLQuery)
 		{
 			Queue<PlaylistItem> aqRetVal = new Queue<PlaylistItem>();
 			Queue<Hashtable> aqDBValues = null;
@@ -351,7 +421,7 @@ namespace helpers.replica
 		}                          //SELECT DISTINCT *, ass."nValue" AS "nRotation", cat."sValue" AS "sRotation" FROM (SELECT DISTINCT * FROM pl."vPlayListResolved" WHERE "dtStartPlanned" > '2012-02-27 17:15:09+04'                          AND "dtStartPlanned" < '2012-02-28 00:05:09+04'                        AND "sStatusName" = 'planned') pl LEFT JOIN (SELECT "idAssets" as "idClips", "nValue" FROM mam."tAssetAttributes" WHERE mam."tAssetAttributes"."sKey"='rotation') ass ON pl."idAssets"= ass."idClips" LEFT JOIN (SELECT id AS "nCatValID", "sValue" FROM mam."tCategoryValues") cat ON cat."nCatValID"=ass."nValue" ORDER BY "dtStartReal","dtStartQueued","dtStartPlanned"
 		public Queue<PlaylistItem> PlaylistItemsWithRotationsArchGet(DateTime dtBegin, DateTime dtEnd)
 		{
-			return PlaylistItemsGet("SELECT DISTINCT *, ass.`nValue` AS `nRotation`, cat.`sValue` AS `sRotation` FROM (SELECT DISTINCT * FROM archive.`vPlayListResolvedFull` WHERE `dtStop` > '" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStop` < '" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "') pl LEFT JOIN (SELECT `idAssets` as `idClips`, `nValue` FROM mam.`tAssetAttributes` WHERE mam.`tAssetAttributes`.`sKey`='rotation') ass ON pl.`idAssets`= ass.`idClips` LEFT JOIN (SELECT id AS `nCatValID`, `sValue` FROM mam.`tCategoryValues`) cat ON cat.`nCatValID`=ass.`nValue` ORDER BY `dtStart`");
+			return PlaylistItemsGet("SELECT DISTINCT pl.*, ass.`nValue` AS `nRotation`, cat.`sValue` AS `sRotation` FROM (SELECT DISTINCT * FROM archive.`vPlayListResolvedFull` WHERE `dtStop` > '" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStop` < '" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "') pl LEFT JOIN (SELECT `idAssets` as `idClips`, `nValue` FROM mam.`tAssetAttributes` WHERE mam.`tAssetAttributes`.`sKey`='rotation') ass ON pl.`idAssets`= ass.`idClips` LEFT JOIN (SELECT id AS `nCatValID`, `sValue` FROM mam.`tCategoryValues`) cat ON cat.`nCatValID`=ass.`nValue` ORDER BY `dtStart`");
 		}
 		public Queue<PlaylistItem> PlaylistItemsAdvertsGet(DateTime dtBegin, DateTime dtEnd)
 		{
@@ -360,35 +430,39 @@ namespace helpers.replica
 
 		public Queue<PlaylistItem> PlaylistItemsGet(IdNamePair[] aStatuses)
 		{
-            if (null == aStatuses || 1 > aStatuses.Length)
+            if (aStatuses.IsNullOrEmpty())
                 throw new Exception(g.Common.sWrongItem + ": aStatuses");
-			string sStatuses = "", sComma = "";
-			foreach (IdNamePair cINP in aStatuses)
-			{
-				sStatuses += sComma + cINP.nID;
-				sComma = ",";
-			}
-			return PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `idStatuses` IN (" + sStatuses + ")");
+            string sStatuses = aStatuses.Select(o => o.sName).ToEnumerationString("'", true);
+			return PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `sStatusName` IN (" + sStatuses + ")");
 		}
 		public Queue<PlaylistItem> PlaylistItemsWithRotationsGet(IdNamePair[] aStatuses)
 		{
-			if (null == aStatuses || 1 > aStatuses.Length)
-				throw new Exception();
-			string sStatuses = "", sComma = "";
-			foreach (IdNamePair cINP in aStatuses)
-			{
-				sStatuses += sComma + cINP.nID;
-				sComma = ",";
-			}
-			return PlaylistItemsGet("SELECT DISTINCT *, ass.`nValue` AS `nRotation`, cat.`sValue` AS `sRotation` FROM (SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `idStatuses` IN (" + sStatuses + ")) pl LEFT JOIN (SELECT `idAssets`, `nValue` FROM mam.`tAssetAttributes` WHERE mam.`tAssetAttributes`.`sKey`='rotation') ass ON pl.`idAssets`= ass.`idAssets` LEFT JOIN (SELECT id AS `nCatValID`, `sValue` FROM mam.`tCategoryValues`) cat ON cat.`nCatValID`=ass.`nValue` ORDER BY `dtStart`");
+            if (aStatuses.IsNullOrEmpty())
+                throw new Exception();
+            string sStatuses = aStatuses.Select(o => o.sName).ToEnumerationString("'", true);
+            return PlaylistItemsGet("SELECT DISTINCT pl.*, ass.`nValue` AS `nRotation`, cat.`sValue` AS `sRotation` FROM (SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `sStatusName` IN (" + sStatuses + ")) pl LEFT JOIN (SELECT `idAssets`, `nValue` FROM mam.`tAssetAttributes` WHERE mam.`tAssetAttributes`.`sKey`='rotation') ass ON pl.`idAssets`= ass.`idAssets` LEFT JOIN (SELECT id AS `nCatValID`, `sValue` FROM mam.`tCategoryValues`) cat ON cat.`nCatValID`=ass.`nValue` ORDER BY `dtStart`");
 		}
 		public DateTime PlaylistItemsLastUsageGet()
 		{
 			//_cDB.RoleSet("replica_playlist");
 			return _cDB.GetValueRaw("SELECT max(`dtStopPlanned`) FROM pl.`vPlayListResolved`").ToDT();
 		}
+        public DateTime FileLastUsageInPlaylistGet(File cFile, DateTime dtBegin, DateTime dtEnd)
+        {
+            //SELECT "dtStartPlanned" FROM pl."vPlayListResolvedOrdered" WHERE "idFiles"=2219 AND "dtStartPlanned" > '2015-01-01' AND "dtStartPlanned" < '2018-03-29' ORDER BY "dtStartPlanned" DESC limit 1
+            DateTime dtRetVal = _cDB.GetValueRaw("SELECT `dtStartPlanned` FROM pl.`vPlayListResolvedOrdered` WHERE `idFiles` = " + cFile.nID + " AND `dtStartPlanned` > '" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartPlanned` < '" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "' ORDER BY `dtStartPlanned` DESC limit 1").ToDT();
 
-		private Queue<PlaylistItem> ComingUpGet(bool bAssetsResolved, uint nOffset, uint nLimit)
+            if (dtRetVal == DateTime.MaxValue)
+            {
+                //SELECT "dtStartPlanned" FROM archive."pl.tItems" WHERE "idFiles"=6890 AND "dtStartPlanned" > '2017-01-01' AND "dtStartPlanned" < '2018-03-29' ORDER BY "dtStartPlanned" DESC limit 1
+                dtRetVal = _cDB.GetValueRaw("SELECT `dtStartPlanned` FROM archive.`pl.tItems` WHERE `idFiles` = " + cFile.nID + " AND `dtStartPlanned` > '" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartPlanned` < '" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "' ORDER BY `dtStartPlanned` DESC limit 1").ToDT();
+            }
+            return dtRetVal;
+        }
+
+
+
+        private Queue<PlaylistItem> ComingUpGet(bool bAssetsResolved, uint nOffset, uint nLimit)
 		{
 			Queue<PlaylistItem> aqRetVal = new Queue<PlaylistItem>();
 			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT * FROM pl.`vComingUp`", null, "`dtStart`", nOffset, nLimit);
@@ -402,7 +476,27 @@ namespace helpers.replica
 			}
 			return aqRetVal;
 		}
-		private Queue<PlaylistItem> ComingUpGet(bool bAssetsResolved, TimeSpan tsDuration)
+        private Queue<PlaylistItem> ComingUpGet(bool bAssetsResolved, TimeSpan tsDuration)
+        {
+            Queue<PlaylistItem> aqRetVal = new Queue<PlaylistItem>();
+            if (TimeSpan.MaxValue > tsDuration)
+            {
+                DateTime dtUpTo = DateTime.Now.Add(tsDuration);
+                Queue<Hashtable> aqDBValues = _cDB.Select("SELECT * FROM pl.`vComingUp` where `dtStartPlanned` < '" + dtUpTo.ToString("yyyy-MM-dd HH:mm:ss") + "' AND NOT `dtTimingsUpdate` IS NULL ORDER BY `dtTimingsUpdate` DESC, `dtStartPlanned`");
+                PlaylistItem cPLI = null;
+                while (null != aqDBValues && 0 < aqDBValues.Count)
+                {
+                    cPLI = new PlaylistItem(aqDBValues.Dequeue());
+                    if (bAssetsResolved && null != cPLI.cAsset)
+                        cPLI.cAsset = Asset.Load(cPLI.cAsset.nID);
+                    aqRetVal.Enqueue(cPLI);
+                }
+            }
+            else
+                aqRetVal = ComingUpGet(bAssetsResolved, 0, 0);
+            return aqRetVal;
+        }
+        private Queue<PlaylistItem> ComingUpGet_old(bool bAssetsResolved, TimeSpan tsDuration)
 		{
 			Queue<PlaylistItem> aqRetVal = new Queue<PlaylistItem>();
 			Queue<PlaylistItem> aqPLIs = null;
@@ -425,7 +519,7 @@ namespace helpers.replica
 							cPLI = aqPLIs.Dequeue();
 							if (DateTime.MaxValue > dtStartPrevious)
 								tsCurrent += cPLI.dtStart.Subtract(dtStartPrevious);
-							dtStartPrevious = cPLI.dtStart; //теоретически мы можем словить дедлуп во внешнем цикле
+							dtStartPrevious = cPLI.dtStart; //С‚РµРѕСЂРµС‚РёС‡РµСЃРєРё РјС‹ РјРѕР¶РµРј СЃР»РѕРІРёС‚СЊ РґРµРґР»СѓРї РІРѕ РІРЅРµС€РЅРµРј С†РёРєР»Рµ
 							aqRetVal.Enqueue(cPLI);
 						}
 						nOffset += nLimit;
@@ -541,7 +635,24 @@ namespace helpers.replica
 				return cFile;
 			return null;
 		}
-        public File FileGet(Storage cStorage, string sFilename)
+		public File FileGetByVIID(string sVIID)   // "VI52316372"  OR "rolik_takoito.mov OR "rolik_takoito.mxf" OR "rolik_takoito"
+        {
+            if (sVIID.StartsWith("VI"))
+                foreach (File cFile in FilesGet("`sFilename` like '" + sVIID.Substring(2) + "%'").Values)
+                    return cFile;
+            else
+            {
+                string sWOExt = System.IO.Path.GetFileNameWithoutExtension(sVIID);
+                List<File> aRes = FilesGet("`sFilename` = '" + sWOExt + ".mov'").Values.ToList();
+                if (!aRes.IsNullOrEmpty())
+                    return aRes[0];
+                aRes = FilesGet("`sFilename` = '" + sWOExt + ".mxf'").Values.ToList();
+                if (!aRes.IsNullOrEmpty())
+                    return aRes[0];
+            }
+            return null;
+		}
+		public File FileGet(Storage cStorage, string sFilename)
 		{
             foreach (File cFile in FilesGet("`idStorages`=" + cStorage.nID + " AND `sFilename`='" + sFilename + "'").Values)
 				return cFile;
@@ -565,7 +676,7 @@ namespace helpers.replica
 			if (null == sWhere)
 				sWhere = "";
 			//_cDB.RoleSet("replica_assets");
-			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `idStorages`, `idStorageTypes`, `sStorageTypeName`, `sPath`, `sStorageName`, `bStorageEnabled`, `sFilename`, `dtLastFileEvent`, `eError` FROM media.`vFiles`" + (0 < sWhere.Length ? " WHERE " + sWhere : "") + " ORDER BY `sStorageName`, `sFilename`");
+			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `idStorages`, `idStorageTypes`, `sStorageTypeName`, `sPath`, `sStorageName`, `bStorageEnabled`, `sFilename`, `dtLastFileEvent`, `eError`, `nStatus`, `nAge` FROM media.`vFiles` " + (0 < sWhere.Length ? " WHERE " + sWhere : "") + " ORDER BY `sStorageName`, `sFilename`");
 			File cFile;
 			while (null != aqDBValues && 0 < aqDBValues.Count)
 			{
@@ -593,6 +704,31 @@ namespace helpers.replica
 		public void FileErrorRemove(File cFile)
 		{
 			_cDB.Perform("SELECT media.`fFileErrorRemove`(" + cFile.nID + ")");
+		}
+		public void FileStatusSet(File cFile)
+		{
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'status', " + cFile.eStatus.ToInt() + ")");
+		}
+		public void LastFileEventUpdate(File cFile)
+		{
+			_cDB.Perform("update media.`tFiles` set `dtLastFileEvent` = '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' where id=" + cFile.nID);
+		}
+        public void FileModificationUpdate(File cFile)
+        {
+            _cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'modification', '" + cFile.dtModification.ToString("yyyy-MM-dd HH:mm:ss") + "'::timestamp with time zone)");
+        }
+        public void FileFormatSet(File cFile, byte nFPS, ushort nWidth, ushort nHeight, int nAspect_dividend, int nAspect_divider, long nFramesQty)
+		{
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'fps', " + nFPS + ")");
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'w', " + nWidth + ")");
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'h', " + nHeight + ")");
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'aspect_divd', " + nAspect_dividend + ")");
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'aspect_divr', " + nAspect_divider + ")");
+			_cDB.Perform("SELECT `bValue` FROM media.`fFileAttributeSet`(" + cFile.nID + ", 'fr_qty', " + nFramesQty + ")");
+		}
+		public void FileRename(File cFile, string sNewName)
+		{
+			_cDB.Perform("update media.`tFiles` set `sFilename` = '" + sNewName + "' where id=" + cFile.nID);
 		}
 
 		public Storage StorageGet(string sName)
@@ -622,10 +758,33 @@ namespace helpers.replica
 				aqRetVal.Enqueue(new Storage(aqDBValues.Dequeue()));
 			return aqRetVal;
 		}
-		#endregion
 
-		#region mam
-		protected Queue<Asset> AssetsGet(string sWhere)
+        public enum FileIsInPlaylist
+        {
+            IsNot,
+            YesItIs,
+            IsInFragment,
+        }
+        public FileIsInPlaylist FileCheckIsInPlaylist(long nFileID, int nMinutes)
+        {
+            Queue<Hashtable> ahRows;
+
+            string sSQL = "SELECT `idFiles` FROM pl.`vPlayListResolvedOrdered` WHERE `dtStartPlanned` < now() + interval '" + nMinutes + " minutes' AND `sStatusName` in ('planned', 'queued', 'prepared', 'onair') AND `idFiles` = " + nFileID;
+            ahRows = _cDB.Select(sSQL);
+            if (!ahRows.IsNullOrEmpty())
+                return FileIsInPlaylist.IsInFragment;
+
+            sSQL = "SELECT `idFiles` FROM pl.`vPlayListResolvedOrdered` WHERE `dtStartPlanned` < now() + interval '100 days' AND `sStatusName` in ('planned', 'queued', 'prepared', 'onair') AND `idFiles` = " + nFileID;
+            ahRows = _cDB.Select(sSQL);
+            if (!ahRows.IsNullOrEmpty())
+                return FileIsInPlaylist.YesItIs;
+
+            return FileIsInPlaylist.IsNot;
+        }
+        #endregion
+
+        #region mam
+        public Queue<Asset> AssetsGet(string sWhere)
 		{
 			return new Queue<Asset>(AssetsResolvedGet(sWhere));
 		}
@@ -653,6 +812,24 @@ namespace helpers.replica
 					return new Asset(ahValues);
 			}
 		}
+		public Dictionary<long, Asset> PGAssetsResolvedGet()
+		{
+			Dictionary<long, Asset> ahRetVal = new Dictionary<long, Asset>();
+			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT ar.*, acv.`sCustomValue` AS `pg_id` FROM mam.`vAssetsResolved` ar LEFT JOIN mam.`vAssetsCustomValues` acv ON ar.id=acv.id WHERE acv.`sCustomValueName`='id'");  // AND ar.`sVideoTypeName`='clip'
+			foreach (Hashtable ahAsset in aqDBValues)
+			{
+				try
+				{
+					ahRetVal.Add(ahAsset["pg_id"].ToID(), new Asset(ahAsset));
+				}
+				catch (Exception ex)
+				{
+					(new Logger()).WriteNotice("error info: clips have the same pgid [pg_id=" + ahAsset["pg_id"] + "]");
+					(new Logger()).WriteError(ex);
+				}
+			}
+			return ahRetVal;
+        }
 		public IdNamePair AssetVideoTypeGet(long nAssetID)
 		{
 			//_cDB.RoleSet("replica_programs");
@@ -671,6 +848,25 @@ namespace helpers.replica
 			if (null != aqAssets && 0 < aqAssets.Count)
 				return aqAssets.Dequeue();
 			return null;
+		}
+		public Advertisement AssetGetByVIID(string sVIID)
+		{
+			string sWhere;
+			if (sVIID.StartsWith("VI"))
+				sWhere = "`sName` like '%" + sVIID.Substring(2) + "%'";
+			else
+			{
+				sWhere = "`sName` like '%" + System.IO.Path.GetFileNameWithoutExtension(sVIID) + "%'";
+			}
+			Queue<Asset> aqAssets = AssetsGet(sWhere);
+			if (null != aqAssets && 0 < aqAssets.Count)
+				return (Advertisement)aqAssets.Dequeue();
+			return null;
+		}
+
+		public Asset[] AssetsByNameBeginningGet(string sNameBeginning)
+		{
+			return AssetsResolvedGet("`sName` like '"+sNameBeginning+"%'");
 		}
 		public Asset AssetGet(CustomValue stCV)
 		{
@@ -719,8 +915,7 @@ namespace helpers.replica
 		{
 			return AssetsGet((string)null);
 		}
-
-		public Queue<Asset> AssetsGet(string sName, SearchMask eSearchMask)
+        public Queue<Asset> AssetsGet(string sName, SearchMask eSearchMask)
 		{
 			if (SearchMask.equal != eSearchMask)
 			{
@@ -797,7 +992,7 @@ namespace helpers.replica
 				{
 					if (!access.scopes.assets.bCanCreate)
 						return;
-					AssetAdd(cAsset);
+					AssetAdd(cAsset); 
 					_cDB.Perform("SELECT mam.`fVideoSet`(" + cAsset.nID + "," + cAsset.stVideo.cType.nID + ",'" + cAsset.stVideo.sName.ForDB() + "')");
 				}
 				else if (access.scopes.assets.name.bCanUpdate)
@@ -817,7 +1012,6 @@ namespace helpers.replica
 				if (access.scopes.assets.custom_values.bCanUpdate)
 					AssetCustomValuesSave(cAsset);
 				_cDB.TransactionCommit();
-	
 			}
 			catch
 			{
@@ -832,7 +1026,7 @@ namespace helpers.replica
 			_cDB.TransactionBegin();
 			try
 			{
-				if (null == cAsset.cFile)
+				if (null == cAsset.cFile || cAsset.cFile.nID <= 0)
 				{
 					_cDB.Perform("SELECT mam.`fAssetAttributeRemove`(" + cAsset.nID + ", 'nFrameIn');");
 					_cDB.Perform("SELECT mam.`fAssetAttributeRemove`(" + cAsset.nID + ", 'nFrameOut');");
@@ -860,10 +1054,28 @@ namespace helpers.replica
 			_cDB.TransactionBegin();
 			try
 			{
-				if (null != cAsset.cClass)
-					_cDB.Perform("SELECT mam.`fAssetClassSet`(" + cAsset.nID + "," + cAsset.cClass.nID + ")");
+				if (!cAsset.aClasses.IsNullOrEmpty())
+					_cDB.Perform("SELECT mam.`fAssetClassesSet`(" + cAsset.nID + "," + cAsset.aClasses.ToIdsArrayForDB() + ")");
 				else
 					_cDB.Perform("SELECT mam.`fAssetAttributeRemove`(" + cAsset.nID + ", 'class');");
+				_cDB.TransactionCommit();
+			}
+			catch
+			{
+				_cDB.TransactionRollBack();
+				throw;
+			}
+		}
+        public void AssetCustomValueSet(Asset cAsset, string sName, string sValue)
+        {
+            AssetCustomValueSet(cAsset.nID, sName, sValue);
+        }
+        public void AssetCustomValueSet(long nIDAsset, string sName, string sValue)
+		{
+			_cDB.TransactionBegin();
+			try
+			{
+				_cDB.Perform("SELECT mam.`fAssetCustomValueSet`(" + nIDAsset + ",'" + sName.ForDB() + "','" + sValue.ForDB() + "')");
 				_cDB.TransactionCommit();
 			}
 			catch
@@ -968,8 +1180,7 @@ namespace helpers.replica
 		{
 			try
 			{
-				//_cDB.RoleSet("replica_assets_full");
-				_cDB.Perform("SELECT mam.`fAssetClassSet`(" + cAsset.nID + "," + cAsset.cClass.nID + ")");
+				_cDB.Perform("SELECT mam.`fAssetClassesSet`(" + cAsset.nID + "," + cAsset.aClasses.ToIdsArrayForDB() + ")");
 			}
 			catch
 			{
@@ -979,10 +1190,27 @@ namespace helpers.replica
 		}
 		public void AssetDurationRefresh(long nAssetID)
 		{
-			//_cDB.RoleSet("replica_assets_full");
 			_cDB.Perform("SELECT adm.`fAssetDurationRefresh`(" + nAssetID + ")");
 		}
-
+		public long FileDurationQuery(long nFileID)
+		{
+			Hashtable ahRow = _cDB.GetRow("SELECT `bValue`, `nValue` FROM adm.`fFileDurationGet`(" + nFileID + ")");
+			if (ahRow["bValue"].ToBool())
+			{
+				return ahRow["nValue"].ToID();
+			}
+			return -1;
+		}
+		public IdNamePair CommandStatusGet(long nCommandsQueueID)
+		{
+			return new IdNamePair(_cDB.GetRow("SELECT * FROM adm.`fCommandsQueueStatusGet`(" + nCommandsQueueID + ")"));
+		}
+		public long FileDurationResultGet(long nCommandsQueueID)
+		{
+			string sRes = _cDB.GetValue("SELECT `sValue` FROM adm.`fCommandParametersGet`(" + nCommandsQueueID + ", 'nFramesQty')");
+			long nRes = long.Parse(sRes);
+            return nRes;
+		}
 		public Queue<Clip> ClipsGet()
 		{
 			return new Queue<Clip>(AssetsResolvedGet("'clip'=`sVideoTypeName`").Select(o => (Clip)o));
@@ -1003,7 +1231,8 @@ namespace helpers.replica
 					_cDB.Perform("SELECT mam.`fAssetPersonAdd`(" + cClip.nID + "," + stPerson.nID + ")");
 
 				_cDB.Perform("SELECT mam.`fAssetStylesClear`(" + cClip.nID + ")");
-				foreach (IdNamePair cStyle in cClip.aStyles)
+				if (null != cClip.aStyles)
+					foreach (IdNamePair cStyle in cClip.aStyles)
 					_cDB.Perform("SELECT mam.`fAssetStyleAdd`(" + cClip.nID + "," + cStyle.nID + ")");
 				if (null != cClip.cRotation)
 					_cDB.Perform("SELECT mam.`fAssetRotationSet`(" + cClip.nID + "," + cClip.cRotation.nID + ")");
@@ -1013,6 +1242,8 @@ namespace helpers.replica
 					_cDB.Perform("SELECT mam.`fAssetSoundBeginSet`(" + cClip.nID + "," + cClip.stSoundLevels.cStart.nID + ")");
 				if (null != cClip.stSoundLevels.cStop)
 					_cDB.Perform("SELECT mam.`fAssetSoundEndSet`(" + cClip.nID + "," + cClip.stSoundLevels.cStop.nID + ")");
+				if (null != cClip.cSex)
+					_cDB.Perform("SELECT mam.`fAssetSexSet`(" + cClip.nID + "," + cClip.cSex.nID + ")");
 
 				ClipCuesSave(cClip);
 				_cDB.TransactionCommit();
@@ -1040,12 +1271,11 @@ namespace helpers.replica
 		{
 			AssetSave(cDesign);
 		}
-
 		public Queue<Program> ProgramsGet()
 		{
 			return new Queue<Program>(AssetsResolvedGet("'program'=`sVideoTypeName`").Select(o => (Program)o));
 		}
-		private List<long> ProgramClipIDsGet(Program cProgram)   // отмирает
+		private List<long> ProgramClipIDsGet(Program cProgram)   // РѕС‚РјРёСЂР°РµС‚   // РѕС‚РјРµСЂР»Р°
 		{
 			//_cDB.RoleSet("replica_programs");
 			RegisteredTable cRT = RegisteredTableGet("mam", "tAssets");
@@ -1063,7 +1293,7 @@ namespace helpers.replica
 					aResult.Add((int)ahRows.Dequeue()["nValue"]);
 			return aResult;
 		}
-		private List<Program.RAOInfo> ProgramRAOInfoGet(Program cProgram)
+		public List<Program.ClipsFragment> ProgramRAOInfoGet(Program cProgram)
 		{
 			//_cDB.RoleSet("replica_programs");
 			RegisteredTable cRT = RegisteredTableGet("mam", "tAssetAttributes");
@@ -1072,32 +1302,88 @@ namespace helpers.replica
 			Queue<Hashtable> ahRows = _cDB.Select("SELECT `idAssets`, `nValue` as `nRAOFramesQty` from mam.`tAssetAttributes` where `sKey`='RAOFramesQty' and id in (select `nValue` from mam.`tAssetAttributes` where `idAssets`=" + cProgram.nID + " and `sKey`='clip' and `idRegisteredTables`=" + cRT.nID + ");");  //"tAssets"
 			//SELECT "idAssets", "nValue" from mam."tAssetAttributes" where "sKey"='RAOFramesQty' and id in (select "nValue" from mam."tAssetAttributes" where "idAssets"=1167 and "sKey"='clip' and "idRegisteredTables"=21);    //"tAssetAttributes"
 
-			List<Program.RAOInfo> aResult = new List<Program.RAOInfo>();
-			Hashtable ahRow;
-			if (null != ahRows)
-				while (0 < ahRows.Count)
-				{
-					ahRow = ahRows.Dequeue();
-					aResult.Add(new Program.RAOInfo() { cClip = ClipGet((int)ahRow["idAssets"]), nFramesQty = (int)ahRow["nRAOFramesQty"] });
-				}
-			return aResult;
-		}
-		public List<Program.RAOInfo> ProgramRAOInfo_old_and_new_Get(Program cProgram)
-		{
-			List<Program.RAOInfo> aResult = new List<Program.RAOInfo>();
-			List<Program.RAOInfo> aRAOInfo = ProgramRAOInfoGet(cProgram);
-			List<long> aIDs = ProgramClipIDsGet(cProgram);
-			Program.RAOInfo cRAOInfo;
+			List<Program.ClipsFragment> aResult = new List<Program.ClipsFragment>();
+			if (null == ahRows || ahRows.Count <= 0)
+				return aResult;
 
-			foreach (long nID in aIDs.Where(o => null == aRAOInfo.FirstOrDefault(oo => oo.cClip.nID == o)))  // берем старым способом только те, которых нету в новом
+			Dictionary<long, Program.ClipsFragment> ahCFs = ahRows.ToDictionary(o => o["idAssets"].ToLong(), o => new Program.ClipsFragment() { cClip = null, nFramesQty = (int)o["nRAOFramesQty"] });
+			Asset[] aAssets = AssetsResolvedGet("id in (" + ahCFs.Keys.ToArray().ToEnumerationString(false) + ")");
+			foreach (Asset cA in aAssets)
 			{
-				aResult.Add(cRAOInfo = new Program.RAOInfo() { cClip = ClipGet(nID) });
-				cRAOInfo.nFramesQty = cRAOInfo.cClip.nFramesQty;
+				ahCFs[cA.nID].cClip = (Clip)cA;
+				aResult.Add(ahCFs[cA.nID]);
 			}
-			aResult.AddRange(aRAOInfo);   // берем все новым способом
 			return aResult;
 		}
+		public void ProgramRAOInfoGet(List<Program> aPrograms) // РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРѕ РґР»СЏ РјР°СЃСЃРѕРІРѕРіРѕ Р·Р°Р±РѕСЂР° С„СЂР°РіРјРµРЅС‚РѕРІ РєР»РёРїРѕРІ РґР»СЏ РїСЂРѕРіСЂР°РјРј
+		{
+			if (null == aPrograms || aPrograms.Count <= 0)
+				return;
+			RegisteredTable cRT = RegisteredTableGet("mam", "tAssetAttributes");
+			if (null == cRT)
+				throw new Exception("RegisteredTable is null: [mam.tAssetAttributes]");
+			Dictionary<long, Program> ahPrograms = aPrograms.ToDictionary(o => o.nID, o => o);
+			Dictionary<long, Clip> ahClips;
+			List<long> aClipsIDs = new List<long>();
+			string sPrograms = "";
+			foreach (Program cP in aPrograms)
+			{
+				if (sPrograms.Length > 0)
+					sPrograms += ",";
+				sPrograms += "" + cP.nID;
+			}
+			Queue<Hashtable> ahRows = _cDB.Select("SELECT aa1.`idAssets` as `idClips`, aa1.`nValue` as `nRAOFramesQty`, aa2.`idAssets` as `idPrograms` from mam.`tAssetAttributes` aa1 left join mam.`tAssetAttributes` aa2 on aa1.id=aa2.`nValue` where aa2.`sKey`='clip' and aa2.`idRegisteredTables`=" + cRT.nID + " and aa1.`sKey`='RAOFramesQty' and aa1.id in (select `nValue` from mam.`tAssetAttributes` where `sKey`='clip' and `idRegisteredTables`=" + cRT.nID + " and `idAssets` in (" + sPrograms + ")) order by aa2.`idAssets`, aa1.id;");
+			//SELECT aa1."idAssets" as "idClips", aa1."nValue" as "nRAOFramesQty", aa2."idAssets" as "idPrograms" from mam."tAssetAttributes" aa1 left join mam."tAssetAttributes" aa2 on aa1.id=aa2."nValue" where aa2."sKey"='clip' and aa2."idRegisteredTables"=21 and aa1."sKey"='RAOFramesQty' and aa1.id in (select "nValue" from mam."tAssetAttributes" where "sKey"='clip' and "idRegisteredTables"=21) order by aa2."idAssets", aa1.id 
+			if (null == ahRows)
+				throw new Exception("ProgramRAOInfoGet: select result is null (1)");
+			Hashtable ahRow;
+			long nClipID;
+			string sClips = "";
+			List<Program.ClipsFragment> aCF = new List<Program.ClipsFragment>();
+			long nCurrentProgramID = 0, nProgramID;
+			while (0 < ahRows.Count)
+			{
+				ahRow = ahRows.Dequeue();
+				nClipID= ahRow["idClips"].ToLong();
+				if (!aClipsIDs.Contains(nClipID))
+				{
+					aClipsIDs.Add(nClipID);
+					if (sClips.Length > 0)
+						sClips += ",";
+					sClips += "" + nClipID;
+				}
 
+				nProgramID = ahRow["idPrograms"].ToLong();
+				if (nCurrentProgramID != nProgramID)
+				{
+					if (0 < nCurrentProgramID)
+						ahPrograms[nCurrentProgramID].aClipsFragments = aCF.ToArray();
+					aCF.Clear();
+					nCurrentProgramID = nProgramID;
+				}
+				aCF.Add(new Program.ClipsFragment() { cClip = new Clip(nClipID, null), nFramesQty = (int)ahRow["nRAOFramesQty"] });
+			}
+			if (0 < nCurrentProgramID)
+				ahPrograms[nCurrentProgramID].aClipsFragments = aCF.ToArray();
+
+            if (!sClips.IsNullOrEmpty())
+            {
+                ahRows = _cDB.Select("select * from mam.`vAssetsResolved` where id in (" + sClips + ");");
+                if (null == ahRows)
+                    throw new Exception("ProgramRAOInfoGet: select result is null (2)");
+                ahClips = ahRows.ToDictionary(o => o["id"].ToLong(), o => new Clip(o));
+
+                foreach (Program cP in aPrograms)
+                {
+                    if (cP.aClipsFragments == null)
+                        continue;
+                    foreach (Program.ClipsFragment CF in cP.aClipsFragments)
+                    {
+                        CF.cClip = ahClips[CF.cClip.nID];
+                    }
+                }
+            }
+		}
 		protected void ProgramClipsSet(Program cProgram)
 		{
 			_cDB.TransactionBegin();
@@ -1120,23 +1406,23 @@ namespace helpers.replica
 					{
 						ahRow=ahRows.Dequeue();
 						nID = (int)ahRow["nValue"];
-						_cDB.Perform("DELETE FROM mam.`tAssetAttributes` WHERE id=" + nID + ";");  // TODO сделать в БД прямую функцию....
+						_cDB.Perform("DELETE FROM mam.`tAssetAttributes` WHERE id=" + nID + ";");  // TODO СЃРґРµР»Р°С‚СЊ РІ Р‘Р” РїСЂСЏРјСѓСЋ С„СѓРЅРєС†РёСЋ....
 						//DELETE FROM mam.`tAssetAttributes` WHERE id=12;
 					}
 
 				_cDB.Perform("SELECT * FROM mam.`fAssetAttributeRemove`(" + cProgram.nID + ", 'clip');");
 				//SELECT * FROM mam."fAssetAttributeRemove"(6397, 'clip');
-				if (null != cProgram.aRAOInfo)
-					foreach (Program.RAOInfo cRAOI in cProgram.aRAOInfo)
+				if (null != cProgram.aClipsFragments)
+					foreach (Program.ClipsFragment cRAOI in cProgram.aClipsFragments)
 					{
 						nID = _cDB.GetValueLong("INSERT INTO mam.`tAssetAttributes` (`idAssets`,`idRegisteredTables`,`sKey`,`nValue`) VALUES (" + cRAOI.cClip.nID + ", null,'RAOFramesQty'," + cRAOI.nFramesQty + ") RETURNING id;");
 						//                    INSERT INTO mam."tAssetAttributes" ("idAssets","idRegisteredTables","sKey","nValue") VALUES (8429, null,'RAOFramesQty',7950) RETURNING id;
 						//                    SELECT * FROM mam."fAssetAttributeAdd"(8429, null, 'RAOFramesQty',7950);   
-						//  fAssetAttributeAdd   не работает т.к. не вставляет одинаковые строки! Можно вернуть, если её починить
+						//  fAssetAttributeAdd   РЅРµ СЂР°Р±РѕС‚Р°РµС‚ С‚.Рє. РЅРµ РІСЃС‚Р°РІР»СЏРµС‚ РѕРґРёРЅР°РєРѕРІС‹Рµ СЃС‚СЂРѕРєРё! РњРѕР¶РЅРѕ РІРµСЂРЅСѓС‚СЊ, РµСЃР»Рё РµС‘ РїРѕС‡РёРЅРёС‚СЊ
 						if (nID < 1)
 							throw new Exception("INSERT INTO mam.`tAssetAttributes` was unsuccessful");
 
-						_cDB.Perform("SELECT * FROM mam.`fAssetAttributeAdd`(" + cProgram.nID + ", " + cRT_AA.nID + ", 'clip', " + nID + ");"); //TODO сделать в БД прямую функцию....
+						_cDB.Perform("SELECT * FROM mam.`fAssetAttributeAdd`(" + cProgram.nID + ", " + cRT_AA.nID + ", 'clip', " + nID + ");"); //TODO СЃРґРµР»Р°С‚СЊ РІ Р‘Р” РїСЂСЏРјСѓСЋ С„СѓРЅРєС†РёСЋ....
 						// SELECT * FROM mam."fAssetAttributeAdd"(891, 20, 'clip', 54);
 					}
 				_cDB.TransactionCommit();
@@ -1191,57 +1477,11 @@ namespace helpers.replica
 		{
 			return ClassesGet("`id`=" + nID).Dequeue();
 		}
-		public Dictionary<long, Class> ClassesTreeGet()
-		{
-			Dictionary<long, Class> aRetVal = new Dictionary<long, Class>();
-			Dictionary<long, Class> aRawClassesList = new Dictionary<long, Class>();
-			Class cClass = null;
-			try
-			{
-				Queue<Class> aqClasses = ClassesGet(null);
-				while (0 < aqClasses.Count)
-				{
-					cClass = aqClasses.Dequeue();
-					if (!aRawClassesList.ContainsKey(cClass.nID))
-						aRawClassesList.Add(cClass.nID, cClass);
-					else
-						cClass = aRawClassesList[cClass.nID];
-					if (null != cClass.cTestator)
-					{
-						if (aRawClassesList.ContainsKey(cClass.cTestator.nID))
-						{
-							if (!cClass.cTestator.bResolved)
-								cClass.cTestator = aRawClassesList[cClass.cTestator.nID];
-							else
-								aRawClassesList[cClass.cTestator.nID] = cClass.cTestator;
-							cClass.cTestator.bResolved = true;
-							if (null == cClass.cTestator.aHeritors)
-								cClass.cTestator.aHeritors = new Dictionary<long, Class>();
-							cClass.cTestator.aHeritors.Add(cClass.nID, cClass);
-							continue;
-						}
-					}
-					else if (!aRetVal.ContainsKey(cClass.nID))
-					{
-						cClass.bResolved = true;
-						aRetVal.Add(cClass.nID, cClass);
-					}
-					else
-						continue;
-					aqClasses.Enqueue(cClass);
-				}
-			}
-			catch (Exception ex)
-			{
-				(new Logger()).WriteError(ex);
-			}
-			return aRetVal;
-		}
 		public Queue<Class> ClassesGet()
 		{
 			return ClassesGet(null);
 		}
-		private Queue<Class> ClassesGet(string sWhere)
+		public Queue<Class> ClassesGet(string sWhere)
 		{
 			//_cDB.RoleSet("replica_programs");
 			Queue<Class> aqRetVal = new Queue<Class>();
@@ -1253,14 +1493,12 @@ namespace helpers.replica
 			while (null != aqDBValues && 0 < aqDBValues.Count)
 			{
 				ahRow = aqDBValues.Dequeue();
-				cClass = new Class();
-				cClass.nID = ahRow["id"].ToID();
-				cClass.sName = ahRow["sName"].ToString();
-				if (null != ahRow["idParent"])
-				{
-					cClass.cTestator = new Class();
-					cClass.cTestator.nID = ahRow["idParent"].ToID();
-				}
+				cClass = new Class(ahRow);
+				//if (null != ahRow["idParent"])
+				//{
+				//	cClass.cTestator = new Class();
+				//	cClass.cTestator.nID = ahRow["idParent"].ToID();
+				//}
 				aqRetVal.Enqueue(cClass);
 			}
 			return aqRetVal;
@@ -1270,19 +1508,31 @@ namespace helpers.replica
 		{
 			//_cDB.RoleSet("replica_assets");
 			if (0 > nAssetID)
-				return null;
-			string sSQL = "SELECT `idPersons` as id, `sPersonName` as `sName` FROM mam.`vAssetsPersons` WHERE id=" + nAssetID;
-			Queue<Hashtable> aqDBValues = _cDB.Select(sSQL);
+				return null;  //SELECT  pe.* FROM mam."vPersons" pe left join mam."vAssetsPersons" ap on pe.id=ap."idPersons" WHERE ap.id=19514
+			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT  pe.* FROM mam.`vPersons` pe left join mam.`vAssetsPersons` ap on pe.id=ap.`idPersons` WHERE ap.id=" + nAssetID);
 			Person[] astRetVal = new Person[aqDBValues.Count];
 			Hashtable ahRow = null;
 			int nIndx = 0;
 			while (null != aqDBValues && 0 < aqDBValues.Count)
 			{
 				ahRow = aqDBValues.Dequeue();
-				astRetVal[nIndx++] = new Person(ahRow["id"].ToID(), ahRow["sName"].ToString());
+				astRetVal[nIndx++] = new Person(ahRow);
 			}
 			return astRetVal;
 		}
+
+		public IdNamePair SexGet(long nAssetID)
+		{
+			//_cDB.RoleSet("replica_assets");
+			if (0 > nAssetID)
+				return null;
+			string sSQL = "select cv.id, cv.`sValue` as `sName` from mam.`tAssetAttributes` aa left join mam.`tCategoryValues` cv on aa.`nValue`=cv.id where `sKey`='sex' and `idAssets`=" + nAssetID;
+			Queue<Hashtable> ahSex = _cDB.Select(sSQL);
+			if (null == ahSex || ahSex.Count < 1)
+				return null;
+			return new IdNamePair(ahSex.Dequeue());
+		}
+
 		public IdNamePair[] StylesLoad(long nAssetID)
 		{
 			//_cDB.RoleSet("replica_assets");
@@ -1296,23 +1546,44 @@ namespace helpers.replica
 			if (0 > nAssetID)
 				return null;
 			CustomValue[] aRetVal = null;
-			Hashtable ahRow = null;
-			Queue<Hashtable> aqDBValues = null;
-			string sSQL = "SELECT `sCustomValueName` as `sName`, `sCustomValue` as `sValue` FROM mam.`vAssetsCustomValues` WHERE id=" + nAssetID + " ORDER BY `sCustomValueName` DESC";
+			Queue<Hashtable> aqDBValues = _cDB.Select("SELECT `sCustomValueName` as `sName`, `sCustomValue` as `sValue` FROM mam.`vAssetsCustomValues` WHERE id=" + nAssetID + " ORDER BY `sCustomValueName` DESC");
 			//_cDB.RoleSet("replica_programs");
-			if (null != (aqDBValues = _cDB.Select(sSQL)))
-			{
-				aRetVal = new CustomValue[aqDBValues.Count];
-				int nIndx = 0;
-				while (0 < aqDBValues.Count)
-				{
-					ahRow = aqDBValues.Dequeue();
-					aRetVal[nIndx++] = new CustomValue(ahRow["sName"].ToString(), ahRow["sValue"].ToString());
-				}
-			}
-			if (1 > aRetVal.Length)
+			if (null != aqDBValues && aqDBValues.Count > 0)
+				aRetVal = aqDBValues.Select(o => new CustomValue(o)).ToArray();
+			if (null== aRetVal || 1 > aRetVal.Length)
 				aRetVal = null;
 			return aRetVal;
+		}
+		public void CustomsLoad(Asset[] aAssets)  // РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРѕ РґР»СЏ РјР°СЃСЃРѕРІРѕР№ Р·Р°Р»РёРІРєРё РєР°СЃС‚РѕРјСЃРѕРІ РІ Р°СЃСЃРµС‚С‹
+		{
+			string sAssets = "";
+			foreach (Asset cA in aAssets)
+			{
+				if (sAssets.Length > 0)
+					sAssets += ",";
+				sAssets += "" + cA.nID;
+			}
+			Hashtable ahRow;
+			long nAssetID, nCurrentAssetID=0;
+			List<CustomValue> aCV=new List<CustomValue>();
+			Queue<Hashtable> ahRows = _cDB.Select("SELECT id, `sCustomValueName` as `sName`, `sCustomValue` as `sValue` FROM mam.`vAssetsCustomValues` WHERE id in (" + sAssets + ") ORDER BY id,  `sCustomValueName` DESC");
+			// SELECT id, "sCustomValueName" as "sName", "sCustomValue" as "sValue" FROM mam."vAssetsCustomValues" WHERE id in (1,2) ORDER BY id,  "sCustomValueName" DESC
+			Dictionary<long, Asset> ahAssets = aAssets.ToDictionary(o => o.nID, o => o);
+			while (0 < ahRows.Count)
+			{
+				ahRow = ahRows.Dequeue();
+				nAssetID = ahRow["id"].ToLong();
+				if (nCurrentAssetID != nAssetID)
+				{
+					if (0 < nCurrentAssetID)
+						ahAssets[nCurrentAssetID].aCustomValues = aCV.ToArray();
+					aCV.Clear();
+					nCurrentAssetID = nAssetID;
+				}
+				aCV.Add(new CustomValue(ahRow));
+			}
+			if (0 < nCurrentAssetID)
+				ahAssets[nCurrentAssetID].aCustomValues = aCV.ToArray();
 		}
 		public Cues CuesLoad(long nAssetID)
 		{
@@ -1329,7 +1600,6 @@ namespace helpers.replica
 			);
 			return stRetVal;
 		}
-
 		public IdNamePair PersonTypeGet(string sPersonType)
 		{
 			//_cDB.RoleSet("replica_assets");
@@ -1342,7 +1612,7 @@ namespace helpers.replica
 		{
 			//_cDB.RoleSet("replica_assets_full");
 			if (1 > cPerson.nID)
-				cPerson.nID = _cDB.GetValueInt("SELECT mam.`fPersonAdd`(" + cPerson.cType.nID.ToString() + ", '" + cPerson.sName.ForDB() + "')");
+				cPerson.nID = _cDB.GetValueInt("SELECT `nValue` FROM mam.`fPersonAdd`(" + cPerson.cType.nID.ToString() + ", '" + cPerson.sName.ForDB() + "')");
 			else
 				_cDB.Perform("UPDATE mam.`tPersons` SET `sName` = '" + cPerson.sName.ForDB() + "' WHERE " + cPerson.nID + "=id;");
 		}
@@ -1357,7 +1627,21 @@ namespace helpers.replica
 		{
 			return _cDB.Select("SELECT * FROM mam.`vPersons` WHERE id=" + nID).Select(o => new Person(o)).FirstOrDefault();
 		}
-		public Queue<Person> PersonsGet(IdNamePair cPersonTypeFilter)
+        public Dictionary<long, List<Person>> AllAssetPersonsGet()
+        {
+            Queue<Hashtable> aqAssetsPersons = _cDB.Select("SELECT vap.id as `idAssets`, tp.id, tp.`sName`, tpt.id as `idPersonTypes`, tpt.`sName` as `sPersonTypeName` FROM mam.`vAssetsPersons` vap left join mam.`tPersons` tp on vap.`idPersons`=tp.id left join mam.`tPersonTypes` tpt on tp.`idPersonTypes`=tpt.id");
+            Dictionary<long, List<Person>> ahClipsId_Persons = new Dictionary<long, List<Person>>();
+            foreach (Hashtable ahRow in aqAssetsPersons)
+            {
+                long nAssetID = ahRow["idAssets"].ToID();
+                Person cP = new Person(ahRow);
+                if (!ahClipsId_Persons.ContainsKey(nAssetID))
+                    ahClipsId_Persons.Add(nAssetID, new List<Person>());
+                ahClipsId_Persons[nAssetID].Add(cP);
+            }
+            return ahClipsId_Persons;
+        }
+        public Queue<Person> PersonsGet(IdNamePair cPersonTypeFilter)
 		{
 			string sWhere = null;
 			if (null != cPersonTypeFilter)
@@ -1395,10 +1679,23 @@ namespace helpers.replica
 			string sSQL = "SELECT id, `sName` FROM mam.`vRotations` ORDER BY `sName`";
 			return INPsListGet(sSQL);
 		}
+		public IdNamePair RotationGet(string sName)
+		{
+			long nID = _cDB.GetValueLong("SELECT id FROM mam.`vRotations` WHERE `sName`='" + sName + "'");
+			if (nID == long.MaxValue)
+				return null;
+			return new IdNamePair(nID, sName);
+		}
 		public IdNamePair[] PalettesGet()
 		{
 			//_cDB.RoleSet("replica_assets");
 			string sSQL = "SELECT id, `sName` FROM mam.`vPalettes` ORDER BY `sName`";
+			return INPsListGet(sSQL);
+		}
+		public IdNamePair[] SexGet()
+		{
+			//_cDB.RoleSet("replica_assets");
+			string sSQL = "SELECT id, `sName` FROM mam.`vSex` ORDER BY `id`";
 			return INPsListGet(sSQL);
 		}
 		public IdNamePair[] SoundsGet()
@@ -1416,44 +1713,132 @@ namespace helpers.replica
 			else
 				return null;
 		}
-		#endregion
+        //public Dictionary<long, Class> ClassesTreeGet()
+        //{
+        //	Dictionary<long, Class> aRetVal = new Dictionary<long, Class>();
+        //	Dictionary<long, Class> aRawClassesList = new Dictionary<long, Class>();
+        //	Class cClass = null;
+        //	try
+        //	{
+        //		Queue<Class> aqClasses = ClassesGet(null);
+        //		while (0 < aqClasses.Count)
+        //		{
+        //			cClass = aqClasses.Dequeue();
+        //			if (!aRawClassesList.ContainsKey(cClass.nID))
+        //				aRawClassesList.Add(cClass.nID, cClass);
+        //			else
+        //				cClass = aRawClassesList[cClass.nID];
+        //			if (null != cClass.cTestator)
+        //			{
+        //				if (aRawClassesList.ContainsKey(cClass.cTestator.nID))
+        //				{
+        //					if (!cClass.cTestator.bResolved)
+        //						cClass.cTestator = aRawClassesList[cClass.cTestator.nID];
+        //					else
+        //						aRawClassesList[cClass.cTestator.nID] = cClass.cTestator;
+        //					cClass.cTestator.bResolved = true;
+        //					if (null == cClass.cTestator.aHeritors)
+        //						cClass.cTestator.aHeritors = new Dictionary<long, Class>();
+        //					cClass.cTestator.aHeritors.Add(cClass.nID, cClass);
+        //					continue;
+        //				}
+        //			}
+        //			else if (!aRetVal.ContainsKey(cClass.nID))
+        //			{
+        //				cClass.bResolved = true;
+        //				aRetVal.Add(cClass.nID, cClass);
+        //			}
+        //			else
+        //				continue;
+        //			aqClasses.Enqueue(cClass);
+        //		}
+        //	}
+        //	catch (Exception ex)
+        //	{
+        //		(new Logger()).WriteError(ex);
+        //	}
+        //	return aRetVal;
+        //}
+        #endregion
 
-		#region cues
-		protected TemplateBind[] TemplateBindsGet(string sWhere)
-		{//	  				    SELECT cc.*, tt."sName", tt."sFile" FROM cues."tTemplates" tt JOIN cues."tClassAndTemplateBinds" cc on tt.id=cc."idTemplates" WHERE "sName" LIKE '%Анонс-%' order by "idTemplates";
+        #region cues
+        protected TemplateBind[] TemplateBindsGet(string sWhere)
+		{//	  				    SELECT cc.*, tt."sName", tt."sFile" FROM cues."tTemplates" tt JOIN cues."tClassAndTemplateBinds" cc on tt.id=cc."idTemplates" WHERE "sName" LIKE '%РђРЅРѕРЅСЃ-%' order by "idTemplates";
 			return _cDB.Select("SELECT cc.*, tt.`sName`, tt.`sFile` FROM cues.`tTemplates` tt JOIN cues.`tClassAndTemplateBinds` cc on tt.id=cc.`idTemplates` " + sWhere + " order by `idTemplates`;").Select(o => new TemplateBind(o)).ToArray();
 		}
-        public TemplateBind[] TemplateBindsGet(PlaylistItem cPLI)
+        public TemplateBind[] TemplateBindsGetRaw(Class[] aClasses)
         {
             try
             {
-                Dictionary<string, object> ahParams = new Dictionary<string, object>();
-                ahParams.Add("idPlaylistItems", (int)cPLI.nID);
-                ahParams.Add("idClasses", cPLI.cClass.nID);
-								  //SELECT * FROM (SELECT *, cues."fIsTemplateActual"(1707427, id) as "bActual" FROM cues."vClassAndTemplateBinds" WHERE 11="idClasses") s WHERE "bActual";
-				return _cDB.Select("SELECT * FROM (SELECT *, cues.`fIsTemplateActual`(:idPlaylistItems, id) as `bActual` FROM cues.`vClassAndTemplateBinds` WHERE :idClasses = `idClasses`) s WHERE `bActual`", ahParams).Select(o => new TemplateBind(o) {
-					cTemplate = new cues.Template(o["idTemplates"].ToID(), o["sTemplateName"].ToString(), o["sTemplateFile"].ToString()),
+                if (aClasses.IsNullOrEmpty())
+                    return null;
+                TemplateBind[] aRetVal;
+                string sClasses = aClasses.Select(o => o.nID).ToEnumerationString(true);
+                // select * from cues."vClassAndTemplateBinds" WHERE "idClasses" in (21, 3, 2)
+                aRetVal = _cDB.Select("SELECT * FROM cues.`vClassAndTemplateBinds` WHERE `idClasses` IN (" + sClasses + ")").Select(o => new TemplateBind(o)
+                {
+                    cTemplate = new cues.Template(o["idTemplates"].ToID(), o["sTemplateName"].ToString(), o["sTemplateFile"].ToString()),
+                    cRegisteredTable = (null == o["idRegisteredTables"] ? null : new hk.RegisteredTable(o["idRegisteredTables"], o["sRegisteredTableSchema"], o["sRegisteredTableName"], o["sRegisteredTableUpdated"], null))
+                }).ToArray();
+
+                return aRetVal;
+            }
+            catch (Exception ex)
+            {
+                (new Logger()).WriteError(ex);
+            }
+            return null;
+        }
+        public TemplateBind[] TemplateBindsActualGet(PlaylistItem cPLI)
+        {
+            try
+            {
+                if (cPLI.aClasses.IsNullOrEmpty())
+                    return null;
+                TemplateBind[] aRetVal;
+                //SELECT * FROM (SELECT *, cues."fIsTemplateActual"(756984, id) as "bActual" FROM cues."vClassAndTemplateBinds"          WHERE "idClasses" in (21, 3, 2)) s WHERE "bActual";
+                //SELECT * from cues."fActualBindsGet"(756984)   // РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅР°СЏ С‚РѕР¶Рµ СЃР°РјРѕРµ - РІ 10 Рё Р±РѕР»РµРµ СЂР°Р· Р±С‹СЃС‚СЂРµРµ
+                aRetVal = _cDB.Select("SELECT * from cues.`fActualBindsGet`(" + cPLI.nID + ")").Select(o => new TemplateBind(o)
+                {
+                    cTemplate = new cues.Template(o["idTemplates"].ToID(), o["sTemplateName"].ToString(), o["sTemplateFile"].ToString()),
 					cRegisteredTable = (null == o["idRegisteredTables"] ? null : new hk.RegisteredTable(o["idRegisteredTables"], o["sRegisteredTableSchema"], o["sRegisteredTableName"], o["sRegisteredTableUpdated"], null))
 				}).ToArray();
+
+                return TemplateBindsRemoveUsed(cPLI, aRetVal);
             }
             catch (Exception ex)
             {
                 (new Logger()).WriteError(ex);
             }
             return null;
+        }
+        private TemplateBind[] TemplateBindsRemoveUsed(PlaylistItem cPLI, TemplateBind[] aTBs)
+        {
+            List<long> aUsedTemplateBinds;
+            List<TemplateBind> aTBindsDoRemove;
+            List<TemplateBind> aRetVal = aTBs.ToList();
+            aUsedTemplateBinds = aRetVal.Where(o => o.cClass.nID == cPLI.aClasses[0].nID).Select(o => o.cTemplate.nID).Distinct().ToList();
+            for (int nI = 1; nI < cPLI.aClasses.Length; nI++)
+            {
+                aTBindsDoRemove = aRetVal.Where(o => o.cClass.nID == cPLI.aClasses[nI].nID && aUsedTemplateBinds.Contains(o.cTemplate.nID)).ToList();
+                foreach (TemplateBind cTB in aTBindsDoRemove)
+                    aRetVal.Remove(cTB);
+                aUsedTemplateBinds.AddRange(aRetVal.Where(o => o.cClass.nID == cPLI.aClasses[nI].nID).Select(o => o.cTemplate.nID).Distinct());
+            }
+            return aRetVal.ToArray();
         }
         public TemplatesSchedule[] TemplatesScheduleGet()
-        {
-            try
-            {
-                return _cDB.Select("SELECT * FROM cues.`tTemplatesSchedule`").Select(o => new TemplatesSchedule(o)).ToArray();
-            }
-            catch (Exception ex)
-            {
-                (new Logger()).WriteError(ex);
-            }
-            return null;
-        }
+		{
+			try
+			{
+				return _cDB.Select("SELECT * FROM cues.`tTemplatesSchedule` WHERE `dtStop` IS NULL OR `dtStop` > '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'").Select(o => new TemplatesSchedule(o)).ToArray();
+			}
+			catch (Exception ex)
+			{
+				(new Logger()).WriteError(ex);
+			}
+			return null;
+		}
 		public TemplatesSchedule TemplatesScheduleGet(long nID)
 		{
 			try
@@ -1490,15 +1875,20 @@ namespace helpers.replica
 		public void TemplatesScheduleSave(TemplatesSchedule cTemplatesSchedule)
 		{
 			Dictionary<string, object> ahParams = new Dictionary<string, object>();
-			ahParams.Add("idClassAndTemplateBinds", cTemplatesSchedule.cTemplateBind.nID);
-			ahParams["dtStart"] = cTemplatesSchedule.dtStart;
-			//EMERGENCY:l может в таком виде и не сработать...  Да, TimeSpan передаётся в СЛ как очень странный бесполезный класс...
+			ahParams.Add("idClassAndTemplateBinds", (int)cTemplatesSchedule.cTemplateBind.nID);
+			ahParams.Add("dtStart", cTemplatesSchedule.dtStart);
+			//EMERGENCY:l РјРѕР¶РµС‚ РІ С‚Р°РєРѕРј РІРёРґРµ Рё РЅРµ СЃСЂР°Р±РѕС‚Р°С‚СЊ...  Р”Р°, TimeSpan РїРµСЂРµРґР°С‘С‚СЃСЏ РІ РЎР› РєР°Рє РѕС‡РµРЅСЊ СЃС‚СЂР°РЅРЅС‹Р№ Р±РµСЃРїРѕР»РµР·РЅС‹Р№ РєР»Р°СЃСЃ...
 			ahParams.Add("tsInterval", new TimeSpan(0, 0, 0, 0, cTemplatesSchedule.nIntervalInMilliseconds));
-			ahParams.Add("dtStop", (cTemplatesSchedule.dtStop.IsNullOrEmpty() ? null : cTemplatesSchedule.dtStop.ToString("yyyy-MM-dd HH:mm:ss")));
+			if (cTemplatesSchedule.dtStop.IsNullOrEmpty())
+			{
+				ahParams.Add("dtStop", null);
+			}
+			else
+				ahParams.Add("dtStop", cTemplatesSchedule.dtStop);  //.ToString("yyyy-MM-dd HH:mm:ss")
 			if (0 < cTemplatesSchedule.nID)
 			{
-				ahParams.Add("nID", cTemplatesSchedule.nID);
-				ahParams["dtLast"] = cTemplatesSchedule.dtLast;
+				ahParams.Add("nID", (int)cTemplatesSchedule.nID);
+				ahParams.Add("dtLast", cTemplatesSchedule.dtLast);
 				_cDB.Perform("UPDATE cues.`tTemplatesSchedule` SET `idClassAndTemplateBinds`=:idClassAndTemplateBinds, `dtLast`=:dtLast, `dtStart`=:dtStart, `tsInterval`=:tsInterval, `dtStop`=:dtStop WHERE :nID = id;", ahParams);
 			}
 			else
@@ -1511,8 +1901,8 @@ namespace helpers.replica
 					throw new Exception("RegisteredTable is null: [cues.tTemplatesSchedule]");
 
 				ahParams.Clear();
-				ahParams.Add("nRegisteredTables", cCuesTemplateSchedule.nID);
-				ahParams.Add("nID", cTemplatesSchedule.nID);
+				ahParams.Add("nRegisteredTables", (int)cCuesTemplateSchedule.nID);
+				ahParams.Add("nID", (int)cTemplatesSchedule.nID);
 				ahParams.Add("sKey", "");
 				ahParams.Add("sValue", "");
 				foreach (DictionaryElement cDE in cTemplatesSchedule.aDictionary)
@@ -1526,8 +1916,8 @@ namespace helpers.replica
 		public bool DictionaryElementSave(DictionaryElement cDE)
 		{
 			Dictionary<string, object> ahParams = new Dictionary<string, object>();
-			ahParams.Add("nRegisteredTables", cDE.nRegisteredTablesID);
-			ahParams.Add("nTargetID", cDE.nTargetID);
+			ahParams.Add("nRegisteredTables", (int)cDE.nRegisteredTablesID);
+			ahParams.Add("nTargetID", (int)cDE.nTargetID);
 			ahParams.Add("sKey", cDE.sKey);
 			ahParams.Add("sValue", cDE.sValue);
 			if (false == _cDB.GetValueBool("SELECT `bValue` FROM cues.`fDictionaryValueRemove`(:nRegisteredTables, :nTargetID, :sKey);", ahParams))
@@ -1543,8 +1933,8 @@ namespace helpers.replica
 				if (null == nCuesTemplateSchedule)
 					throw new Exception("RegisteredTable is null: [cues.tTemplatesSchedule]");
                 Dictionary<string, object> ahParams = new Dictionary<string, object>();
-				ahParams.Add("nTargetID", cTemplatesSchedule.nID);
-				ahParams.Add("nRegisteredTables", nCuesTemplateSchedule.nID);
+				ahParams.Add("nTargetID", (int)cTemplatesSchedule.nID);
+				ahParams.Add("nRegisteredTables", (int)nCuesTemplateSchedule.nID);
 				if (false == _cDB.GetValueBool("SELECT `bValue` FROM cues.`fDictionaryValueRemove`(:nRegisteredTables, :nTargetID);", ahParams))
 					return false;
 
@@ -1595,6 +1985,7 @@ namespace helpers.replica
 				throw;
 			}
 		}
+
 		#endregion
 
 		#region ia
@@ -1609,7 +2000,7 @@ namespace helpers.replica
 				sSQL += cMsg.nCount + ",";
 				sSQL += cMsg.nSourceNumber + ",";
 				sSQL += cMsg.nTargetNumber + ",";
-				sSQL += "'" + cMsg.sText + "',";
+				sSQL += "'" + cMsg.sText.ForDB() + "',";
 				if (null != cMsg.aImageBytes)
 				{
 					sSQL += ":ImageBinaryData)";
@@ -1627,7 +2018,10 @@ namespace helpers.replica
 				throw new Exception(sSQL, ex);
 			}
 		}
-
+        protected int MessagesCountGet(string sWhere)
+        {
+            return _cDB.GetValueInt("SELECT COUNT(*) AS `nCount` FROM ia.`vMessagesResolved` WHERE " + sWhere);
+        }
 		protected Queue<Message> MessagesGet(string sWhere, string sOrderBy, ushort nLimit)
 		{
 			Queue<Message> aqRetVal = new Queue<Message>();
@@ -1719,11 +2113,11 @@ namespace helpers.replica
 		#endregion
 
 		#region adm
-		public bool AdmSCROnAirGet()//удалить, как явление. сам механизм заменить на Shift'ы (scr."tShifts")
+		public bool AdmSCROnAirGet()//СѓРґР°Р»РёС‚СЊ, РєР°Рє СЏРІР»РµРЅРёРµ. СЃР°Рј РјРµС…Р°РЅРёР·Рј Р·Р°РјРµРЅРёС‚СЊ РЅР° Shift'С‹ (scr."tShifts")
 		{
 			return _cDB.GetValueBool("SELECT `sValue` FROM adm.`vPreferences` WHERE 'runtime'=`sClassName` AND 'scr_onair'=`sName` AND `bClassActive` AND `bActive`");
 		}
-		public void AdmSCROnAirSet(bool bOnAir)//удалить, как явление. сам механизм заменить на Shift'ы (scr."tShifts")
+		public void AdmSCROnAirSet(bool bOnAir)//СѓРґР°Р»РёС‚СЊ, РєР°Рє СЏРІР»РµРЅРёРµ. СЃР°Рј РјРµС…Р°РЅРёР·Рј Р·Р°РјРµРЅРёС‚СЊ РЅР° Shift'С‹ (scr."tShifts")
 		{
 			_cDB.Perform("UPDATE adm.`tPreferences` SET `sValue`=" + bOnAir.ToString() + " WHERE id in (SELECT id FROM adm.`vPreferences` WHERE 'runtime'=`sClassName` AND 'scr_onair'=`sName` AND `bClassActive` AND `bActive`)");
 		}
@@ -1748,6 +2142,10 @@ namespace helpers.replica
             ahParams.Add("sKey", sKey);
             return _cDB.GetValue("SELECT `sValue` FROM adm.`vPreferences` WHERE 'social'=`sClassName` AND :sKey=`sName` AND `bClassActive` AND `bActive`", ahParams);
         }
+		public void CommandQueueAdd(string sCommand)
+		{
+			_cDB.Select("select adm.`fCommandsQueueAdd`('"+ sCommand + "')");
+		}
         #endregion
 
 		#region preferences

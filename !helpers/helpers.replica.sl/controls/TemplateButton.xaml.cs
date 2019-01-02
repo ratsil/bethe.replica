@@ -426,10 +426,10 @@ namespace controls.replica.sl
                 eStatus = Status.Started;
                 return;
             }
-            
-            eFirstAction = _eFirstAction;
-            eStatus = Status.Idle;
-        }
+
+			eFirstAction = _eFirstAction;
+			eStatus = Status.Idle;
+		}
         private void _ui_btnPlay_Click(object sender, RoutedEventArgs e)
         {
 			if ("Player Playlist" == sFile)
@@ -488,7 +488,12 @@ namespace controls.replica.sl
 			bPressedByUser = false;
 			btnTemplate_Click();
 		}
-        public void SkippingCancel()
+		public void ClickByUser()
+		{
+			bPressedByUser = true;
+			btnTemplate_Click();
+		}
+		public void SkippingCancel()
         {
             ((TextBlock)_ui_btnSkip.Content).Text = "SKIP";
             _ui_btnSkip.Background = Coloring.Notifications.cTextBoxActive;

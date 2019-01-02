@@ -153,8 +153,17 @@
     <Compile Include="lib\childs\AssetProperties.xaml.cs">
       <DependentUpon>AssetProperties.xaml</DependentUpon>
     </Compile>
+    <Compile Include="lib\childs\AssetsProperties.xaml.cs">
+      <DependentUpon>AssetsProperties.xaml</DependentUpon>
+    </Compile>
     <Compile Include="lib\childs\ClipsChooser.xaml.cs">
       <DependentUpon>ClipsChooser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="lib\childs\controls\Classes.xaml.cs">
+      <DependentUpon>Classes.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="lib\childs\FilesAgeSet.xaml.cs">
+      <DependentUpon>FilesAgeSet.xaml</DependentUpon>
     </Compile>
     <Compile Include="lib\childs\TimeCodeEnter.xaml.cs">
       <DependentUpon>TimeCodeEnter.xaml</DependentUpon>
@@ -270,9 +279,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="lib\childs\AssetsProperties.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="lib\childs\ClipsChooser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="lib\childs\controls\Classes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="lib\childs\FilesAgeSet.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="lib\childs\TimeCodeEnter.xaml">
       <SubType>Designer</SubType>
@@ -364,12 +385,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\stuff\replica.pfx">
+      <Link>replica.pfx</Link>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\AppManifest.xml">
       <SubType>Designer</SubType>
     </None>
     <None Include="Properties\OutOfBrowserSettings.xml" />
-    <None Include="replica.pfx" />
     <None Include="Service References\services.preferences\Preferences.wsdl" />
     <None Include="Service References\services.preferences\replica.sl.services.preferences.ReplicaGetResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -429,11 +452,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\!helpers\helpers.replica.sl\helpers.replica.sl.csproj">
-      <Project>{49A13166-0461-4354-B910-8EF251320FA1}</Project>
+      <Project>{49a13166-0461-4354-b910-8ef251320fa1}</Project>
       <Name>helpers.replica.sl</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common.globalization.sl\helpers.common.globalization.sl.csproj">
-      <Project>{513A5E9C-1870-4984-A46B-982A091033B3}</Project>
+      <Project>{513a5e9c-1870-4984-a46b-982a091033b3}</Project>
       <Name>helpers.common.globalization.sl</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common.sl\helpers.common.sl.csproj">

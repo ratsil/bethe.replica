@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <preferences>
 	<replica>
-		<player fps="25" threshold="00:00:00.5" cache="d:/cache/pl/">
-			<playlist length="10" safe="00:03:00" />
+		<player fps="25" cache="/path" opacity="true" ignor_files="megamix.mov, megamix.mxf">     <!-- ignor_list="megamix.mov,plug.mov"  -->
+			<playlist start_hard_threshold="00:00:10.0" dur_queue_min="00:30:00" dur_enqueue="00:10:00" safe="00:03:00" durmin="00:00:01" durclipmin="00:02:30.0" plug_id="0" plug_file="/path" />
 		</player>
 	</replica>
 	<ingenie>

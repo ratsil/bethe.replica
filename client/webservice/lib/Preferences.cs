@@ -34,6 +34,7 @@ namespace webservice
 			ahStrings["onair"] = "onair";
 			ahStrings["played"] = "played";
 			ahStrings["skipped"] = "skipped";
+			ahStrings["failed"] = "failed";
 			_aBinds.Add(MapClass.pli_status, ahStrings);
 			ahStrings = new StringDictionary();
             ahStrings["planned"] = g.Webservice.sNoticePreferences1;
@@ -42,6 +43,7 @@ namespace webservice
 			ahStrings["onair"] = g.Webservice.sNoticePreferences4;
 			ahStrings["played"] = g.Webservice.sNoticePreferences5;
 			ahStrings["skipped"] = g.Webservice.sNoticePreferences6;
+			ahStrings["failed"] = g.Webservice.sNoticePreferences8;
 			_aTitles.Add(MapClass.pli_status, ahStrings);
 
 			ahStrings = new StringDictionary();
@@ -94,17 +96,31 @@ namespace webservice
 			public class Replica : Clients
 			{
 				public long nFramesMinimum;
+				public long nFramesBase;
 				public int nFrequencyOfOccurrenceMax;
 				public string sPreviewsPath;
 				public string sTrailersPath;
-                public string sLocale;
+				public bool bIsPgIdNeeded;
+                public string sFilesDialogFilter;
+				public string sLocale;
                 public bool bContextMenuDeleteSince;
-                public bool bStatisticsRAOVisible;
+				public int nPLRecalculateTimeout;
+				public int nPLImportTimeout;
+				public bool bStatisticsRAOVisible;
                 public bool bStatisticsMessagesVisible;
+				public string sChannelName;
+
+				public string sDefautClassClip;
+				public string sDefautClassProgram;
+				public string sDefautClassDesign;
+				public string sDefautClassAdvertisement;
+				public string sDefautClassUnknown;
 
 				public Replica()
 				{
                     bContextMenuDeleteSince = bStatisticsRAOVisible = bStatisticsMessagesVisible = true;
+					nPLRecalculateTimeout = 180;
+					nPLImportTimeout = 3600;
 				}
 			}
 		}
@@ -127,28 +143,13 @@ namespace webservice
 		{
 			DB.Credentials cRetVal = new DB.Credentials()
 			{
-				sServer = "db.channel.replica",
-				nPort = 5432,
-				sDatabase = "replica",
+				sServer = _cInstance._cDBCredentials.sServer,
+				nPort = _cInstance._cDBCredentials.nPort,
+				sDatabase = _cInstance._cDBCredentials.sDatabase,
 				sUser = sUsername,
 				sPassword = sPassword,
-				nTimeout = 240
-			};
-			if (null == sPassword)
-			{
-				switch (sUsername)
-				{
-					case "user":
-						cRetVal.sPassword = "";
-						break;
-					case "replica_client":
-						cRetVal.sPassword = "";
-						break;
-					case "replica_management":
-						cRetVal.sPassword = "";
-						break;
-				}
-			}
+				nTimeout = _cInstance._cDBCredentials.nTimeout
+            };
 			return cRetVal;
 		}
 
@@ -201,8 +202,38 @@ namespace webservice
                 return _cInstance._sVKontakteSecret;
             }
         }
+		static public bool bPowerGoldIDsAreAssetIDs
+		{
+			get
+			{
+				return _cInstance._bPowerGoldIDsAreAssetIDs;
+			}
+		}
+        static public int nColumnWithPGIds
+        {
+            get
+            {
+                return _cInstance._nColumnWithPGIds;
+            }
+        }
+        static public bool bMakeAdvertAsset
+        {
+            get
+            {
+                return _cInstance._bMakeAdvertAsset;
+            }
+        }
+        static public TimeSpan tsSafeRange
+        {
+            get
+            {
+                return _cInstance._tsSafeRange;
+            }
+        }
+
 
         static public string sClipStorageName;
+		static public string sTSRConnection;
 
 		private Clients.Replica _cClientReplica;
         private string _sOAuthDomain;
@@ -212,8 +243,13 @@ namespace webservice
         private string _sTwitterSecret;
         private string _sVKontakteAppID;
         private string _sVKontakteSecret;
+		private bool _bPowerGoldIDsAreAssetIDs;
+        private bool _bMakeAdvertAsset;
+        private int _nColumnWithPGIds;
+        private TimeSpan _tsSafeRange;
+        private DB.Credentials _cDBCredentials;
 
-		public Preferences()
+        public Preferences()
 			: base("//webservice")
 		{
 		}
@@ -222,31 +258,55 @@ namespace webservice
 			if (null == cXmlNode)
 				return;
 			XmlNode cXmlNodeChild;
-			XmlNode cXmlNodeClient = cXmlNode.NodeGet("storages", false);
-			if (null != cXmlNodeClient)
+			XmlNode cXmlNodeClient;
+
+			string sChName = cXmlNode.AttributeOrDefaultGet<string>("name", "channel");
+
+            _cDBCredentials = new DB.Credentials(cXmlNode.NodeGet("database"));
+
+            if (null != (cXmlNodeClient = cXmlNode.NodeGet("import", false)))
+			{
+				sTSRConnection = cXmlNodeClient.AttributeValueGet("tsr_connection");
+				_bPowerGoldIDsAreAssetIDs = cXmlNodeClient.AttributeOrDefaultGet<bool>("pgid_assetid", true);
+                _bMakeAdvertAsset = cXmlNodeClient.AttributeOrDefaultGet<bool>("make_advert_asset", false);
+                _nColumnWithPGIds = cXmlNodeClient.AttributeOrDefaultGet<int>("column_pgid", 0);
+            }
+            if (null != (cXmlNodeClient = cXmlNode.NodeGet("playlist", false)))
+            {
+                _tsSafeRange = cXmlNodeClient.AttributeOrDefaultGet<TimeSpan>("safe_range", new TimeSpan(0, 15, 0));
+            }
+            if (null != (cXmlNodeClient = cXmlNode.NodeGet("storages", false)))
 			{
                 cXmlNodeChild = cXmlNodeClient.NodeGet("clips");
 				_cClientReplica = new Clients.Replica();
                 sClipStorageName = cXmlNodeChild.AttributeValueGet("name");
 			}
-			cXmlNodeClient = cXmlNode.NodeGet("clients/replica", false);
-			if (null != cXmlNodeClient)
+			if (null != (cXmlNodeClient = cXmlNode.NodeGet("clients/replica", false)))
 			{
                 cXmlNodeChild = cXmlNodeClient.NodeGet("frames");
                 _cClientReplica = new Clients.Replica() { sLocale = sLocale };
+				_cClientReplica.sChannelName = sChName;
                 _cClientReplica.nFramesMinimum = cXmlNodeChild.AttributeGet<int>("minimum");
-                cXmlNodeChild = cXmlNodeClient.NodeGet("customs");
+				_cClientReplica.nFramesBase = cXmlNodeChild.AttributeGet<int>("base");
+				cXmlNodeChild = cXmlNodeClient.NodeGet("customs");
                 _cClientReplica.nFrequencyOfOccurrenceMax = cXmlNodeChild.AttributeGet<int>("occurrence");
                 cXmlNodeChild = cXmlNodeClient.NodeGet("previews");
                 _cClientReplica.sPreviewsPath = cXmlNodeChild.AttributeValueGet("path");
                 cXmlNodeChild = cXmlNodeClient.NodeGet("trailers");
-                _cClientReplica.sTrailersPath = cXmlNodeChild.AttributeValueGet("path");
+				_cClientReplica.sTrailersPath = cXmlNodeChild.AttributeValueGet("path");
+				cXmlNodeChild = cXmlNodeClient.NodeGet("ingest");
+				_cClientReplica.bIsPgIdNeeded = cXmlNodeChild.AttributeOrDefaultGet<bool>("pg_id_needed", true);
+                _cClientReplica.sFilesDialogFilter = cXmlNodeChild.AttributeOrDefaultGet<string>("files_filter", "(*.*)|*.*|H264 files (*.mp4)|*.mp4|QuickTime Movies (*.mov)|*.mov|MPEG Files (*.mpg)|*.mpg|Material eXchange Format (*.mxf)|*.mxf|Audio Video Interleaved (*.avi)|*.avi|Windows Media Video (*.wmv)|*.wmv");
                 cXmlNodeChild = cXmlNodeClient.NodeGet("pages/playlist/menu", false);
                 if (null == cXmlNodeChild)
                 {
                     cXmlNodeChild = cXmlNodeClient.NodeGet("context_menu_playlist", false);
-                    if (null != cXmlNodeChild)
-                        _cClientReplica.bContextMenuDeleteSince = cXmlNodeChild.AttributeGet<bool>("delete_all");
+					if (null != cXmlNodeChild)
+					{
+						_cClientReplica.bContextMenuDeleteSince = cXmlNodeChild.AttributeGet<bool>("delete_all");
+						_cClientReplica.nPLRecalculateTimeout = cXmlNodeChild.AttributeGet<int>("recalc_timeout");
+						_cClientReplica.nPLImportTimeout = cXmlNodeChild.AttributeGet<int>("import_timeout");
+					}
                 }
                 else
                     _cClientReplica.bContextMenuDeleteSince = cXmlNodeChild.AttributeGet<bool>("deleteSince");
@@ -256,9 +316,28 @@ namespace webservice
                 cXmlNodeChild = cXmlNodeClient.NodeGet("pages/stat/messages", false);
                 if (null != cXmlNodeChild)
                     _cClientReplica.bStatisticsMessagesVisible = cXmlNodeChild.AttributeGet<bool>("visible");
-            }
-			cXmlNodeClient = cXmlNode.NodeGet("social", false);
-			if (null != cXmlNodeClient)
+
+				cXmlNodeChild = cXmlNodeClient.NodeGet("pages/assets/default_class", false);
+				if (null != cXmlNodeChild)
+				{
+					_cClientReplica.sDefautClassClip = cXmlNodeChild.AttributeValueGet("clip", false);
+					if (_cClientReplica.sDefautClassClip == null)
+						_cClientReplica.sDefautClassClip = "unknown";
+					_cClientReplica.sDefautClassProgram = cXmlNodeChild.AttributeValueGet("program", false);
+					if (_cClientReplica.sDefautClassProgram == null)
+						_cClientReplica.sDefautClassProgram = "unknown";
+					_cClientReplica.sDefautClassDesign = cXmlNodeChild.AttributeValueGet("design", false);
+					if (_cClientReplica.sDefautClassDesign == null)
+						_cClientReplica.sDefautClassDesign = "unknown";
+					_cClientReplica.sDefautClassAdvertisement = cXmlNodeChild.AttributeValueGet("advertisement", false);
+					if (_cClientReplica.sDefautClassAdvertisement == null)
+						_cClientReplica.sDefautClassAdvertisement = "unknown";
+					_cClientReplica.sDefautClassUnknown = cXmlNodeChild.AttributeValueGet("unknown", false);
+					if (_cClientReplica.sDefautClassUnknown == null)
+						_cClientReplica.sDefautClassUnknown = "unknown";
+				}
+			}
+			if (null != (cXmlNodeClient = cXmlNode.NodeGet("social", false)))
 			{
                 _sOAuthDomain = cXmlNodeClient.AttributeValueGet("domain");
                 if (null != (cXmlNodeChild = cXmlNodeClient.NodeGet("facebook", false)))
@@ -271,7 +350,7 @@ namespace webservice
                     _sTwitterKey = cXmlNodeChild.AttributeValueGet("key");
                     _sTwitterSecret = cXmlNodeChild.AttributeValueGet("secret");
                 }
-                _sVKontakteAppID = "3930961";
+                _sVKontakteAppID = "";
             }
 		}
 	}

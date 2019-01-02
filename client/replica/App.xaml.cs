@@ -18,7 +18,7 @@ namespace replica.sl
 			if (null == _cDBI)
 			{
 				_cPingTimer = new System.Windows.Threading.DispatcherTimer();
-				_cPingTimer.Interval = TimeSpan.FromMinutes(5);
+				_cPingTimer.Interval = TimeSpan.FromMinutes(1);
 				_cPingTimer.Tick += _cPingTimer_Tick;
 				_cDBI = new DBInteract();
 				_cDBI.PingCompleted += cDBI_PingCompleted;

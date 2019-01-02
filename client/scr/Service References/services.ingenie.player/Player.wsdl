@@ -20,6 +20,11 @@
           <s:element minOccurs="0" maxOccurs="1" name="sName" type="s:string" />
         </s:sequence>
       </s:complexType>
+      <s:complexType name="Class">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:IdNamePair" />
+        </s:complexContent>
+      </s:complexType>
       <s:element name="StoragesSetResponse">
         <s:complexType />
       </s:element>
@@ -104,8 +109,15 @@
           <s:element minOccurs="0" maxOccurs="1" name="sStorageName" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="sStoragePath" type="s:string" />
           <s:element minOccurs="1" maxOccurs="1" name="bFileExist" type="s:boolean" />
-          <s:element minOccurs="0" maxOccurs="1" name="sClassName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bCached" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="sCopyPercent" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="aClasses" type="tns:ArrayOfClass" />
           <s:element minOccurs="1" maxOccurs="1" name="bLogoBinding" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClass">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Class" nillable="true" type="tns:Class" />
         </s:sequence>
       </s:complexType>
       <s:complexType name="Clip">
@@ -122,7 +134,8 @@
           <s:element minOccurs="0" maxOccurs="1" name="sRotation" type="s:string" />
           <s:element minOccurs="1" maxOccurs="1" name="bLocked" type="s:boolean" />
           <s:element minOccurs="1" maxOccurs="1" name="bSmoking" type="s:boolean" />
-          <s:element minOccurs="0" maxOccurs="1" name="sClassName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="bCached" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="aClasses" type="tns:ArrayOfClass" />
         </s:sequence>
       </s:complexType>
       <s:element name="ItemCreateResponse">
@@ -136,7 +149,7 @@
         <s:sequence>
           <s:element minOccurs="1" maxOccurs="1" name="nID" type="s:unsignedLong" />
           <s:element minOccurs="0" maxOccurs="1" name="sPreset" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="sCurrentClass" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="aCurrentClasses" type="tns:ArrayOfClass" />
           <s:element minOccurs="1" maxOccurs="1" name="dtStatusChanged" type="s:dateTime" />
           <s:element minOccurs="1" maxOccurs="1" name="eStatus" type="tns:Status" />
           <s:element minOccurs="0" maxOccurs="1" name="sInfo" type="s:string" />
@@ -319,10 +332,45 @@
           <s:element minOccurs="0" maxOccurs="unbounded" name="Item" nillable="true" type="tns:Item" />
         </s:sequence>
       </s:complexType>
+      <s:element name="LinearPLFragmentSet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aPLIs" type="tns:ArrayOfAdvertisement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LinearPLFragmentSetResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ItemsCachedGet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="bFromPlaylistOnly" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItemsCachedGetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItemsCachedGetResult" type="tns:ArrayOfAdvertisement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CacheClip">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cClip" type="tns:Clip" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CacheClipResponse">
+        <s:complexType />
+      </s:element>
       <s:element name="Init">
         <s:complexType>
           <s:sequence>
             <s:element minOccurs="1" maxOccurs="1" name="nClientBrowserID" type="s:unsignedLong" />
+            <s:element minOccurs="0" maxOccurs="1" name="sVersionOfSCR" type="s:string" />
           </s:sequence>
         </s:complexType>
       </s:element>
@@ -532,6 +580,24 @@
   <wsdl:message name="ItemsRunningGetSoapOut">
     <wsdl:part name="parameters" element="tns:ItemsRunningGetResponse" />
   </wsdl:message>
+  <wsdl:message name="LinearPLFragmentSetSoapIn">
+    <wsdl:part name="parameters" element="tns:LinearPLFragmentSet" />
+  </wsdl:message>
+  <wsdl:message name="LinearPLFragmentSetSoapOut">
+    <wsdl:part name="parameters" element="tns:LinearPLFragmentSetResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItemsCachedGetSoapIn">
+    <wsdl:part name="parameters" element="tns:ItemsCachedGet" />
+  </wsdl:message>
+  <wsdl:message name="ItemsCachedGetSoapOut">
+    <wsdl:part name="parameters" element="tns:ItemsCachedGetResponse" />
+  </wsdl:message>
+  <wsdl:message name="CacheClipSoapIn">
+    <wsdl:part name="parameters" element="tns:CacheClip" />
+  </wsdl:message>
+  <wsdl:message name="CacheClipSoapOut">
+    <wsdl:part name="parameters" element="tns:CacheClipResponse" />
+  </wsdl:message>
   <wsdl:message name="InitSoapIn">
     <wsdl:part name="parameters" element="tns:Init" />
   </wsdl:message>
@@ -654,6 +720,18 @@
     <wsdl:operation name="ItemsRunningGet">
       <wsdl:input message="tns:ItemsRunningGetSoapIn" />
       <wsdl:output message="tns:ItemsRunningGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LinearPLFragmentSet">
+      <wsdl:input message="tns:LinearPLFragmentSetSoapIn" />
+      <wsdl:output message="tns:LinearPLFragmentSetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItemsCachedGet">
+      <wsdl:input message="tns:ItemsCachedGetSoapIn" />
+      <wsdl:output message="tns:ItemsCachedGetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CacheClip">
+      <wsdl:input message="tns:CacheClipSoapIn" />
+      <wsdl:output message="tns:CacheClipSoapOut" />
     </wsdl:operation>
     <wsdl:operation name="Init">
       <wsdl:input message="tns:InitSoapIn" />
@@ -821,6 +899,33 @@
     </wsdl:operation>
     <wsdl:operation name="ItemsRunningGet">
       <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LinearPLFragmentSet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/LinearPLFragmentSet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsCachedGet">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/ItemsCachedGet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CacheClip">
+      <soap:operation soapAction="http://replica/ig/services/Player.asmx/CacheClip" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -1049,6 +1154,33 @@
     </wsdl:operation>
     <wsdl:operation name="ItemsRunningGet">
       <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemsRunningGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LinearPLFragmentSet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/LinearPLFragmentSet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItemsCachedGet">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/ItemsCachedGet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CacheClip">
+      <soap12:operation soapAction="http://replica/ig/services/Player.asmx/CacheClip" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

@@ -30,15 +30,15 @@ namespace webservice
 
 
                 sLastPlayed = cCurrentPLI.dtStartReal.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
-                string sType = cCurrentPLI.cClass.sName.ToLower();
+                string sType = cCurrentPLI.cFile.cStorage.sPath.ToLower();
                 if (sType.Contains("program"))
                     sType = "program";
-                else if (sType.Contains("advertisement"))
+                else if (sType.Contains("design") || sType.Contains("plug"))
+                    sType = "design";
+                else if (sType.Contains("advert"))
                     sType = "advertisement";
                 else if (sType.Contains("clip"))
                     sType = "clip";
-                else if (sType.Contains("design"))
-                    sType = "design";
                 else
                     sType = "unknown";
 

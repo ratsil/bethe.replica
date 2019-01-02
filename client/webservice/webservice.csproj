@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,7 +12,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>webservice</RootNamespace>
     <AssemblyName>webservice</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <SilverlightApplicationList>{17EE2BDF-9737-4419-BB58-757E12398EB5}|..\replica\replica.csproj|ClientBin|False</SilverlightApplicationList>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -44,6 +44,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -53,31 +55,16 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Facebook">
       <HintPath>..\..\packages\Facebook.6.4.2\lib\net40-client\Facebook.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Core, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\!dlls\IKVM.OpenJDK.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Util, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\!dlls\IKVM.OpenJDK.Util.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.Runtime, Version=0.42.0.6, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\!dlls\IKVM.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="LinqToTwitter">
       <HintPath>..\..\packages\linqtotwitter.2.1.8\lib\net40\LinqToTwitter.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="org.apache.poi, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\!dlls\org.apache.poi.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -102,6 +89,18 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\!dlls\IKVM.OpenJDK.Core.dll">
+      <Link>App_Data\lib\IKVM.OpenJDK.Core.dll</Link>
+    </Content>
+    <Content Include="..\..\!dlls\IKVM.OpenJDK.Util.dll">
+      <Link>App_Data\lib\IKVM.OpenJDK.Util.dll</Link>
+    </Content>
+    <Content Include="..\..\!dlls\IKVM.Runtime.dll">
+      <Link>App_Data\lib\IKVM.Runtime.dll</Link>
+    </Content>
+    <Content Include="..\..\!dlls\org.apache.poi.dll">
+      <Link>App_Data\lib\org.apache.poi.dll</Link>
+    </Content>
     <Content Include="clientaccesspolicy.xml" />
     <Content Include="ClientBin\replica.xap" />
     <Content Include="ia\messages.aspx" />
@@ -114,10 +113,9 @@
     <Content Include="main.css" />
     <Content Include="main.html" />
     <Content Include="current.aspx" />
-    <None Include="App_Data\lib\IKVM.OpenJDK.Core.dll" />
-    <Content Include="App_Data\lib\IKVM.OpenJDK.Util.dll" />
-    <None Include="App_Data\lib\IKVM.Runtime.dll" />
-    <Content Include="App_Data\lib\org.apache.poi.dll" />
+    <Content Include="..\..\stuff\replica.pfx">
+      <Link>replica.pfx</Link>
+    </Content>
     <Content Include="grids\grid.xml" />
     <Content Include="ia\cliporder.aspx" />
     <Content Include="ia\clips.aspx" />
@@ -138,8 +136,9 @@
     <Content Include="index.aspx" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
-    <Content Include="replica.pfx" />
+    <None Include="Properties\PublishProfiles\replica-debug.pubxml" />
     <None Include="Properties\PublishProfiles\replica-local.pubxml" />
+    <None Include="Properties\PublishProfiles\replica-release.pubxml" />
     <None Include="services\.htaccess" />
     <None Include="templates\export.rao.row.xml" />
     <None Include="templates\export.rao.footer.xml" />
@@ -271,24 +270,6 @@
     <Compile Include="services\SessionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\!helpers\helpers.replica\helpers.replica.csproj">
-      <Project>{1F234A17-6AC8-4DD1-84E6-76C4B40994BF}</Project>
-      <Name>helpers.replica</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common.globalization\helpers.common.globalization.csproj">
-      <Project>{3231FCF5-FC39-47EC-A1C5-FDA5467075DB}</Project>
-      <Name>helpers.common.globalization</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common\helpers.common.csproj">
-      <Project>{6274E189-EF3E-4457-B13B-F82F284AB903}</Project>
-      <Name>helpers.common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\!submodules\helpers\helpers.db\helpers.db.csproj">
-      <Project>{6d2e75af-bc9f-43fe-9dd7-a0b687092364}</Project>
-      <Name>helpers.db</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="globalization\Webservice.ru-RU.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Webservice.ru-RU.Designer.cs</LastGenOutput>
@@ -306,7 +287,24 @@
       <LastGenOutput>templates.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\!helpers\helpers.replica\helpers.replica.csproj">
+      <Project>{1f234a17-6ac8-4dd1-84e6-76c4b40994bf}</Project>
+      <Name>helpers.replica</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common.globalization\helpers.common.globalization.csproj">
+      <Project>{3231fcf5-fc39-47ec-a1c5-fda5467075db}</Project>
+      <Name>helpers.common.globalization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\common\helpers.common\helpers.common.csproj">
+      <Project>{fbeba6dc-8ea6-49a9-8cb6-e4dd9d1512de}</Project>
+      <Name>helpers.common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\!submodules\helpers\helpers.db\helpers.db.csproj">
+      <Project>{6d2e75af-bc9f-43fe-9dd7-a0b687092364}</Project>
+      <Name>helpers.db</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

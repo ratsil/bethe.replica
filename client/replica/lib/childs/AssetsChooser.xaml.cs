@@ -8,14 +8,15 @@ using System.Windows.Input;
 using replica.sl;
 using controls.sl;
 using g = globalization;
+using helpers.extensions;
 
 namespace controls.childs.replica.sl
 {
-    public partial class AssetsChooser : ChildWindow
-    {
-        private List<AssetSL> _aSelectedAssets;
-        public List<AssetSL> aSelectedAssets
-        {
+	public partial class AssetsChooser : ChildWindow
+	{
+		private List<AssetSL> _aSelectedAssets;
+		public List<AssetSL> aSelectedAssets
+		{
 			get
 			{
 				List<AssetSL> aRetVal = null;
@@ -26,11 +27,17 @@ namespace controls.childs.replica.sl
 				else
 					return _aSelectedAssets;
 			}
-        }
+			set
+			{
+				_aSelectedAssets = value;
+				_ui_btnAddToSequence_Click(null, null);
+			}
+		}
 		public DateTime dtStart
 		{
 			set
 			{
+				_dtMinimum = value;
 				_ui_dtpDateTime.DisplayDateStart = value;
 			}
 		}
@@ -48,7 +55,7 @@ namespace controls.childs.replica.sl
 				_ui_dtpDateTime.SelectedDate = value;
 				_ui_tmpDateTime.Value = value;
 			}
-			get 
+			get
 			{
 				return DateTimeGet();
 			}
@@ -62,7 +69,12 @@ namespace controls.childs.replica.sl
 				else
 					return _ui_chbAsBlock.IsChecked.Value;
 			}
+			set
+			{
+				_ui_chbAsBlock.IsChecked = value;
+			}
 		}
+		private DateTime _dtMinimum;
 		private DateTime _dtNextMouseClickForDoubleClick;
 		private AssetSL _cAssetForDoubleClick;
 		public DateTime dtHard
@@ -95,11 +107,11 @@ namespace controls.childs.replica.sl
 					return DateTime.MaxValue;
 			}
 		}
-
+		private bool bChangedByMe;
 		public AssetsChooser()
 		{
 			InitializeComponent();
-            Title = g.Helper.sSelectAsset;
+			Title = g.Helper.sSelectAsset;
 
 			_aSelectedAssets = new List<AssetSL>();
 
@@ -111,6 +123,7 @@ namespace controls.childs.replica.sl
 
 			_ui_lbClipsSelected.ItemsSource = new List<AssetSL>();
 			_ui_lbClipsSelected.Background = Coloring.Notifications.cTextBoxActive;
+			_ui_tmpDateTime.ValueChanged += _ui_tmpDateTime_ValueChanged;
 
 			_ui_rbtnHard.Checked += new RoutedEventHandler(_ui_rbtn_Checked);
 			_ui_rbtnSoft.Checked += new RoutedEventHandler(_ui_rbtn_Checked);
@@ -118,7 +131,48 @@ namespace controls.childs.replica.sl
 			_ui_lbClipsSelected.AddHandler(Button.MouseLeftButtonDownEvent, new MouseButtonEventHandler(_ui_lbClipsSelected_MouseLeftButtonDown), true);
 			_ui_lbClipsSelected.AddHandler(Button.KeyDownEvent, new KeyEventHandler(_ui_lbClipsSelected_KeyDown), true);
 			_ui_lbClipsSelected.AddHandler(Button.KeyUpEvent, new KeyEventHandler(_ui_lbClipsSelected_KeyUp), true);
+            _ui_nudFramesQty.ValueChanged += _ui_nudFramesQty_ValueChanged;
+			bChangedByMe = false;
+        }
+
+		private void _ui_nudFramesQty_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			if (_ui_lbClipsSelected.SelectedItem == null)
+				return;
+			if (!bChangedByMe)
+			{
+				AssetSL cSelectedAsset = (AssetSL)_ui_lbClipsSelected.SelectedItem;
+				cSelectedAsset.nFrameOut = (long)_ui_nudFramesQty.Value;
+			}
+			bChangedByMe = false;
+			ShowDuration();
 		}
+		private void ShowDuration()
+		{
+			if (null == _ui_lbClipsSelected.ItemsSource)
+			{
+				_ui_tbDuration.Text = "----";
+				return;
+			}
+            List<AssetSL> aAssets = (List<AssetSL>)_ui_lbClipsSelected.ItemsSource;
+
+			long nDur = 0;
+			foreach (AssetSL cA in aAssets)
+				nDur += cA.nFrameOut;
+			_ui_tbDuration.Text = nDur.ToFramesString(true, true, true, true);
+		}
+
+		private void _ui_tmpDateTime_ValueChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
+		{
+			if (null != _ui_dtpDateTime.SelectedDate && null != _ui_dtpDateTime.DisplayDateStart && _ui_dtpDateTime.SelectedDate.Value.Date == _ui_dtpDateTime.DisplayDateStart.Value.Date)
+				if (null != _ui_tmpDateTime.Value && _ui_tmpDateTime.Value.Value.TimeOfDay < _dtMinimum.TimeOfDay)
+				{
+					_ui_tmpDateTime.ValueChanged -= _ui_tmpDateTime_ValueChanged;
+                    _ui_tmpDateTime.Value = _dtMinimum;
+					_ui_tmpDateTime.ValueChanged += _ui_tmpDateTime_ValueChanged;
+				}
+        }
+
 		protected override void OnOpened()
 		{
 			base.OnOpened();
@@ -128,6 +182,9 @@ namespace controls.childs.replica.sl
 			_ui_btnDelete.IsEnabled = false;
 			_ui_btnDown.IsEnabled = false;
 			_ui_btnUp.IsEnabled = false;
+			_ui_nudFramesQty.Minimum = 25;
+			_ui_nudFramesQty.IsEnabled = false;
+            _ui_tbDuration.Text = "----";
 		}
 		private DateTime DateTimeGet()
 		{
@@ -172,6 +229,7 @@ namespace controls.childs.replica.sl
 				{
 					aAss.Add(cAss);
 					_ui_lbClipsSelected.ItemsSource = aAss;
+					ShowDuration();
 					_ui_lbClipsSelected.Background = Coloring.Notifications.cTextBoxChanged;
 				}
 				_ui_lbClipsSelected.UpdateLayout();
@@ -185,16 +243,27 @@ namespace controls.childs.replica.sl
 				_ui_btnDelete.IsEnabled = true;
 				_ui_btnDown.IsEnabled = true;
 				_ui_btnUp.IsEnabled = true;
+				_ui_nudFramesQty.IsEnabled = true;
+				ShowFramesQty((AssetSL)_ui_lbClipsSelected.SelectedItem);
 			}
 			else
 			{
 				_ui_btnDelete.IsEnabled = false;
 				_ui_btnDown.IsEnabled = false;
 				_ui_btnUp.IsEnabled = false;
-			}
+				bChangedByMe = true;
+				_ui_nudFramesQty.Value = 0;
+				_ui_nudFramesQty.IsEnabled = false;
+            }
 			//AssetSL cSelectedAsset = (AssetSL)_ui_lbClipsSelected.SelectedItem;
 			//_ui_lbClipsSelected_Remove(cSelectedAsset);
 		}
+		private void ShowFramesQty(AssetSL cA)
+		{
+			bChangedByMe = true;
+			_ui_nudFramesQty.Maximum = cA.nFramesQty;
+			_ui_nudFramesQty.Value = cA.nFrameOut;
+        }
 		private void _ui_lbClipsSelected_Remove(AssetSL cAsset)
 		{
 			if (null != cAsset)
@@ -206,7 +275,8 @@ namespace controls.childs.replica.sl
 					int nIndx = aAss.IndexOf(cAsset);
 					aAss.Remove(cAsset);
 					_ui_lbClipsSelected.ItemsSource = aAss;
-					if (aAss.Count > 0)
+					ShowDuration();
+                    if (aAss.Count > 0)
 						_ui_lbClipsSelected.SelectedItem = aAss[nIndx > aAss.Count - 1 ? aAss.Count - 1 : nIndx];
 				}
 				_ui_lbClipsSelected.UpdateLayout();
@@ -261,6 +331,7 @@ namespace controls.childs.replica.sl
 				aAssets.Remove(cSelectedAsset);
 				aAssets.Insert(nIndx-1, cSelectedAsset);
 				_ui_lbClipsSelected.ItemsSource = aAssets;
+				ShowDuration();
 				_ui_lbClipsSelected.UpdateLayout();
 				_ui_lbClipsSelected.SelectedItem = cSelectedAsset;
 			}
@@ -286,6 +357,7 @@ namespace controls.childs.replica.sl
 				aAssets.Remove(cSelectedAsset);
 				aAssets.Insert(nIndx + 1, cSelectedAsset);
 				_ui_lbClipsSelected.ItemsSource = aAssets;
+				ShowDuration();
 				_ui_lbClipsSelected.UpdateLayout();
 				_ui_lbClipsSelected.SelectedItem = cSelectedAsset;
 			}

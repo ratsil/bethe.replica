@@ -1,7 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <preferences>
 	<replica>
-		<management>
+		<management sleep="00:01:00" >
+			<pg_dump sleep="0:05:00" path_bin="/path/bin" path_out="/path/out" name_out="backup" db_name="replica" db_host="server" copy_to="/path" login="user" pass="" />
+			<playlist sleep="0:01:00" channel="CHANNEL" adv_path="/path" vi_mail_target="user@example.com" >
+				<generation length="6:00:00" pl_min="2:00:00" />
+				<blocks artist="3:00:00" foreign="3:00:00" clip="5:00:00" clip_force="3:00:00" clip_1="5:00:00" clip_2="6:30:00" clip_3="14:00:00" clip_3min="10:00:00" clip_4="18:40:00" clip_4min="12:00:00" clip_foreign="15:00:00" />
+			</playlist>
 			<commands sleep="00:00:00.3" />
 		</management>
 	</replica>

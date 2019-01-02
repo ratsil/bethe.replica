@@ -72,10 +72,25 @@ namespace webservice.services
 				return aErrors[aErrors.Length - 1];
 			return null;
 		}
-
 		static public void Add(SessionInfo cSI, Exception ex)
 		{
-			(new Logger()).WriteError(ex);
+			Add(cSI, ex, false);
+		}
+        static public void Add(SessionInfo cSI, Exception ex, bool bDoNotSend)
+        {
+            Add(cSI, ex, null, bDoNotSend);
+        }
+        static public void Add(SessionInfo cSI, Exception ex, string sAdditionalInfo)
+        {
+            Add(cSI, ex, sAdditionalInfo, false);
+        }
+        static public void Add(SessionInfo cSI, Exception ex, string sAdditionalInfo, bool bDoNotSend)
+        {
+            sAdditionalInfo = sAdditionalInfo == null ? "" : sAdditionalInfo + " ";
+            if (bDoNotSend)
+                (new Logger()).WriteNotice("error: " + sAdditionalInfo + ex.ToString());
+            else
+                (new Logger()).WriteError(sAdditionalInfo, ex);
 			WebServiceError cError = new WebServiceError(ex);
 			if (null == _aqServerErrors)
 				_aqServerErrors = new Queue<WebServiceError>();
@@ -94,7 +109,11 @@ namespace webservice.services
 		}
 		static public void Add(SessionInfo cSI, string sMessage)
 		{
-			Add(cSI, new Exception(sMessage));
+			Add(cSI, sMessage, false);
+		}
+		static public void Add(SessionInfo cSI, string sMessage, bool bDoNotSend)
+		{
+			Add(cSI, new Exception(sMessage), bDoNotSend);
 		}
 		static public void Add(string sMessage)
 		{

@@ -174,8 +174,47 @@
   <data name="sErrorPLImport20" xml:space="preserve">
     <value>cannot find any suitable assets while design file parsing</value>
   </data>
+  <data name="sErrorPLImport21" xml:space="preserve">
+    <value>file from PowerGold [{2}] has wrong status [{0}] or error [{1}]</value>
+  </data>
+  <data name="sErrorPLImport22" xml:space="preserve">
+    <value>the block's ignor time start mark '!' can't be on the first one</value>
+  </data>
+  <data name="sErrorPLImport23" xml:space="preserve">
+    <value>can't connect to DB TSR</value>
+  </data>
+  <data name="sErrorPLImport24" xml:space="preserve">
+    <value>can't read from DB TSR</value>
+  </data>
+  <data name="sErrorPLImport25" xml:space="preserve">
+    <value>code VI is not determined in TSR</value>
+  </data>
+  <data name="sErrorPLImport26" xml:space="preserve">
+    <value>type is not determined in TSR</value>
+  </data>
+  <data name="sErrorPLImport27" xml:space="preserve">
+    <value>info about this file was not found in DB</value>
+  </data>
+  <data name="sErrorPLImport28" xml:space="preserve">
+    <value>unknown error during creating or saving asset</value>
+  </data>
+  <data name="sErrorPLImport29" xml:space="preserve">
+    <value>strange file type in TSR</value>
+  </data>
   <data name="sErrorPLImport3" xml:space="preserve">
     <value>there are no bindings between PG identifiers and assets:</value>
+  </data>
+  <data name="sErrorPLImport30" xml:space="preserve">
+    <value>can't add file duration querry</value>
+  </data>
+  <data name="sErrorPLImport31" xml:space="preserve">
+    <value>can't get file duration</value>
+  </data>
+  <data name="sErrorPLImport32" xml:space="preserve">
+    <value>items were NOT added to playlist because of problems with the file:</value>
+  </data>
+  <data name="sErrorPLImport33" xml:space="preserve">
+    <value>duration of some movies doesn't match:</value>
   </data>
   <data name="sErrorPLImport4" xml:space="preserve">
     <value>cannot find any suitable assets while PowerGold file parsing</value>
@@ -224,6 +263,9 @@
   </data>
   <data name="sNoticePreferences7" xml:space="preserve">
     <value>Other</value>
+  </data>
+  <data name="sNoticePreferences8" xml:space="preserve">
+    <value>Failed</value>
   </data>
   <data name="sNoticeVJ1" xml:space="preserve">
     <value>not specified</value>

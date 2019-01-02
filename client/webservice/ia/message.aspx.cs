@@ -25,7 +25,7 @@ namespace webservice.ia
 				: base("message")
 			{ }
 		}
-		protected void Page_Load(object sender, EventArgs e)
+        protected void Page_Load(object sender, EventArgs e)
 		{
 			try
 			{
@@ -130,7 +130,8 @@ namespace webservice.ia
 			catch (Exception ex)
 			{
 				(new Logger()).WriteError(ex);
-				string sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><error description=\"" + ex.Message.ForXML() + "\"";
+				string sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"+ Environment.NewLine;
+				sXML += "<error description=\"" + ex.Message.ForXML() + "\">" + Environment.NewLine;
 				if (null != ex.InnerException)
 				{
 					sXML += "<inner description=\"" + ex.InnerException.Message.ForXML() + "\" />" + Environment.NewLine;

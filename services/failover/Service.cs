@@ -28,7 +28,7 @@ namespace replica.failover
 
 			try
 			{
-				(new Logger("service")).WriteNotice("получен сигнал на запуск");//TODO LANG
+				(new Logger("service")).WriteWarning("получен сигнал на запуск");//TODO LANG
 				_bRunning = true;
 				_nThreadsFinished = 0;
 
@@ -44,7 +44,7 @@ namespace replica.failover
 				Cues.Logger.sFile = replica.cues.Template.Logger.sFile = "cues";
 				replica.cues.Template.iInteract = new Failover();
 				_cCues = new Cues();
-				_cCues.WatcherCommands = WatcherCommands;
+				_cCues.WatcherCommands = null; // = WatcherCommands;
 				_cCues.Start(new Failover());
 			}
 			catch (Exception ex)
@@ -56,9 +56,10 @@ namespace replica.failover
 		{
 			try
 			{
-				(new Logger("service")).WriteNotice("получен сигнал на остановку");//TODO LANG
+				(new Logger("service")).WriteWarning("получен сигнал на остановку");//TODO LANG
 				_bRunning = false;
 				DateTime dt = DateTime.Now;
+                _cCues.Stop();
 				_cPlaylist.Stop();
 				_cPlayer.Stop();
 				while (1 > _nThreadsFinished && DateTime.Now.Subtract(dt).TotalSeconds < 2)
@@ -70,16 +71,23 @@ namespace replica.failover
 			{
 				(new Logger("service")).WriteError(ex);
 			}
-		}
+            finally
+            {
+                (new Logger("service")).WriteNotice("сервис остановлен");//TODO LANG
+                while (Logger.nQueueLength > 0)
+                    Thread.Sleep(1);
+            }
+        }
 
-		private void WatcherCommands(object cStateInfo)
+        private void WatcherCommands(object cStateInfo)
 		{
 			(new Logger("commands")).WriteNotice("модуль управления командами запущен");//TODO LANG
+			DBInteract cDBI = new DBInteract();
 			while (_bRunning)
 			{
 				try
 				{
-					(new DBInteract()).ProcessCommands(new Delegate[] { (DBInteract.PlayerSkipDelegate)_cPlayer.Skip, (DBInteract.FailoverSynchronizeDelegate)Failover.Synchronize });
+					cDBI.ProcessCommands(new Delegate[] { (DBInteract.PlayerSkipDelegate)_cPlayer.Skip, (DBInteract.FailoverSynchronizeDelegate)Failover.Synchronize });
 					Thread.Sleep(300);
 				}
 				catch (Exception ex)

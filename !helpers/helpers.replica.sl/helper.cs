@@ -80,5 +80,5 @@ namespace helpers.replica.sl
 			}
 			return cPrevAss;
 		}
-	}
+    }
 }

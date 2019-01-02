@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
@@ -37,7 +37,7 @@ namespace replica.cues
 
 			try
 			{
-				(new Logger("service")).WriteNotice("получен сигнал на запуск");//TODO LANG
+				(new Logger("service")).WriteWarning("РїРѕР»СѓС‡РµРЅ СЃРёРіРЅР°Р» РЅР° Р·Р°РїСѓСЃРє");//TODO LANG
 				_bRunning = true;
 				_nThreadsFinished = 0;
 
@@ -55,20 +55,27 @@ namespace replica.cues
         {
 			try
 			{
-				(new Logger("service")).WriteNotice("получен сигнал на остановку");//TODO LANG
+				(new Logger("service")).WriteWarning("РїРѕР»СѓС‡РµРЅ СЃРёРіРЅР°Р» РЅР° РѕСЃС‚Р°РЅРѕРІРєСѓ");//TODO LANG
 				_bRunning = false;
-				Thread.Sleep(2000);
+                _cCues.Stop();
+                //Thread.Sleep(2000);
 				Template.ProccesingStop();
 			}
 			catch (Exception ex)
 			{
 				(new Logger("service")).WriteError(ex);
 			}
-		}
+            finally
+            {
+                (new Logger("service")).WriteNotice("СЃРµСЂРІРёСЃ РѕСЃС‚Р°РЅРѕРІР»РµРЅ");//TODO LANG
+                while (Logger.nQueueLength > 0)
+                    Thread.Sleep(1);
+            }
+        }
 
-		private void WatcherCommands(object cStateInfo)
+        private void WatcherCommands(object cStateInfo)
 		{
-			(new Logger("commands")).WriteNotice("модуль управления командами запущен");//TODO LANG
+			(new Logger("commands")).WriteNotice("РјРѕРґСѓР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ РєРѕРјР°РЅРґР°РјРё Р·Р°РїСѓС‰РµРЅ");//TODO LANG
 			while (_bRunning)
 			{
 				try
@@ -79,10 +86,11 @@ namespace replica.cues
 				catch (Exception ex)
 				{
 					(new Logger("commands")).WriteError(ex);
-					Thread.Sleep(5000);
+                    if (_bRunning)
+					    Thread.Sleep(5000);
 				}
 			}
-			(new Logger("commands")).WriteNotice("модуль управления командами остановлен");//TODO LANG
+			(new Logger("commands")).WriteNotice("РјРѕРґСѓР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ РєРѕРјР°РЅРґР°РјРё РѕСЃС‚Р°РЅРѕРІР»РµРЅ");//TODO LANG
 			_nThreadsFinished++;
 		}
 	}

@@ -1,0 +1,41 @@
+﻿<controls:ChildWindow
+        x:Class="controls.childs.replica.sl.FilesAgeSet"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+		xmlns:slc="clr-namespace:controls.replica.sl"
+		xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+        Width="350" Height="auto" BorderThickness="0">
+    <controls:ChildWindow.Resources>
+        <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
+    </controls:ChildWindow.Resources>
+	<Grid x:Name="LayoutRoot" Margin="0" Background="#FF65829D">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+        <!--<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sCuesClass, Source={StaticResource g}}" />-->
+		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5,0,5">
+			<TextBlock Text="{Binding Path=cReplica.sNoticeIngest6, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10,10,4" />
+			<StackPanel Name="_ui_spAge" Orientation="Horizontal"  Margin="0,10,5,4" Height="22" Width="50" Background="#FFE5E8EB" HorizontalAlignment="Right" VerticalAlignment="Center">
+				<itk:NumericUpDown Minimum="0" Maximum="99" Name="_ui_nudAge" Width="50"  Height="22" ValueChanged="_ui_nud_ValueChanged" />
+			</StackPanel>
+		</StackPanel>
+		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,5">
+			<TextBlock Name="_ui_txtAction" Text="{Binding Path=cReplica.sNoticeIngest7, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,4,10,4" />
+			<ComboBox Name="_ui_ddlAction" DisplayMemberPath="sName" SelectedIndex="0" SelectionChanged="_ui_ddl_SelectionChanged"  Height="22" Margin="0,4,5,4">
+				<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sMove, Source={StaticResource g}}" />
+				<ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" />
+			</ComboBox>
+		</StackPanel>
+		<!--<ComboBox Grid.Column="1" Grid.Row="0" Margin="5,0,0,0" Name="_ui_ddlClasses" DisplayMemberPath="sName" SelectionChanged="_ui_ddlClasses_SelectionChanged" Background="#FFFFBF2E" />-->
+
+
+		<Button Grid.Column="0" Grid.Row="2" x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click" Width="75" Height="23" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,12,5,4" />
+		<Button Grid.Column="0" Grid.Row="2" x:Name="OKButton" Content="OK" Click="OKButton_Click" Width="75" Height="23" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,12,84,4" />
+    </Grid>
+</controls:ChildWindow>

@@ -39,9 +39,8 @@ namespace replica.sl.Views
 			App.Current.Host.Content.Resized += new EventHandler(BrowserWindow_Resized);
 
 			_dlgProgress.Show();
-			_dlgProgress.sInfo = "_cDBI.DBCredentialsSetAsync";
-			_cDBI.InitAsync("user", "");
-		}
+            _cDBI_InitCompleted(null, null);
+        }
 
 	
 

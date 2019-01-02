@@ -120,6 +120,9 @@
   <data name="sAutumn" xml:space="preserve">
     <value>Осень</value>
   </data>
+  <data name="sBtnCheckMinimum" xml:space="preserve">
+    <value>Узнать минимум</value>
+  </data>
   <data name="sCampaign" xml:space="preserve">
     <value>Кампания</value>
   </data>
@@ -165,6 +168,12 @@
   <data name="sErrorAssetsList9" xml:space="preserve">
     <value>Вы уверены, что хотите отвязать родителей у этих ассетов?</value>
   </data>
+  <data name="sErrorAssetsProperties1" xml:space="preserve">
+    <value>Сохранение классов в этих ассетах произошло с ошибками:</value>
+  </data>
+  <data name="sErrorAssetsProperties2" xml:space="preserve">
+    <value>Сохранение ротаций в этих ассетах произошло с ошибками:</value>
+  </data>
   <data name="sErrorIngest1" xml:space="preserve">
     <value>Не получена важная информация из БД о транслитерации/nВозможно из-за проблем с правами доступа</value>
   </data>
@@ -174,11 +183,32 @@
   <data name="sErrorIngest3" xml:space="preserve">
     <value>Указанное имя файла отличается от целевого и не будет использовано! Вы хотите продолжить?</value>
   </data>
+  <data name="sErrorIngest4" xml:space="preserve">
+    <value>Укажите {0}!!</value>
+  </data>
+  <data name="sErrorIngest5" xml:space="preserve">
+    <value>Заменяемый файл скорее всего уже закеширован или в процессе!{0}Строго не рекомендуется сейчас его заменять!{0}Продолжайте только если Вы ТОЧНО контролируете все последствия!!</value>
+  </data>
+  <data name="sErrorIngest6" xml:space="preserve">
+    <value>Ни оригинальное, ни текущее имя файла не соответствует вашему имени файла !!{0}Вы УВЕРЕНЫ????{0}Возможно, неправильный файл пойдёт в эфир!!</value>
+  </data>
   <data name="sErrorPersonsList1" xml:space="preserve">
     <value>Этих исполнителей удалить не удалось</value>
   </data>
   <data name="sErrorPlaylist1" xml:space="preserve">
     <value>Невозможно продолжить! Добавление в плейлист уже идёт, возможно вы копируете часть плейлиста</value>
+  </data>
+  <data name="sErrorPlaylist10" xml:space="preserve">
+    <value>Статус должен быть 'planned'</value>
+  </data>
+  <data name="sErrorPlaylist11" xml:space="preserve">
+    <value>Статус удаляемого элемента не может быть 'onair'</value>
+  </data>
+  <data name="sErrorPlaylist12" xml:space="preserve">
+    <value>Размещение задания прошло с ошибками</value>
+  </data>
+  <data name="sErrorPlaylist13" xml:space="preserve">
+    <value>Внимание! Необходим полный пересчёт плейлиста!</value>
   </data>
   <data name="sErrorPlaylist2" xml:space="preserve">
     <value>Пересчет невозможен</value>
@@ -210,6 +240,9 @@
   <data name="sErrorRecalculate3" xml:space="preserve">
     <value>Cначала загрузите тайм-коды...</value>
   </data>
+  <data name="sErrorStat1" xml:space="preserve">
+    <value>Статус 'played' не был обнаружен</value>
+  </data>
   <data name="sErrorTemplates1" xml:space="preserve">
     <value>Не удалось получить информацию о cues.tTemplate</value>
   </data>
@@ -221,6 +254,12 @@
   </data>
   <data name="sErrorTemplates4" xml:space="preserve">
     <value>Добавление невозможно, т.к. в это время уже заверстан другой анонс</value>
+  </data>
+  <data name="sMoveFile" xml:space="preserve">
+    <value>Переместить файл (а не копировать)</value>
+  </data>
+  <data name="sNoAsset" xml:space="preserve">
+    <value>Не создавать ассет</value>
   </data>
   <data name="sNoticeArtistSearch1" xml:space="preserve">
     <value>Исполнитель : Название песни</value>
@@ -299,6 +338,9 @@
   </data>
   <data name="sNoticeIngest14" xml:space="preserve">
     <value>сезон</value>
+  </data>
+  <data name="sNoticeIngest15" xml:space="preserve">
+    <value>Нечего обрабатывать - список пуст</value>
   </data>
   <data name="sNoticeIngest2" xml:space="preserve">
     <value>концертная запись:</value>
@@ -405,6 +447,18 @@
   <data name="sNoticePlaylist32" xml:space="preserve">
     <value>дата и время завершения</value>
   </data>
+  <data name="sNoticePlaylist33" xml:space="preserve">
+    <value>Дайте название для нового плейлиста</value>
+  </data>
+  <data name="sNoticePlaylist34" xml:space="preserve">
+    <value>Задание размещено</value>
+  </data>
+  <data name="sNoticePlaylist35" xml:space="preserve">
+    <value>Вы УВЕРЕНЫ, что хотите запустить этот плейлист ПОВЕРХ ОСНОВНОГО ЭФИРА??????</value>
+  </data>
+  <data name="sNoticePlaylist36" xml:space="preserve">
+    <value>Нельзя вставлять после только что вставленного и не пересчитанного элемента</value>
+  </data>
   <data name="sNoticePlaylist4" xml:space="preserve">
     <value>Нельзя прикрепить элементы к еще не добавленному или находящемуся в кэше элементу</value>
   </data>
@@ -447,11 +501,38 @@
   <data name="sNoticeTimeCodeEnter1" xml:space="preserve">
     <value>Нажмите цифры, enter или escape</value>
   </data>
+  <data name="sPathAdvertisement" xml:space="preserve">
+    <value>Путь к рекламе</value>
+  </data>
+  <data name="sPathTrailers" xml:space="preserve">
+    <value>Путь к анонсам</value>
+  </data>
+  <data name="sReplaceSelectedFile" xml:space="preserve">
+    <value>Заменить выделенный файл</value>
+  </data>
   <data name="sSpring" xml:space="preserve">
     <value>Весна</value>
   </data>
+  <data name="sStorageAdvertisement" xml:space="preserve">
+    <value>Хранилище рекламы</value>
+  </data>
+  <data name="sStorageTrailers" xml:space="preserve">
+    <value>Хранилище анонсов</value>
+  </data>
   <data name="sSummer" xml:space="preserve">
     <value>Лето</value>
+  </data>
+  <data name="sWarningIngest1" xml:space="preserve">
+    <value>Файл с таким именем уже был загружен ранее! Вы уверены, что хотите заменить его?</value>
+  </data>
+  <data name="sWarningIngest2" xml:space="preserve">
+    <value>Такой код привязки уже есть в этом ассете:{0}{1}{0}с файлом:{2}{0}{0}</value>
+  </data>
+  <data name="sWarningIngest3" xml:space="preserve">
+    <value>Заменяемый файл находится в эфирном плейлисте!{0}Необходимо обсудить замену файла с Вашим медиапланером!</value>
+  </data>
+  <data name="sWarningPlaylistImport1" xml:space="preserve">
+    <value>В сформированном плейлисте есть ошибки!{0}Строго не рекомендуется продолжать импорт!{0}Вы точно уверены что контролируете все последствия???</value>
   </data>
   <data name="sWinter" xml:space="preserve">
     <value>Зима</value>

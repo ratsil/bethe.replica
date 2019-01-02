@@ -492,4 +492,25 @@
   <data name="sMix" xml:space="preserve">
     <value>Нарезка</value>
   </data>
+  <data name="sStartNow" xml:space="preserve">
+    <value>Старт сейчас</value>
+  </data>
+  <data name="sSex" xml:space="preserve">
+    <value>Пол</value>
+  </data>
+  <data name="sTSR1" xml:space="preserve">
+    <value>не удалось подсоедениться к БД TSR</value>
+  </data>
+  <data name="sTSR2" xml:space="preserve">
+    <value>не прочитали ответ от БД TSR</value>
+  </data>
+  <data name="sFilesAgeSet" xml:space="preserve">
+    <value>Установить срок хранения файлов</value>
+  </data>
+  <data name="sAssetsProperties" xml:space="preserve">
+    <value>Свойства множества ассетов</value>
+  </data>
+  <data name="sCached" xml:space="preserve">
+    <value>В кэше</value>
+  </data>
 </root>

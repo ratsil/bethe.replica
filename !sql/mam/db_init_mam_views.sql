@@ -58,7 +58,7 @@ CREATE OR REPLACE VIEW mam."vAssetsEnabled" AS
 
 CREATE OR REPLACE VIEW mam."vAssetsVideoTypes" AS
 	SELECT ast.id, vtp.id as "idVideoTypes", vtp."sName" as "sVideoTypeName"
-		FROM mam."vAssets" ast, mam."tVideos" vid, mam."tVideoTypes" vtp
+		FROM mam."tAssets" ast, mam."tVideos" vid, mam."tVideoTypes" vtp
 		WHERE ast.id=vid."idAssets" AND vid."idVideoTypes"=vtp.id;
 
 CREATE OR REPLACE VIEW mam."vAssetsPersons" AS
@@ -120,55 +120,106 @@ CREATE OR REPLACE VIEW mam."vAssetsClasses" AS
 	SELECT ast.id, c.id as "idClasses", c."sName" as "sClassName", c."idParent" as "nTestatorClassID"
 		FROM mam."vAssets" ast, pl."tClasses" c
 		WHERE 'tClasses'=ast."sTableName" AND c.id=ast."nValue";
-		
-CREATE OR REPLACE VIEW mam."vAssetsResolved" AS
-		 SELECT DISTINCT ON (ast.id) ast.id, ast."sName", vid.id AS "idVideos", vid."sName" AS "sVideoName", vtp.id AS "idVideoTypes", vtp."sName" AS "sVideoTypeName", ast_p."nPersonsQty", ast_a."nAlbumsQty", ast_s."nStylesQty", ast_r."idRotations", ast_r."sRotationName", ast_pl."idPalettes", ast_pl."sPaletteName", ast_sli."idSoundLevels" AS "idSoundLevelsForStart", ast_sli."sSoundLevelName" AS "sSoundLevelNameForStart", ast_slo."idSoundLevels" AS "idSoundLevelsForStop", ast_slo."sSoundLevelName" AS "sSoundLevelNameForStop", ast_c."idCues", ast_c."sSong" AS "sCueSong", ast_c."sArtist" AS "sCueArtist", ast_c."sAlbum" AS "sCueAlbum", ast_c."nYear" AS "nCueYear", ast_c."sPossessor" AS "sCuePossessor", ast_f."idFiles", ast_f."idStorages", ast_f."idStorageTypes", ast_f."sStorageTypeName", ast_f."bStorageEnabled", ast_f."sPath", ast_f."sStorageName", ast_f."sFilename", ast_f."dtLastFileEvent", ast_f."sFile", ast_f."eError" AS "eFileError", ast_tc."nFrameIn", ast_tc."nFrameOut", ast_tc."nFramesQty", ast_lp."dtLastPlayed", 
+
+CREATE OR REPLACE VIEW mam."vSex" AS 
+	SELECT cv.id, cv."sValue" AS "sName"
+		FROM mam."tCategoryValues" cv, mam."tCategories" c
+		WHERE c."sName"::text = 'sex'::text AND cv."idCategories" = c.id;
+	ALTER TABLE mam."vSex" OWNER TO pgsql;
+
+CREATE OR REPLACE VIEW mam."vAssetsSex" AS 
+	SELECT ast.id, p.id AS "idSex", p."sName" AS "sSexName"
+		FROM mam."vAssets" ast, mam."vSex" p
+		WHERE 'tCategoryValues'::text = ast."sTableName"::text AND p.id = ast."nValue";
+	ALTER TABLE mam."vAssetsSex" OWNER TO pgsql;
+
+CREATE OR REPLACE VIEW mam."vAssetsResolved" AS 
+	SELECT DISTINCT ON (ast.id) ast.id,
+			ast."sName",
+			vid.id AS "idVideos",
+			vid."sName" AS "sVideoName",
+			vtp.id AS "idVideoTypes",
+			vtp."sName" AS "sVideoTypeName",
+			ast_p."nPersonsQty",
+			ast_a."nAlbumsQty",
+			ast_s."nStylesQty",
+			ast_r."idRotations",
+			ast_r."sRotationName",
+			ast_pl."idPalettes",
+			ast_pl."sPaletteName",
+			ast_sli."idSoundLevels" AS "idSoundLevelsForStart",
+			ast_sli."sSoundLevelName" AS "sSoundLevelNameForStart",
+			ast_slo."idSoundLevels" AS "idSoundLevelsForStop",
+			ast_slo."sSoundLevelName" AS "sSoundLevelNameForStop",
+			ast_c."idCues",
+			ast_c."sSong" AS "sCueSong",
+			ast_c."sArtist" AS "sCueArtist",
+			ast_c."sAlbum" AS "sCueAlbum",
+			ast_c."nYear" AS "nCueYear",
+			ast_c."sPossessor" AS "sCuePossessor",
+			ast_f."idFiles",
+			ast_f."idStorages",
+			ast_f."idStorageTypes",
+			ast_f."sStorageTypeName",
+			ast_f."bStorageEnabled",
+			ast_f."sPath",
+			ast_f."sStorageName",
+			ast_f."sFilename",
+			ast_f."dtLastFileEvent",
+			ast_f."sFile",
+			ast_f."eError" AS "eFileError",
+			ast_tc."nFrameIn",
+			ast_tc."nFrameOut",
+			ast_tc."nFramesQty",
+			ast_lp."dtLastPlayed",
 				CASE
 					WHEN ast_e.id IS NULL THEN 0
 					ELSE 1
-				END AS "bPLEnabled", ast_cl."idClasses", ast_cl."sClassName", ast_cl."nTestatorClassID", ast_tp."sType", ast_pr."idParent", ast_tp."idType"
-		   FROM mam."vAssetTimings" ast_lp, mam."vAssets" ast
-		   LEFT JOIN mam."vAssetsEnabled" ast_e ON ast.id = ast_e.id
-		   LEFT JOIN ( SELECT "vAssetsPersons".id, count(*) AS "nPersonsQty"
-			  FROM mam."vAssetsPersons"
-			 GROUP BY "vAssetsPersons".id) ast_p ON ast.id = ast_p.id
-		   LEFT JOIN ( SELECT "vAssetsAlbums".id, count(*) AS "nAlbumsQty"
-		   FROM mam."vAssetsAlbums"
-		  GROUP BY "vAssetsAlbums".id) ast_a ON ast.id = ast_a.id
-		   LEFT JOIN ( SELECT "vAssetsStyles".id, count(*) AS "nStylesQty"
-		   FROM mam."vAssetsStyles"
-		  GROUP BY "vAssetsStyles".id) ast_s ON ast.id = ast_s.id
-		   LEFT JOIN mam."vAssetsCues" ast_c ON ast.id = ast_c.id
-		   LEFT JOIN mam."vAssetsRotations" ast_r ON ast.id = ast_r.id
-		   LEFT JOIN mam."vAssetsPalettes" ast_pl ON ast.id = ast_pl.id
-		   LEFT JOIN mam."vAssetsSoundLevels" ast_sli ON ast.id = ast_sli.id AND 'sound_start'::text = ast_sli."sSoundLevelType"::text
-		   LEFT JOIN mam."vAssetsSoundLevels" ast_slo ON ast.id = ast_slo.id AND 'sound_end'::text = ast_slo."sSoundLevelType"::text
-		   LEFT JOIN mam."vAssetsFiles" ast_f ON ast.id = ast_f.id
-		   LEFT JOIN mam."vAssetsTimeCodes" ast_tc ON ast.id = ast_tc.id
-		   LEFT JOIN mam."tVideos" vid ON ast.id = vid."idAssets"
-		   LEFT JOIN mam."tVideoTypes" vtp ON vid."idVideoTypes" = vtp.id
-		   LEFT JOIN mam."vAssetsClasses" ast_cl ON ast.id = ast_cl.id
-		   LEFT JOIN mam."vAssetTypes" ast_tp ON ast.id = ast_tp.id
-		   LEFT JOIN mam."vParents" ast_pr ON ast.id = ast_pr.id
-		  WHERE ast.id = ast_lp.id AND ('nFramesQty'::text = ast."sKey"::text OR 'program'::text = vtp."sName"::text);
+				END AS "bPLEnabled",
+			ast_cl."idClasses",
+			ast_cl."sClassName",
+			ast_cl."nTestatorClassID",
+			ast_tp."sType",
+			ast_pr."idParent",
+			ast_tp."idType",
+			ast_sx."idSex",
+			ast_sx."sSexName"
+		FROM mam."vAssetTimings" ast_lp,
+    		mam."vAssets" ast
+			LEFT JOIN mam."vAssetsEnabled" ast_e ON ast.id = ast_e.id
+			LEFT JOIN ( SELECT "vAssetsPersons".id,
+					count(*) AS "nPersonsQty"
+				FROM mam."vAssetsPersons"
+				GROUP BY "vAssetsPersons".id) ast_p ON ast.id = ast_p.id
+			LEFT JOIN ( SELECT "vAssetsAlbums".id,
+					count(*) AS "nAlbumsQty"
+				FROM mam."vAssetsAlbums"
+				GROUP BY "vAssetsAlbums".id) ast_a ON ast.id = ast_a.id
+			LEFT JOIN ( SELECT "vAssetsStyles".id,
+					count(*) AS "nStylesQty"
+				FROM mam."vAssetsStyles"
+				GROUP BY "vAssetsStyles".id) ast_s ON ast.id = ast_s.id
+			LEFT JOIN mam."vAssetsCues" ast_c ON ast.id = ast_c.id
+			LEFT JOIN mam."vAssetsRotations" ast_r ON ast.id = ast_r.id
+			LEFT JOIN mam."vAssetsPalettes" ast_pl ON ast.id = ast_pl.id
+			LEFT JOIN mam."vAssetsSex" ast_sx ON ast.id = ast_sx.id
+			LEFT JOIN mam."vAssetsSoundLevels" ast_sli ON ast.id = ast_sli.id AND 'sound_start'::text = ast_sli."sSoundLevelType"::text
+			LEFT JOIN mam."vAssetsSoundLevels" ast_slo ON ast.id = ast_slo.id AND 'sound_end'::text = ast_slo."sSoundLevelType"::text
+			LEFT JOIN mam."vAssetsFiles" ast_f ON ast.id = ast_f.id
+			LEFT JOIN mam."vAssetsTimeCodes" ast_tc ON ast.id = ast_tc.id
+			LEFT JOIN mam."tVideos" vid ON ast.id = vid."idAssets"
+			LEFT JOIN mam."tVideoTypes" vtp ON vid."idVideoTypes" = vtp.id
+			LEFT JOIN mam."vAssetsClasses" ast_cl ON ast.id = ast_cl.id
+			LEFT JOIN mam."vAssetTypes" ast_tp ON ast.id = ast_tp.id
+			LEFT JOIN mam."vParents" ast_pr ON ast.id = ast_pr.id
+		WHERE ast.id = ast_lp.id AND ('nFramesQty'::text = ast."sKey"::text OR 'program'::text = vtp."sName"::text);
+
 
 CREATE OR REPLACE VIEW mam."vPersonsCueLast" AS
 	SELECT "idPersons" as id, "sArtist" as "sCue" 
 		FROM mam."vAssetsCues" ac, (SELECT id, max("idPersons") as "idPersons", count(*) as "nQty" FROM mam."vAssetsPersons" GROUP BY id) ap 
 		WHERE ac.id=ap.id AND 1 = ap."nQty";
 
--- media view declaration. here because of pl and mam references
-CREATE OR REPLACE VIEW media."vFilesUnused" as
-	SELECT * 
-		FROM media."vFiles" 
-		WHERE id NOT IN 
-			(
-				SELECT "idFiles" FROM pl."tItems" GROUP BY "idFiles" 
-				UNION 
-				SELECT "idFiles" FROM mam."vAssetsFiles" GROUP BY "idFiles" 
-				UNION 
-				SELECT "idFiles" FROM pl."tPlugs" GROUP BY "idFiles"
-			);
 CREATE OR REPLACE VIEW mam."vMacros" AS
 	SELECT m.id, m."idMacroTypes", mt."sName" as "sMacroTypeName", m."sName", m."sValue"
 		FROM mam."tMacroTypes" mt, mam."tMacros" m

@@ -16,6 +16,12 @@ namespace scr
 {
 	static public class x
 	{
+
+		static public IEnumerable<scr.services.preferences.Template> GetPlayWith(this scr.services.preferences.Template[] aTemplates, long nPresetID)
+		{
+			scr.services.preferences.Parameters cP;
+			return aTemplates.Where(o => null != o.aParameters && null != (cP = o.aParameters.Get(nPresetID)) && cP.bPlayWith);
+		}
 		static public scr.services.preferences.Template Get(this scr.services.preferences.Template[] aTemplates, Bind eBind)
 		{
 			return aTemplates.FirstOrDefault(o => o.eBind == eBind);
@@ -23,6 +29,14 @@ namespace scr
 		static public scr.services.preferences.Parameters Get(this scr.services.preferences.Parameters[] aParameters, long nPresetID)
 		{
 			return aParameters.FirstOrDefault(o => o.nPresetID == nPresetID);
+		}
+		static public scr.services.preferences.Parameters GetParameters(this scr.services.preferences.Template[] aTemplates, long nPresetID, TemplateButton cTB)
+		{
+			scr.services.preferences.Template cT = aTemplates.FirstOrDefault(o => null != o.sFile && o.sFile == cTB.sFile);
+			if (null != cT)
+				return cT.aParameters.Get(nPresetID);
+			else
+				return null;
 		}
 		static public scr.services.preferences.Offset[] Get(this scr.services.preferences.Offset[] aOffsets, long nPresetID)
 		{
@@ -34,15 +48,15 @@ namespace scr
 				return false;
 			if (null != cOffset.sType && (null==cPLI || cOffset.sType.ToLower() != cPLI.eType.ToString().ToLower()))
 				return false;
-			if (null != cOffset.sClass && (null==cPLI || cOffset.sClass.ToLower() != cPLI.sClassName.ToLower()))
+			if (null != cOffset.sClass && (null==cPLI || !cPLI.aClasses.ContainsName(cOffset.sClass)))
 				return false;
 			if (null != cOffset.sNextType && (null==cNextPLI || cOffset.sNextType.ToLower() != cNextPLI.eType.ToString().ToLower()))
 				return false;
-			if (null != cOffset.sNextClass && (null == cNextPLI || cOffset.sNextClass.ToLower() != cNextPLI.sClassName.ToLower()))
+			if (null != cOffset.sNextClass && (null == cNextPLI || !cNextPLI.aClasses.ContainsName(cOffset.sNextClass)))
 				return false;
 			if (null != cOffset.sPreType && (null == cPreviousPLI || cOffset.sPreType.ToLower() != cPreviousPLI.eType.ToString().ToLower()))
 				return false;
-			if (null != cOffset.sPreClass && (null == cPreviousPLI || cOffset.sPreClass.ToLower() != cPreviousPLI.sClassName.ToLower()))
+			if (null != cOffset.sPreClass && (null == cPreviousPLI || !cPreviousPLI.aClasses.ContainsName(cOffset.sPreClass)))
 				return false;
 			return true;
 		}
@@ -75,15 +89,32 @@ namespace scr
 					return true;
 			return false;
 		}
-		public static void Kill(this Item cItem)
+        static public void Kill(this Item cItem)
 		{
 			Item.Kill(cItem);
 		}
-	}
-	#region services types casts
-	public class Item : TemplateButton.Item
+        static public bool ContainsName(this IP.Class[] aC, string sName)
+        {
+            if (aC.IsNullOrEmpty())
+                return false;
+            foreach (IP.Class cC in aC)
+                if (sName.ToLower() == cC.sName.ToLower())
+                    return true;
+            return false;
+        }
+        static public IP.Class ToClassIP(this DBI.Class cDBIClass)
+        {
+            return new IP.Class { nID = cDBIClass.nID, sName = cDBIClass.sName };
+        }
+        static public IP.Class[] ToArrayIP(this DBI.Class[] aC)
+        {
+            return aC.Select(o => o.ToClassIP()).ToArray();
+        }
+    }
+    #region services types casts
+    public class Item : TemplateButton.Item
 	{
-		public string sCurrentClass;
+		public IP.Class[] aCurrentClasses;
 
 		private static Item Get(ulong nID, string sInfo)
 		{ 
@@ -131,7 +162,7 @@ namespace scr
 		{
 			if (null == cItem)
 				return null;
-			return new IP.Playlist() { nID = cItem.nID, eStatus = cItem.eStatus.To<IP.Status>(), sCurrentClass = cItem.sCurrentClass, sPreset = cItem.sPreset, sInfo = cItem.sInfo };
+			return new IP.Playlist() { nID = cItem.nID, eStatus = cItem.eStatus.To<IP.Status>(), aCurrentClasses = cItem.aCurrentClasses, sPreset = cItem.sPreset, sInfo = cItem.sInfo };
 		}
 		static protected Item Get(ulong nID)
 		{

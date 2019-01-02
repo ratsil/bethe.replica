@@ -8,139 +8,61 @@ using helpers.replica.media;
 using helpers.replica.pl;
 
 using g = globalization;
+using helpers.replica.tsr;
 
 namespace webservice.services
 {
 	public class PlaylistImport
 	{
-		public class VIPlaylist
-		{
-			private class Block
-			{
-				public class Type
-				{
-					public string sName;
-					public string sCover;
-					static public bool operator ==(Type cLeft, Type cRight)
-					{
-						bool bRetVal = false;
-						if (null == (object)cLeft) //привидение к object нужно, чтобы не было рекурсии
-						{
-							if (null == (object)cRight)
-								return true;
-							else
-								return false;
-						}
-						else if (null == (object)cRight)
-							return false;
-						if (cLeft.sName == cRight.sName && cLeft.sCover == cRight.sCover)
-							bRetVal = true;
-						return bRetVal;
-					}
-					static public bool operator !=(Type cLeft, Type cRight)
-					{
-						return !(cLeft == cRight);
-					}
-
-					public Type(string sType, string sCover)
-					{
-						sName = sType.Trim(' ', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0').ToLower();
-						this.sCover = sCover.ToLower();
-					}
-				}
-
-				public TimeSpan tsStart;
-				public Type cType;
-				public Queue<Asset> aqAssets;
-
-				public Block(TimeSpan tsStart, Type cType)
-				{
-					this.tsStart = tsStart;
-					this.cType = cType;
-					aqAssets = new Queue<Asset>();
-				}
-			}
-
-			private List<Block> _aBlocks;
-			private Block _cBlockLast;
-
-			public int nBlocksQty
-			{
-				get
-				{
-					return _aBlocks.Count;
-				}
-			}
-
-			public VIPlaylist()
-			{
-				_aBlocks = new List<Block>();
-			}
-
-			private bool DoesBlockExist(TimeSpan tsStart, Block.Type cType)
-			{
-				return (0 < _aBlocks.Count(o => o.tsStart == tsStart && (null == cType || o.cType == cType)));
-			}
-			public bool DoesBlockExist(TimeSpan tsStart, string sType, string sCover)
-			{
-				return DoesBlockExist(tsStart, new Block.Type(sType, sCover));
-			}
-			public bool DoesBlockExist(TimeSpan tsStart)
-			{
-				return DoesBlockExist(tsStart, null);
-			}
-			public void BlockAdd(TimeSpan tsStart, string sType, string sCover)
-			{
-				Block.Type cType = new Block.Type(sType, sCover);
-				if (DoesBlockExist(tsStart, cType))
-					throw new Exception("specified block already exists [" + tsStart.ToShort() + ":" + sType + ":" + sCover + "]");
-				_cBlockLast = new Block(tsStart, cType);
-				_aBlocks.Add(_cBlockLast);
-			}
-			private Block BlockGet(TimeSpan tsStart, string sType, string sCover)
-			{
-				return _aBlocks.FirstOrDefault(o => o.tsStart == tsStart && o.cType == new Block.Type(sType, sCover));
-			}
-			public int BlockAssetsQtyGet(TimeSpan tsStart, string sType, string sCover)
-			{
-				Block cBlock = BlockGet(tsStart, sType, sCover);
-				if (null == cBlock)
-					throw new Exception("specified block doesn't exist [" + tsStart.ToShort() + ":" + sType + ":" + sCover + "]");
-				return cBlock.aqAssets.Count;
-			}
-			public void BlockLastAssetAdd(Asset cAsset)
-			{
-				if (null == _cBlockLast)
-					throw new Exception("can't find last block");
-				_cBlockLast.aqAssets.Enqueue(cAsset);
-			}
-			public Asset BlockAssetDequeue(TimeSpan tsStart, string sType, string sCover)
-			{
-				Block cBlock = BlockGet(tsStart, sType, sCover);
-				if (null == cBlock)
-					throw new Exception("specified block doesn't exist [" + tsStart.ToShort() + ":" + sType + ":" + sCover + "]");
-				if (0 < cBlock.aqAssets.Count)
-					return cBlock.aqAssets.Dequeue();
-				return null;
-			}
-			public ILookup<TimeSpan, Asset[]> AssetsUnusedGet()
-			{
-				return _aBlocks.Where(o => o.aqAssets.Count > 0).ToLookup(k => k.tsStart, v => v.aqAssets.ToArray());
-			}
-		}
 		private class RotateInfo
 		{
-			private LinkedList<Asset> _aAssets;
-			private LinkedListNode<Asset> _cLLN;
+			private List<Asset> _aAssets;
+			private int _cCurrentIndex;
 
-			public RotateInfo(IEnumerable<Asset> iCollection)
-			{
-				_aAssets = new LinkedList<Asset>(iCollection);
-			}
-			public Asset Next()
-			{
-				return (_cLLN = (null == _cLLN || null == _cLLN.Next ? _aAssets.First : _cLLN.Next)).Value;
-			}
+            public RotateInfo(IEnumerable<Asset> iCollection)
+            {
+                _aAssets = new List<Asset>(iCollection);
+                _cCurrentIndex = 0;
+            }
+            public Asset Next()
+            {
+                lock (_aAssets)
+                    return _aAssets[(_cCurrentIndex = (_cCurrentIndex >= _aAssets.Count - 1 ? 0 : _cCurrentIndex + 1))];
+            }
+            public void Add(Asset cAsset)
+            {
+                lock (_aAssets)
+                    _aAssets.Add(cAsset);
+            }
+            public void Randomize()
+            {
+                lock (_aAssets)
+                {
+                    if (_aAssets.Count < 2)
+                        return;
+                    Random cR = new Random();
+                    List<Asset> aRandomAssets = new List<Asset>();
+                    Asset cAsset;
+                    int nRandomIndex;
+                    while (_aAssets.Count > 0)
+                    {
+                        nRandomIndex = cR.Next(0, _aAssets.Count - 1);
+                        cAsset = _aAssets[nRandomIndex];
+                        _aAssets.RemoveAt(nRandomIndex);
+                        aRandomAssets.Add(cAsset);
+                    }
+                    _aAssets = aRandomAssets;
+                }
+            }
+		}
+		public class XLSRow
+		{
+			public string sID;
+			public TimeSpan tsTime;
+            public long nFramesQty;
+			public string sText;
+			public string sType;
+			public string sCover;
 		}
 
 		public string[] aMessages
@@ -151,9 +73,12 @@ namespace webservice.services
 				return _ahMessages.Select(o => Environment.NewLine + o.Key + (1 > o.Value.Count ? "" : sDelimeter + string.Join(sDelimeter, o.Value.Distinct()) + Environment.NewLine)).ToArray();
 			}
 		}
+		public string sLog;
 
 		private Dictionary<string, List<string>> _ahMessages;
 		private Dictionary<string, RotateInfo> _ahBumpers;
+		Dictionary<string, Asset> _ahVIBinds;
+        private Queue<Asset> _ahAllAssets;
 		private webservice.DBInteract _cDBI;
 
 		public PlaylistImport(webservice.DBInteract cDBI)
@@ -202,66 +127,15 @@ namespace webservice.services
 			return cRetVal;
 		}
 
-		private Queue<List<string>> GetValuesFromExcel(string sFile)
-		{
-			Queue<List<string>> aqRetVal = null;
-
-			java.io.InputStream inp = new java.io.FileInputStream(sFile);
-
-			org.apache.poi.ss.usermodel.Workbook wb = (org.apache.poi.ss.usermodel.Workbook)org.apache.poi.ss.usermodel.WorkbookFactory.create(inp);
-			org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
-			int nRowsQty = sheet.getLastRowNum() + 1;
-			int nCellsQty = 0;
-			org.apache.poi.ss.usermodel.Row row = null;
-			org.apache.poi.ss.usermodel.Cell cell = null;
-			aqRetVal = new Queue<List<string>>();
-			List<string> aRow = null;
-			for (int nRowIndx = sheet.getFirstRowNum(); nRowsQty > nRowIndx; nRowIndx++)
-			{
-				if (null != (row = sheet.getRow(nRowIndx)))
-				{
-					nCellsQty = row.getLastCellNum() + 1;
-					aRow = new List<string>();
-					for (int nCellIndx = row.getFirstCellNum(); nCellsQty > nCellIndx; nCellIndx++)
-					{
-						if (null != (cell = row.getCell(nCellIndx)))
-						{
-							object cValue = null;
-							switch (cell.getCellType())
-							{
-								case org.apache.poi.ss.usermodel.Cell.__Fields.CELL_TYPE_STRING:
-									cValue = cell.getRichStringCellValue().getString();
-									break;
-								case org.apache.poi.ss.usermodel.Cell.__Fields.CELL_TYPE_NUMERIC:
-									cValue = cell.getNumericCellValue();
-									if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell))
-										cValue = DateTime.FromOADate((double)cValue).ToString("yyyy-MM-dd HH:mm:ss");
-									break;
-								case org.apache.poi.ss.usermodel.Cell.__Fields.CELL_TYPE_BOOLEAN:
-									cValue = cell.getBooleanCellValue();
-									break;
-								case org.apache.poi.ss.usermodel.Cell.__Fields.CELL_TYPE_FORMULA:
-									cValue = cell.getCellFormula();
-									break;
-								default:
-									cValue = "";
-									break;
-							}
-							aRow.Add(cValue.ToString());
-						}
-					}
-					aqRetVal.Enqueue(aRow);
-				}
-			}
-			inp.close();
-			return aqRetVal;
-		}
 		private Asset RotateBumper(String sMask)
 		{
 			if (null == _ahBumpers)
 				_ahBumpers = new Dictionary<string, RotateInfo>();
 			if (!_ahBumpers.ContainsKey(sMask))
 			{
+				return null; // to speed up parsing this part was moved to the beginning of parse
+
+
 				Queue<Asset> aqAssets = null;
 				if (null != (aqAssets = _cDBI.AssetsGet(sMask, DBInteract.SearchMask.starts)) && 0 < aqAssets.Count)
 				{
@@ -285,16 +159,31 @@ namespace webservice.services
 				string sFileLine = "";
 				long nID = -1;
 				int nStart, nStop;
-				Dictionary<long, Asset> ahBinds = new Dictionary<long, Asset>();
-				foreach (Asset cAsset in _cDBI.AssetsGet()) //new CustomValue("beep_id", null)
-				{
-					try
+				Dictionary<long, Asset> ahBinds;
+
+				if (webservice.Preferences.bPowerGoldIDsAreAssetIDs)   // это использовалось когда в ПГ-файле стояли айди ассетов (старый эфир), а не кастом вэльюз, как сейчас (hd эфир) (из-за старой базы - PG уже привязан к ней)
+                {
+					ahBinds = new Dictionary<long, Asset>();
+					if (null == _ahAllAssets)
+						_ahAllAssets = _cDBI.AssetsGet();
+					foreach (Asset cAsset in _ahAllAssets) //new CustomValue("beep_id", null)
 					{
-						//nID = cAsset.aCustomValues[0].sValue.ToID();
-						ahBinds.Add(cAsset.nID, cAsset);
+						try
+						{
+							//nID = cAsset.aCustomValues[0].sValue.ToID();
+							ahBinds.Add(cAsset.nID, cAsset);
+						}
+						catch(Exception ex)
+                        {
+                            (new Logger()).WriteError("foreach: ", ex);
+                        }
 					}
-					catch { }
 				}
+				else
+				{
+					ahBinds = _cDBI.PGAssetsResolvedGet();
+				}
+
 
 				aqRetVal = new Queue<Asset>();
 				System.IO.StreamReader cSR = new System.IO.StreamReader(sFile, System.Text.Encoding.GetEncoding(1251));
@@ -304,14 +193,19 @@ namespace webservice.services
 					nLine++;
 					if (1 > sFileLine.Length)
 						continue;
-					nStart = sFileLine.IndexOf(';') + 1;
-					if (2 > nStart)
-					{
+                    nStart = 0;
+                    for (int ni = 0; ni < webservice.Preferences.nColumnWithPGIds; ni++)
+                    {
+                        nStart = sFileLine.IndexOf(';') + 1;
+                    }
+
+                    if (0 > webservice.Preferences.nColumnWithPGIds && webservice.Preferences.nColumnWithPGIds >= nStart)
+                    {
 						MessageAdd(g.Webservice.sErrorPLImport2, nLine + ": " + sFileLine);
 						continue;
 					}
 					nStop = sFileLine.IndexOf(';', nStart);
-					if (3 > nStop)
+					if (3 > nStop || nStop - nStart < 1)
 					{
 						MessageAdd(g.Webservice.sErrorPLImport2, nLine + ": " + sFileLine);
 						continue;
@@ -329,8 +223,15 @@ namespace webservice.services
 						MessageAdd(g.Webservice.sErrorPLImport2, nLine + ": " + sFileLine);
 						continue;
 					}
-					if (ahBinds.ContainsKey(nID) && null != ahBinds[nID])
+					if (ahBinds.ContainsKey(nID) && null != ahBinds[nID] && null != ahBinds[nID].cFile)
+					{
+						if (ahBinds[nID].cFile.eError != helpers.replica.Error.no)
+						{
+							MessageAdd(g.Webservice.sErrorPLImport21.Fmt(ahBinds[nID].cFile.eStatus.ToString(), ahBinds[nID].cFile.eError.ToString(), ahBinds[nID].cFile.sFile));
+							continue;
+                        }
 						aqRetVal.Enqueue(ahBinds[nID]);
+					}
 					else
 						MessageAdd(g.Webservice.sErrorPLImport3, nID.ToStr());
 				}
@@ -341,65 +242,107 @@ namespace webservice.services
 				throw new Exception(g.Webservice.sErrorPLImport5 + ": " + sFile);
 			return aqRetVal;
 		}
+		public Queue<XLSRow> RowsGet(Queue<List<string>> aqExcelValues)
+		{
+			Queue<XLSRow> cRetVal = new Queue<XLSRow>();
+			XLSRow cCurrent;
+			List<string> aRow = null;
+			List<string> aSIDs = new List<string>();
+			string sTime, sText, sID, sType, sCover, sDur;
+            int nDay = 0, nLastHour = 0;
+			TimeSpan ts;
+            long nDurSec;
+			while (0 < aqExcelValues.Count)
+			{
+				aRow = aqExcelValues.Dequeue();
+				if (3 > aRow.Count)
+					continue;
+				sID = aRow[2].Trim();
+				if (1 > sID.Length)
+					continue;
+				if (g.Webservice.sNoticePLImport2 == sID)
+					continue;
+
+				ts = TimeSpan.MinValue;
+				sTime = aRow[0].Trim();
+				sText = aRow[1].Trim();
+                sDur = aRow[3].Trim();
+				sType = aRow[4].Trim().ToLower();
+				sCover = aRow[12].Trim().ToLower();
+
+				if (0 < sTime.Length)
+				{
+					try
+					{
+						ts = DateTime.Parse(sTime).TimeOfDay;
+                        if (ts.Hours < nLastHour && nLastHour - ts.Hours > 10)
+                        {
+                            nDay++;
+                        }
+                        nLastHour = ts.Hours;
+                        ts = ts.Add(new TimeSpan(nDay, 0, 0, 0));
+                    }
+					catch
+					{
+						continue;
+					}
+
+					if (1 > sText.Length)
+						throw new Exception(g.Webservice.sErrorPLImport6 + sTime);
+				}
+                nDurSec = long.TryParse(sDur, out nDurSec) ? nDurSec : 0;
+                cCurrent = new XLSRow() { sID = sID, tsTime = ts, sType = sType, sCover = sCover, sText = sText, nFramesQty = nDurSec * 25 };
+				cRetVal.Enqueue(cCurrent);
+
+				if (!_ahVIBinds.ContainsKey(sID))
+					aSIDs.Add(sID);
+			}
+			AddAdvertsBySIDs(aSIDs);
+			return cRetVal;
+		}
 		public VIPlaylist VideoInternationalFileParse(string sFile)
 		{
+			sLog = "VI LOG\n";
+			Dictionary<string, Class> ahClasses = _cDBI.ClassesGet().ToDictionary(o => o.sName, o => o);
 			VIPlaylist cRetVal = null;
 			if (null != sFile && System.IO.File.Exists(sFile))
 			{
-				Queue<List<string>> aqExcelValues = GetValuesFromExcel(sFile);
+				Queue<List<string>> aqExcelValues = Excel.GetValuesFromExcel(sFile);
 
-				Dictionary<string, Asset> ahVIBinds = new Dictionary<string, Asset>();
+				_ahVIBinds = new Dictionary<string, Asset>();
 				foreach (Asset cAsset in _cDBI.AssetsGet(new CustomValue("vi_id", null)))
 				{
 					try
 					{
-						ahVIBinds.Add(cAsset.aCustomValues[0].sValue, cAsset);
+						_ahVIBinds.Add(cAsset.aCustomValues[0].sValue, cAsset);
 					}
 					catch { }
 				}
 
 				cRetVal = new VIPlaylist();
-				List<string> aRow = null;
 				TimeSpan tsBlockTime = TimeSpan.MinValue;
 				TimeSpan tsPrevBlockTime = TimeSpan.MinValue;
 				int nBlockExcelStart = 0;
 				int nBlockAdvertisementStart = 0;
-				string sTime, sText, sID, sType, sCover;
-				TimeSpan ts;
 
 				List<string> aMissedIDs = new List<string>();
-				while (0 < aqExcelValues.Count)
+                Dictionary<string, string> ahDifferentDurations = new Dictionary<string, string>();
+                XLSRow cRow;
+				// берем заранее все sIDs из TSR, иначе таймауты идут при множественных обращениях
+				Queue<XLSRow> ahRows = RowsGet(aqExcelValues);
+
+
+				while (0 < ahRows.Count)
 				{
-					aRow = aqExcelValues.Dequeue();
-					if (3 > aRow.Count)
-						continue;
-					sID = aRow[2].Trim();
-					if (1 > sID.Length)
-						continue;
-					if (g.Webservice.sNoticePLImport2 == sID)
-						continue;
-
-					sTime = aRow[0].Trim();
-					sText = aRow[1].Trim();
-					sType = aRow[4].Trim().ToLower();
-					sCover = aRow[12].Trim().ToLower();
-
-					if (0 < sTime.Length)
+					cRow = ahRows.Dequeue();
+					if (TimeSpan.MinValue < cRow.tsTime)
 					{
-						try
-						{
-							ts = DateTime.Parse(sTime).TimeOfDay;
-						}
-						catch
-						{
-							continue;
-						}
 
-						if (1 > sText.Length)
-							throw new Exception(g.Webservice.sErrorPLImport6 + sTime);
+						if (1 > cRow.sText.Length)
+							throw new Exception(g.Webservice.sErrorPLImport6 + cRow.tsTime);
 						try
 						{
-							nBlockExcelStart = ts.Minutes;
+							nBlockExcelStart = cRow.tsTime.Minutes;
 							nBlockAdvertisementStart = 0;
 							for (int nMinute = 0; 60 > nMinute; nMinute += 20)
 							{
@@ -407,57 +350,213 @@ namespace webservice.services
 									nBlockAdvertisementStart = nMinute;
 							}
 							tsPrevBlockTime = tsBlockTime;
-							tsBlockTime = new TimeSpan(ts.Hours, nBlockAdvertisementStart, 0);
+							tsBlockTime = new TimeSpan(cRow.tsTime.Days, cRow.tsTime.Hours, nBlockAdvertisementStart, 0);
 							if (tsPrevBlockTime != tsBlockTime)
-							{
-								while (tsBlockTime < tsPrevBlockTime)   // || cRetVal.DoesBlockExist(tsBlockTime)
-									tsBlockTime = tsBlockTime.Add(new TimeSpan(0, 1, 0, 0));
-							}
-							if (!cRetVal.DoesBlockExist(tsBlockTime, sType, sCover))
-								cRetVal.BlockAdd(tsBlockTime, sType, sCover);
-						}
-						catch
-						{
-							throw new Exception(g.Webservice.sErrorPLImport7 + sTime);
+                            {
+                                while (tsBlockTime < tsPrevBlockTime)   // || cRetVal.DoesBlockExist(tsBlockTime)
+                                    tsBlockTime = tsBlockTime.Add(new TimeSpan(0, 1, 0, 0));
+                            }
+                            if (!cRetVal.DoesBlockExist(tsBlockTime, cRow.sType, cRow.sCover))
+                                cRetVal.BlockAdd(tsBlockTime, cRow.sType, cRow.sCover);
+                        }
+                        catch
+                        {
+							throw new Exception(g.Webservice.sErrorPLImport7 + cRow.tsTime);
 						};
 					}
 
-					if (1 > sID.Length)
+					if (1 > cRow.sID.Length)
 						throw new Exception(g.Webservice.sErrorPLImport8.Fmt((0 < tsBlockTime.Days ? tsBlockTime.Days + g.Helper.sDays : ""), tsBlockTime.Hours, tsBlockTime.Minutes));
-					if (ahVIBinds.ContainsKey(sID))
-						cRetVal.BlockLastAssetAdd(ahVIBinds[sID]);
-					else
-						aMissedIDs.Add(sID);
+                    if (_ahVIBinds.ContainsKey(cRow.sID))
+                    {
+                        cRetVal.BlockLastAssetAdd(_ahVIBinds[cRow.sID], ahClasses);
+                        if (_ahVIBinds[cRow.sID].nFramesQty != cRow.nFramesQty && !ahDifferentDurations.ContainsKey(cRow.sID))
+                            ahDifferentDurations.Add(cRow.sID, "[xls=" + cRow.sText + "][time=" + cRow.tsTime.ToString("hh\\:mm\\:ss") + "][SCode=" + cRow.sID + "][dur_tsr=" + cRow.nFramesQty.ToFramesString(true, false, false, false, false, false) + "] -- [asset=" + _ahVIBinds[cRow.sID].sName + "][dur_asset=" + _ahVIBinds[cRow.sID].nFramesQty.ToFramesString(true, false, false, false, false, false) + "][file=" + _ahVIBinds[cRow.sID].cFile.sFilename + "]");
+                    }
+                    else
+                    {
+                        aMissedIDs.Add(cRow.sID);
+                    }
 				}
 				if (0 < aMissedIDs.Count)
 					MessageAdd(g.Webservice.sErrorPLImport9, aMissedIDs);
-				if (null == cRetVal || 1 > cRetVal.nBlocksQty)
+                if (0 < ahDifferentDurations.Count)
+                    MessageAdd(g.Webservice.sErrorPLImport33, ahDifferentDurations.Values);
+                if (null == cRetVal || 1 > cRetVal.nBlocksQty)
 					throw new Exception(g.Webservice.sErrorPLImport10);
 			}
 			else
 				throw new Exception(g.Common.sErrorFileNotFound.ToLower() + ":" + sFile);
 			return cRetVal;
 		}
+		private void AddAdvertsBySIDs(List<string> aSIDs)
+		{
+			List<TSRItem> aTSRI;
+			try
+			{
+				aTSRI = TSRItem.ItemsGetBySCodes(webservice.Preferences.sTSRConnection, aSIDs);
+				foreach (TSRItem cI in aTSRI)
+				{
+					AddAdvertBySID(cI);
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageAdd(ex.Message);
+				WebServiceError.Add(ex);
+			}
+		}
+		private bool AddAdvertBySID(TSRItem cTSRI)
+		{
+
+			Advertisement cAsset;
+			File cFile;
+			Class[] aClasses = null;
+			long nFrQty = 0;
+			string sLogInfo = "";
+			
+			try
+			{
+				sLogInfo = cTSRI.sS_Code + "__" + cTSRI.sVI_Code + "__" + cTSRI.sName;
+				if (cTSRI.sVI_Code == "")
+				{
+					MessageAdd(g.Webservice.sErrorPLImport25 + " [" + sLogInfo + "]");
+					return false;
+				}
+				if (cTSRI.sVI_Code.Substring(0, 1) == "\\" || cTSRI.sVI_Code.Substring(0, 1) == "/")  // исправление чел фактора при копировании 
+					cTSRI.sVI_Code = cTSRI.sVI_Code.Substring(1);
+				if (cTSRI.sVI_Code.Substring(cTSRI.sVI_Code.Length - 1, 1) == "\"")   // исправление чел фактора при копировании 
+					cTSRI.sVI_Code = cTSRI.sVI_Code.Substring(0, cTSRI.sVI_Code.Length - 1);
+				if (cTSRI.eType == TSRItem.Type.NULL)
+				{
+					MessageAdd(g.Webservice.sErrorPLImport26 + " [" + sLogInfo + "]");
+					return false;
+				}
+
+				if (cTSRI.eType == TSRItem.Type.СЕТЬ) //  "сеть" - с логотипом
+					aClasses = _cDBI.ClassesGet("`sName` in ('advertisement_with_logo')").ToArray();
+				else if (cTSRI.eType == TSRItem.Type.МОСКВА)
+					aClasses = _cDBI.ClassesGet("`sName` in ('advertisement_without_logo')").ToArray();
+				else
+				{
+					MessageAdd(g.Webservice.sErrorPLImport29 + " [" + sLogInfo + "]");
+					return false;
+				}
+
+				if (!webservice.Preferences.bMakeAdvertAsset)   // новая схема, т.е. ассет рекламы есть и добавляем инфу в ассет. хр-ж уже есть
+				{
+					cAsset = _cDBI.AssetGetByVIID(cTSRI.sVI_Code);
+					if (null == cAsset || cAsset.cFile.eError != helpers.replica.Error.no)
+					{
+						MessageAdd(g.Webservice.sErrorPLImport27 + " [" + sLogInfo + "]");
+						return false;
+					}
+					sLogInfo += " [asset="+ cAsset.sName + "][fileid=" + cAsset.cFile.nID + "][filename=" + cAsset.cFile.sFilename + "]";
+					cAsset.aClasses = aClasses;
+					cAsset.aCustomValues = new CustomValue[] { new CustomValue("vi_id", cTSRI.sS_Code.ToUpper()) };
+				}
+				else // старая схема, т.е. ассета нет и ищем по файлу и добавляем ассет
+				{
+					cFile = _cDBI.FileGetByVIID(cTSRI.sVI_Code);
+					if (null == cFile || cFile.eError != helpers.replica.Error.no)
+					{
+						MessageAdd(g.Webservice.sErrorPLImport27 + " [" + sLogInfo + "]");
+						return false;
+					}
+					sLogInfo += " [fileid=" + cFile.nID + "][filename=" + cFile.sFilename + "]";
+					long nQueryID;
+					if (0 >= (nQueryID = _cDBI.FileDurationQuery(cFile.nID)))
+					{
+						MessageAdd(g.Webservice.sErrorPLImport30 + " [" + sLogInfo + "]");
+						return false;
+					}
+					DateTime dtQuerryEnd = DateTime.Now.AddSeconds(30);
+					helpers.IdNamePair cQuerryRes;
+					while (dtQuerryEnd > DateTime.Now)
+					{
+						cQuerryRes = _cDBI.CommandStatusGet(nQueryID);
+						if (null != cQuerryRes && cQuerryRes.sName == "succeed")
+						{
+							nFrQty = _cDBI.FileDurationResultGet(nQueryID);
+							break;
+						}
+					}
+					if (0 >= nFrQty)
+					{
+						MessageAdd(g.Webservice.sErrorPLImport31 + " [" + sLogInfo + "]");
+						return false;
+					}
+					cAsset = new Advertisement()
+					{
+						aCustomValues = new CustomValue[] { new CustomValue("vi_id", cTSRI.sS_Code.ToUpper()) },
+						cFile = cFile,
+						nID = -1,
+						sName = cTSRI.sName + "_" + cTSRI.sS_Code,
+						stVideo = new Video(-1, cTSRI.sName + "_" + cTSRI.sS_Code, _cDBI.VideoTypeGet("advertisement")),
+						aClasses = aClasses,
+						nFrameIn = 1,
+						nFrameOut = nFrQty,
+						nFramesQty = nFrQty,
+					};
+				}
+				_cDBI.AdvertisementSave(cAsset);
+				sLog += sLogInfo + "\n";
+				_ahVIBinds.Add(cTSRI.sS_Code, cAsset);
+			}
+			catch (Exception ex)
+			{
+				MessageAdd(g.Webservice.sErrorPLImport28 + " [" + sLogInfo + "]");
+				WebServiceError.Add(ex);
+				return false;
+			}
+			return true;
+		}
 		public Dictionary<TimeSpan, Queue<Asset>> DesignFileParse(string sFile)
 		{
 			Dictionary<TimeSpan, Queue<Asset>> ahRetVal = null;
 			if (null != sFile && System.IO.File.Exists(sFile))
 			{
+				ahRetVal = new Dictionary<TimeSpan, Queue<Asset>>();
+				Queue<List<string>> aqExcelValues =Excel.GetValuesFromExcel(sFile);
+				List<string> aRow = null;
 				Dictionary<string, Asset> ahAssetsNamesBinds = new Dictionary<string, Asset>();
-				foreach (Asset cA in _cDBI.AssetsGet())
+				string[] aRotationsNames = aqExcelValues.Where(o => o[5].ToString().Trim() == "@").Select(o => o[1].ToString().Trim()).ToArray();
+				string sRot;
+				if (null == _ahBumpers)
+					_ahBumpers = new Dictionary<string, RotateInfo>();
+				if (null == _ahAllAssets)
+					_ahAllAssets = _cDBI.AssetsGet();
+				foreach (Asset cA in _ahAllAssets)
 				{
 					try
 					{
 						ahAssetsNamesBinds.Add(cA.sName, cA);
+
+						if (null != (sRot = aRotationsNames.FirstOrDefault(o => cA.sName.StartsWith(o))))
+						{
+							if (!_ahBumpers.ContainsKey(sRot))
+							{
+								Queue<Asset> aqAssets = new Queue<Asset>();
+								RotateInfo cRotateInfo = new RotateInfo(aqAssets);
+								_ahBumpers.Add(sRot, cRotateInfo);
+							}
+							_ahBumpers[sRot].Add(cA);
+						}
 					}
 					catch { }
 				}
+                foreach(string sBumper in _ahBumpers.Keys)
+                {
+                    _ahBumpers[sBumper].Randomize();
+                }
+                //if (null != aRotationsNames.Intersect(_ahBumpers.Keys))   //?
+                //{
+                //	foreach (string sErr in aRotationsNames.Intersect(_ahBumpers.Keys))
+                //		MessageAdd(g.Webservice.sErrorPLImport1, sErr);
+                //}
 
-				ahRetVal = new Dictionary<TimeSpan, Queue<Asset>>();
-				Queue<List<string>> aqExcelValues = GetValuesFromExcel(sFile);
-				List<string> aRow = null;
 
-				Queue<Asset> aqDesignAssets = null;
+                Queue<Asset> aqDesignAssets = null;
 				TimeSpan tsBlockTime = TimeSpan.MinValue, ts;
 				TimeSpan tsPrevBlockTime = TimeSpan.MinValue;
 				string sTime, sText, sNote;
@@ -467,8 +566,9 @@ namespace webservice.services
 				Asset cVIMark = VIMarkGet();
 				Asset cIgnoredMark = IgnoredHardStartMarkGet();
 				Asset cBlockEdgeMark = BlockEdgeMarkGet();
+                int nLastHour = 0, nDay = 0;
 
-				while (0 < aqExcelValues.Count)
+                while (0 < aqExcelValues.Count)
 				{
 					aRow = aqExcelValues.Dequeue();
 					if (6 > aRow.Count)
@@ -494,8 +594,14 @@ namespace webservice.services
 						try
 						{
 							ts = DateTime.Parse(sTime).TimeOfDay;
-						}
-						catch
+                            if (ts.Hours < nLastHour && nLastHour - ts.Hours > 10)
+                            {
+                                nDay++;
+                            }
+                            nLastHour = ts.Hours;
+                            ts = ts.Add(new TimeSpan(nDay, 0, 0, 0));
+                        }
+                        catch
 						{
 							continue;
 						}
@@ -512,7 +618,7 @@ namespace webservice.services
 									nBlockAdvertisementStart = nMinute;
 							}
 							tsPrevBlockTime = tsBlockTime;
-							tsBlockTime = new TimeSpan(ts.Hours, nBlockAdvertisementStart, 0);
+							tsBlockTime = new TimeSpan(ts.Days, ts.Hours, nBlockAdvertisementStart, 0);
 
 
 							if (tsPrevBlockTime != tsBlockTime)
@@ -547,6 +653,8 @@ namespace webservice.services
 					if (0 < sNote.Length && '@' == sNote[0])
 					{
 						cAsset = RotateBumper(sText);
+						if (null == cAsset)
+							MessageAdd(g.Webservice.sErrorPLImport1, sText);
 					}
 					else
 					{
@@ -581,8 +689,162 @@ namespace webservice.services
 			return ahRetVal;
 		}
 
+		private List<PlaylistItem> MergedBlockGet(DateTime dtAdvertisementBind, TimeSpan tsDesignBlockStart, VIPlaylist cVIPL, Queue<Asset> ahDesignBlock, PlaylistItem cLastPLI, out PlaylistItem cNewLastPLI)
+		{
+			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
+			long nFramesQty = 0;
+			PlaylistItem cPLI = new PlaylistItem();
+			cNewLastPLI = null;
+            bool bAdvertisementBlockStopped = false;
+			string sVIBlockType, sVIBlockCover;
+			Asset cVIMark = VIMarkGet();
+			Asset cIgnoredMark = IgnoredHardStartMarkGet();
+			Asset cBlockEdgeMark = BlockEdgeMarkGet();
+			DateTime dtPLIStart, dtPLIStartPlanned;
+			bool bIsTimeShiftIgnored = false;
+			bool bBumperOutNeeded = false;
+			string sBumperOutNameBeginning = "реклама выход";
+			string sBumperInNameBeginning = "реклама вход";
+
+			if (cIgnoredMark.nID != ahDesignBlock.Peek().nID)   // ! не стоит на начале блока - стартуем по дефалту
+			{
+				dtPLIStart = dtAdvertisementBind.Add(tsDesignBlockStart);
+				if (0 < tsDesignBlockStart.Minutes)
+					cPLI.dtStartSoft = dtPLIStart;
+				else
+					cPLI.dtStartHard = dtPLIStart;
+				cPLI.dtStartPlanned = dtPLIStart;
+				bAdvertisementBlockStopped = false;
+			}
+			else if (null != cLastPLI)
+			{
+				cPLI.dtStartSoft = cLastPLI.dtStartHardSoft.AddSeconds(1);
+				cPLI.dtStartPlanned = cLastPLI.dtStartPlanned.AddMilliseconds(cLastPLI.nFramesQty * 40);
+				ahDesignBlock.Dequeue();
+				bIsTimeShiftIgnored = true;
+			}
+			else
+				throw new Exception(g.Webservice.sErrorPLImport22);
+
+			while (0 < ahDesignBlock.Count)
+			{
+				cPLI.cAsset = ahDesignBlock.Dequeue();
+				cPLI.sName = cPLI.cAsset.sName;
+				cPLI.nFramesQty = cPLI.cAsset.nFramesQty;
+				if (cPLI.cAsset.nID > 0 && !bBumperOutNeeded && cPLI.sName.Replace("  ", " ").ToLower().StartsWith(sBumperOutNameBeginning))
+					continue;
+				if (cVIMark.nID == cPLI.cAsset.nID)
+				{
+					//анонсы:сеть
+					sVIBlockType = cPLI.cAsset.sName.Substring(0, cPLI.cAsset.sName.IndexOf(':'));
+					sVIBlockCover = cPLI.cAsset.sName.Substring(sVIBlockType.Length + 1);
+					if (cVIPL.DoesBlockExist(tsDesignBlockStart, sVIBlockType, sVIBlockCover))
+					{
+						try
+						{
+							while (0 < cVIPL.BlockAssetsQtyGet(tsDesignBlockStart, sVIBlockType, sVIBlockCover))
+							{
+								bBumperOutNeeded = true;
+								cPLI.cAsset = cVIPL.BlockAssetDequeue(tsDesignBlockStart, sVIBlockType, sVIBlockCover);
+								if (null == cPLI.cAsset)
+									continue;
+								cPLI.sName = cPLI.cAsset.sName;
+								cPLI.nFramesQty = cPLI.cAsset.nFramesQty;
+								dtPLIStart = cPLI.dtStartHardSoft.AddSeconds(1);
+								dtPLIStartPlanned = cPLI.dtStartPlanned.AddMilliseconds(cPLI.nFramesQty * 40);
+								if (0 < cPLI.nFramesQty)
+								{
+									if (5250 < cPLI.nFramesQty)
+									{
+										MessageAdd(g.Webservice.sErrorPLImport15, cPLI.sName);
+										return null;
+									}
+									CheckFileIsOk(cPLI.cAsset.cFile);
+									if (!bAdvertisementBlockStopped)
+										nFramesQty += cPLI.nFramesQty;
+									aRetVal.Add(cPLI);
+								}
+								else
+									MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
+								cPLI = new PlaylistItem();
+								cPLI.dtStartSoft = dtPLIStart;
+								cPLI.dtStartPlanned = dtPLIStartPlanned;
+							}
+						}
+						catch
+						{
+							throw new Exception(g.Webservice.sErrorPLImport17.Fmt((0 < tsDesignBlockStart.Days ? tsDesignBlockStart.Days + g.Helper.sDays : ""), tsDesignBlockStart.Hours, tsDesignBlockStart.Minutes));
+						}
+					}
+					else
+					{
+						if (0 < aRetVal.Count && aRetVal[aRetVal.Count - 1].sName.Replace("  ", " ").ToLower().StartsWith(sBumperInNameBeginning))
+						{
+							cPLI.dtStartHard = aRetVal[aRetVal.Count - 1].dtStartHard;
+							cPLI.dtStartSoft = aRetVal[aRetVal.Count - 1].dtStartSoft;
+							cPLI.dtStartPlanned = aRetVal[aRetVal.Count - 1].dtStartPlanned;
+							nFramesQty -= aRetVal[aRetVal.Count - 1].nFramesQty;
+                            aRetVal.RemoveAt(aRetVal.Count - 1);
+						}
+						continue;
+						//раньше давали ошибку, а теперь просто игнорим. Это "удаление кармана" в файле оформления
+						//throw new Exception(g.Webservice.sErrorPLImport18.Fmt((0 < tsDesignBlockStart.Days ? tsDesignBlockStart.Days + g.Helper.sDays : ""), tsDesignBlockStart.Hours, tsDesignBlockStart.Minutes));
+					}
+				}
+				else if (cBlockEdgeMark.nID == cPLI.cAsset.nID)
+				{
+					bAdvertisementBlockStopped = true;
+				}
+				else
+				{
+					if (0 < cPLI.nFramesQty)
+					{
+						CheckFileIsOk(cPLI.cAsset.cFile);
+						if (!bAdvertisementBlockStopped)
+							nFramesQty += cPLI.nFramesQty;
+						aRetVal.Add(cPLI);
+					}
+					else
+						MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
+					dtPLIStart = cPLI.dtStartHardSoft.AddSeconds(1);
+					dtPLIStartPlanned = cPLI.dtStartPlanned.AddMilliseconds(cPLI.nFramesQty * 40);
+					cPLI = new PlaylistItem();
+					cPLI.dtStartSoft = dtPLIStart;
+                    cPLI.dtStartPlanned = dtPLIStartPlanned;
+				}
+			}
+
+			if (aRetVal.Count <= 0)
+				return null;
+
+			cNewLastPLI = aRetVal[aRetVal.Count - 1];
+
+			if (bIsTimeShiftIgnored || 0 == nFramesQty)
+				return aRetVal;
+
+			TimeSpan tsBlockDuration = TimeSpan.FromMilliseconds(nFramesQty * 40);
+			for (int nIndx = 0; aRetVal.Count > nIndx; nIndx++)
+			{
+				if (DateTime.MaxValue > aRetVal[nIndx].dtStartHard)
+					aRetVal[nIndx].dtStartHard = aRetVal[nIndx].dtStartHard.Subtract(tsBlockDuration);
+				else
+					aRetVal[nIndx].dtStartSoft = aRetVal[nIndx].dtStartSoft.Subtract(tsBlockDuration);
+				aRetVal[nIndx].dtStartPlanned = aRetVal[nIndx].dtStartPlanned.Subtract(tsBlockDuration);
+			}
+			return aRetVal;
+		}
+		private bool CheckFileIsOk(File cFile)
+		{
+			if (cFile.eError!= helpers.replica.Error.no) // cFile.eStatus!= File.Status.InStock ||    estatus не передаётся в ассет через vAssetsResolved
+			{
+				MessageAdd(g.Webservice.sErrorPLImport32, cFile.sFilename);
+				return false;
+			}
+			return true;
+		}
 		public List<PlaylistItem> PlaylistsMerge(Queue<Asset> aqPGPL, VIPlaylist cVIPL, DateTime dtAdvertisementBind, Dictionary<TimeSpan, Queue<Asset>> ahDsgnPL)
 		{
+			_ahAllAssets = null;
 			List<PlaylistItem> aRetVal = null;
 			if (null == aqPGPL || null == cVIPL || null == ahDsgnPL)
 				throw new Exception("can't find one of the intermediate PLs");
@@ -591,134 +853,30 @@ namespace webservice.services
 
 			//dtAdvertisementBind = dtAdvertisementBind.Add(TimeSpan.FromMinutes(172));
 			DateTime dtPLIStart = dtAdvertisementBind;
-
+			PlaylistItem cLastPLI = null;
 			#region adv
-			Asset cVIMark = VIMarkGet();
-			Asset cIgnoredMark = IgnoredHardStartMarkGet();
-			Asset cBlockEdgeMark = BlockEdgeMarkGet();
-
 			TimeSpan tsBlockDuration = TimeSpan.Zero;
-			PlaylistItem cBlockStartPLI = null;
-			Dictionary<PlaylistItem, TimeSpan> ahBlockDurations = new Dictionary<PlaylistItem, TimeSpan>();
-			bool bAdvertisementBlockStopped = false;
-			string sVIBlockType, sVIBlockCover;
 			TimeSpan tsClipDurationMinimumForCut = _cDBI.AdmClipDurationMinimumForCutGet();
 			TimeSpan tsPLIDurationMinimum = _cDBI.AdmPLIDurationMinimumGet();
 			File[] aPlugs = _cDBI.PlaylistPlugsGet();
+			List<PlaylistItem> aBlock;
 
 			foreach (TimeSpan tsDesignBlockStart in ahDsgnPL.Keys)
 			{
-				if (cIgnoredMark.nID != ahDsgnPL[tsDesignBlockStart].Peek().nID)
+				if (null != (aBlock = MergedBlockGet(dtAdvertisementBind, tsDesignBlockStart, cVIPL, ahDsgnPL[tsDesignBlockStart], cLastPLI,  out cLastPLI)))
 				{
-					dtPLIStart = dtAdvertisementBind.Add(tsDesignBlockStart);
-					if (0 < tsDesignBlockStart.Minutes)
-						cPLI.dtStartSoft = dtPLIStart;
-					else
-						cPLI.dtStartHard = dtPLIStart;
-					cPLI.dtStartPlanned = dtPLIStart;
-					if (null != cBlockStartPLI)
-					{
-						ahBlockDurations.Add(cBlockStartPLI, tsBlockDuration);
-						tsBlockDuration = TimeSpan.Zero;
-					}
-					cBlockStartPLI = cPLI;
-					bAdvertisementBlockStopped = false;
+					aRetVal.AddRange(aBlock);
 				}
-				else
-					ahDsgnPL[tsDesignBlockStart].Dequeue();
-				while (0 < ahDsgnPL[tsDesignBlockStart].Count)
-				{
-					cPLI.cAsset = ahDsgnPL[tsDesignBlockStart].Dequeue();
-					cPLI.sName = cPLI.cAsset.sName;
-					cPLI.nFramesQty = cPLI.cAsset.nFramesQty;
-					if (cVIMark.nID == cPLI.cAsset.nID)
-					{
-						//анонсы:сеть
-						sVIBlockType = cPLI.cAsset.sName.Substring(0, cPLI.cAsset.sName.IndexOf(':'));
-						sVIBlockCover = cPLI.cAsset.sName.Substring(sVIBlockType.Length + 1);
-						if (cVIPL.DoesBlockExist(tsDesignBlockStart, sVIBlockType, sVIBlockCover))
-						{
-							try
-							{
-								while (0 < cVIPL.BlockAssetsQtyGet(tsDesignBlockStart, sVIBlockType, sVIBlockCover))
-								{
-									cPLI.cAsset = cVIPL.BlockAssetDequeue(tsDesignBlockStart, sVIBlockType, sVIBlockCover);
-									if (null == cPLI.cAsset)
-										continue;
-									cPLI.sName = cPLI.cAsset.sName;
-									cPLI.nFramesQty = cPLI.cAsset.nFramesQty;
-									dtPLIStart = cPLI.dtStartPlanned;
-									if (0 < cPLI.nFramesQty)
-									{
-										if (5250 < cPLI.nFramesQty)
-										{
-											MessageAdd(g.Webservice.sErrorPLImport15, cPLI.sName);
-											return new List<PlaylistItem>();
-										}
-										if (!bAdvertisementBlockStopped)
-											tsBlockDuration = tsBlockDuration.Add(TimeSpan.FromMilliseconds(cPLI.nFramesQty * 40)); //TODO FPS
-										aRetVal.Add(cPLI);
-									}
-									else
-										MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
-									cPLI = new PlaylistItem();
-									cPLI.dtStartPlanned = cPLI.dtStartSoft = dtPLIStart.AddSeconds(1);
-								}
-							}
-							catch
-							{
-								throw new Exception(g.Webservice.sErrorPLImport17.Fmt((0 < tsDesignBlockStart.Days ? tsDesignBlockStart.Days + g.Helper.sDays : ""), tsDesignBlockStart.Hours, tsDesignBlockStart.Minutes));
-							}
-						}
-						else
-							throw new Exception(g.Webservice.sErrorPLImport18.Fmt((0 < tsDesignBlockStart.Days ? tsDesignBlockStart.Days + g.Helper.sDays : ""), tsDesignBlockStart.Hours, tsDesignBlockStart.Minutes));
-					}
-					else if (cBlockEdgeMark.nID == cPLI.cAsset.nID)
-					{
-						bAdvertisementBlockStopped = true;
-					}
-					else
-					{
-						if (0 < cPLI.nFramesQty)
-						{
-							if (!bAdvertisementBlockStopped)
-								tsBlockDuration = tsBlockDuration.Add(TimeSpan.FromMilliseconds(cPLI.nFramesQty * 40)); //TODO FPS
-							aRetVal.Add(cPLI);
-						}
-						else
-							MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
-						dtPLIStart = cPLI.dtStartPlanned;
-						cPLI = new PlaylistItem();
-						cPLI.dtStartSoft = dtPLIStart.AddSeconds(1);
-						cPLI.dtStartPlanned = cPLI.dtStartSoft;
-					}
-				}
-			}
-			if (null != cBlockStartPLI)
-			{
-				ahBlockDurations.Add(cBlockStartPLI, tsBlockDuration);
 			}
 
 			foreach (IGrouping<TimeSpan, Asset[]> cKVP in cVIPL.AssetsUnusedGet())
 				MessageAdd(g.Webservice.sNoticePLImport1.Fmt(cKVP.Key), cKVP.SelectMany(o => o).Select(o => o.nID + ":" + o.sName));
 
-
-			aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
-			tsBlockDuration = TimeSpan.Zero;
-			for (int nIndx = 0; aRetVal.Count > nIndx; nIndx++)
-			{
-				if (ahBlockDurations.ContainsKey(aRetVal[nIndx]))
-					tsBlockDuration = ahBlockDurations[aRetVal[nIndx]];
-				if (DateTime.MaxValue > aRetVal[nIndx].dtStartHard)
-					aRetVal[nIndx].dtStartHard = aRetVal[nIndx].dtStartHard.Subtract(tsBlockDuration);
-				else
-					aRetVal[nIndx].dtStartSoft = aRetVal[nIndx].dtStartSoft.Subtract(tsBlockDuration);
-				aRetVal[nIndx].dtStartPlanned = aRetVal[nIndx].dtStartPlanned.Subtract(tsBlockDuration);
-			}
+			//aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
 			#endregion
 			#region clips
 
-			aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
+			//aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
 
 			dtPLIStart = dtAdvertisementBind;
 
@@ -767,7 +925,10 @@ namespace webservice.services
 								}
 							}
 							if (0 < cPLI.nFramesQty)
+							{
+								CheckFileIsOk(cPLI.cAsset.cFile);
 								aRetVal.Add(cPLI);
+							}
 							else
 								MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
 							cPLI = null;
@@ -798,7 +959,10 @@ namespace webservice.services
 				cPLI.dtStartPlanned = dtPLIStart;
 				dtPLIStart = dtPLIStart.AddMilliseconds(cPLI.cAsset.nFramesQty * 40); //TODO FPS
 				if (0 < cPLI.nFramesQty)
+				{
+					CheckFileIsOk(cPLI.cAsset.cFile);
 					aRetVal.Add(cPLI);
+				}
 				else
 					MessageAdd(g.Webservice.sErrorPLImport16, cPLI.sName);
 			}

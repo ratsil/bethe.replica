@@ -269,11 +269,19 @@ namespace replica
 
         private object _cSyncRoot;
         private PlaylistItem _cPLI;
+		public ulong nDuration
+		{
+			get
+			{
+				return _cPLI == null ? 0 : _cPLI.nDuration;
+			}
+		}
         private Part[] _aParts;
         private byte _nPartCurrent;
         private string _sFile;
         private bool _bCached;
 		private string _sCachePath;
+		
 		static private Queue<Part> _aqParts = new Queue<Part>();
 
         public Proxy(PlaylistItem cPLI)
@@ -290,8 +298,10 @@ namespace replica
                 if (System.IO.File.Exists(_sFile))
                 {
                     ffmpeg.net.File.Input cFile = new ffmpeg.net.File.Input(_sFile);
-                    cPLI.nFramesQty = (int)cFile.nFramesQty;
-                    cFile.Dispose();
+					cPLI.nFramesQty = (int)cFile.nFramesQty;
+					if (cPLI.nFrameStop > cPLI.nFramesQty)
+						cPLI.nFrameStop = cPLI.nFramesQty;
+					cFile.Dispose();
                 }
                 else
                     throw new Exception("файл не найден [" + _sFile + "]");
@@ -313,10 +323,15 @@ namespace replica
                 };
 			_aParts[0].TimingsUpdate(_cPLI);
 			try
-			{
-				pl.Proxy cDBProxy = pl.Proxy.Get(cPLI.cClass);
-				if (null != cDBProxy)
-				{
+            {
+                pl.Proxy cDBProxy = null;
+                if (!_cPLI.aClasses.IsNullOrEmpty())
+                    for (int nI = 0; nI < _cPLI.aClasses.Length; nI++)
+                        if (null != cPLI.aClasses && null != (cDBProxy = iInteract.ProxyGet(cPLI.aClasses[nI])))
+                            break;
+
+                if (null != cDBProxy)
+                {
 					XmlDocument cXmlDocument = new XmlDocument();
 					cXmlDocument.Load(cDBProxy.sFile);
 					XmlNode cXmlNode = cXmlDocument.NodeGet("proxy");
@@ -366,9 +381,9 @@ namespace replica
                     sClass = cXmlNode.AttributeValueGet("class"),
                     sData = ProcessMacros(cXNData.OuterXml),
                     sOutput = ProcessRuntimes(cXNData.AttributeValueGet("output")),
-                    nFrameStart = cXmlNode.AttributeGet<long>("start", false),
-                    nDuration = cXmlNode.AttributeGet<long>("duration", false),
-					nTransition = cXmlNode.AttributeGet<ushort>("transition", false)
+                    nFrameStart = cXmlNode.AttributeOrDefaultGet<long>("start", 0),
+                    nDuration = cXmlNode.AttributeOrDefaultGet<long>("duration", long.MaxValue),
+					nTransition = cXmlNode.AttributeOrDefaultGet<ushort>("transition", 0)
                 };
                 if (0 > cRetVal.cPlugin.nFrameStart || 1 > cRetVal.cPlugin.nDuration)
                     throw new Exception("wrong plugin framing");//TODO LANG
@@ -398,12 +413,12 @@ namespace replica
             if (!cRetVal.bDepended)
             {
                 cRetVal.sFile = ProcessRuntimes(cXmlNode.AttributeValueGet("file"));
-                cRetVal.bOpacity = cXmlNode.AttributeGet<bool>("opacity", false);
+                cRetVal.bOpacity = cXmlNode.AttributeOrDefaultGet<bool>("opacity", false);
 
-                cRetVal.nDuration = cXmlNode.AttributeGet<long>("duration", false);
-				cRetVal.nTransition = cXmlNode.AttributeGet<ushort>("transition", false);
-                cRetVal.nFrameStart = cXmlNode.AttributeGet<long>("start", false);
-                long nFrameStop = cXmlNode.AttributeGet<long>("stop", false);
+                cRetVal.nDuration = cXmlNode.AttributeOrDefaultGet<long>("duration", long.MaxValue);
+				cRetVal.nTransition = cXmlNode.AttributeOrDefaultGet<ushort>("transition", 0);
+                cRetVal.nFrameStart = cXmlNode.AttributeOrDefaultGet<long>("start", 0);
+                long nFrameStop = cXmlNode.AttributeOrDefaultGet<long>("stop", long.MaxValue);
                 if ((long.MaxValue > cRetVal.nFrameStart && long.MaxValue > nFrameStop && long.MaxValue > cRetVal.nDuration) || 1 > cRetVal.nDuration)
                     throw new Exception("wrong video framing");//TODO LANG
                 if (long.MaxValue > nFrameStop)
@@ -444,7 +459,7 @@ namespace replica
 					}
 					catch
 					{
-						(new Logger()).WriteNotice("got error while processing macro [macro=" + cMatch.Value + "] [value=" + sValue + "]");
+						(new Logger()).WriteNotice("proxy got error while processing macro [macro=" + cMatch.Value + "] [value=" + sValue + "]");
 						throw;
 					}
 				}
@@ -466,6 +481,15 @@ namespace replica
 					case "sql":
 						cMacro.sValue = ProcessRuntimes(cMacro.sValue);
 						sRetVal = iInteract.MacroExecute(cMacro);
+						int nIndx = 0;
+						while (null == sRetVal)  // просто эксперимент, т.к. дикие случаи, когда просто не может такого быть ))),  например SELECT * FROM cues."fCUSong"(73176, 1)  выполняется отл, а тут была NULL
+						{
+							if (nIndx++ > 20)
+								break;
+							(new Logger()).WriteNotice("MacroExecute: return = NULL!!! (" + nIndx + " times!) [text=" + sText + "][macro=" + (null == cMacro ? "NULL" : cMacro.sValue) + "]");
+							Thread.Sleep(1);
+							sRetVal = iInteract.MacroExecute(cMacro);
+						}
 						break;
 					default:
 						throw new Exception("обнаружен неизвестный тип макро-строки [" + cMacro.cType.sName + "]"); //TODO LANG
@@ -478,8 +502,6 @@ namespace replica
 				if (eFlags.HasFlag(mam.Macro.Flags.Caps))
 					sRetVal = sRetVal.ToUpper();
 			}
-			else
-				(new Logger()).WriteNotice("MacroExecute: return = NULL!!! [text=" + sText + "][macro=" + (null == cMacro ? "NULL" : cMacro.sValue) + "]");
 			return sRetVal;
 		}
 		private string ProcessRuntimes(string sText)
@@ -526,6 +548,9 @@ namespace replica
 				case "{%RUNTIME::PLAYER::PROXY::FILE%}":
 					sRetVal = _cPLI.cFile.sFile;   // _sFile; 
 					break;
+				case "{%RUNTIME::PLAYER::PROXY::FILE_CACHED%}":
+					sRetVal = _sFile;
+					break;
 				case "{%RUNTIME::PLAYER::PROXY::FILE::FOLDERED%}":
 					sRetVal = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_sFile), System.IO.Path.GetFileNameWithoutExtension(_sFile));
 					break;
@@ -564,7 +589,7 @@ namespace replica
 					{
 						if (0 > _nAdjustment)
 						{
-							if ((long)Player.Preferences.nThresholdFrames < (nDuration + _nAdjustment))
+							if ((long)Playlist.Preferences.nDurationMinimumFr < (nDuration + _nAdjustment))
 							{
 								nDuration += _nAdjustment;
 								_nAdjustment = 0;
@@ -588,29 +613,31 @@ namespace replica
         }
         static private void PartStart()
         {
-			Part cPart = _aqParts.Dequeue();
-			(new Player.Logger()).WriteDebug("\t\tpart start [" + cPart.sFile + "][framestart=" + cPart.nFrameStart + "][dur=" + cPart.nDuration + "]");
-			Proxy cProxy;
-                lock (_aStore)
-					if (null == (cProxy = _aStore.FirstOrDefault(o => null != o._aParts && o._aParts.Contains(cPart))))
-                        throw new Exception("указан незарегистрированный элемент плейлиста ingenie:" + cPart.sFile); //TODO LANG
+			lock (_aStore)
+			{
+				Part cPart = _aqParts.Dequeue();
+				(new Player.Logger()).WriteDebug("\t\tpart start [" + cPart.sFile + "][framestart=" + cPart.nFrameStart + "][dur=" + cPart.nDuration + "]");
+				Proxy cProxy;
 
+				if (null == (cProxy = _aStore.FirstOrDefault(o => null != o._aParts && o._aParts.Contains(cPart))))
+					throw new Exception("указан незарегистрированный элемент плейлиста ingenie:" + cPart.sFile); //TODO LANG
 
-            cPart.Start(cProxy._cPLI);
-            if (!System.IO.File.Exists(cPart.sFile))
-            {
-                if (cProxy._sFile == cPart.sFile && cProxy._bCached)
-                    (new Player.Logger()).WriteError(new System.IO.FileNotFoundException("зарегистрированный файл в кэше не найден [" + cProxy._sFile + "]. будет использован исходный файл [" + (cPart.sFile = cProxy._sFile = cProxy._cPLI.cFile.sFile) + "]")); //TODO LANG
-            }
-            if (!System.IO.File.Exists(cPart.sFile))
-            {
-                iInteract.PlaylistItemFail(cProxy._cPLI);
-                throw new System.IO.FileNotFoundException("файл не найден", cPart.sFile); //TODO LANG
-            }
+				cPart.Start(cProxy._cPLI);
+				if (!System.IO.File.Exists(cPart.sFile))
+				{
+					if (cProxy._sFile == cPart.sFile && cProxy._bCached)
+						(new Player.Logger()).WriteError(new System.IO.FileNotFoundException("зарегистрированный файл в кэше не найден [" + cProxy._sFile + "]. будет использован исходный файл [" + (cPart.sFile = cProxy._sFile = cProxy._cPLI.cFile.sFile) + "]")); //TODO LANG
+				}
+				if (!System.IO.File.Exists(cPart.sFile))
+				{
+					iInteract.PlaylistItemFail(cProxy._cPLI);
+					throw new System.IO.FileNotFoundException("файл не найден", cPart.sFile); //TODO LANG
+				}
 #if DEBUG
-			//cPart.stArea = new Area(0, -180, 1920, 1440);  //DNF
+				//cPart.stArea = new Area(0, -180, 1920, 1440);  //DNF
 #endif
-            cPlaylist.EffectAdd(cPart, cPart.nTransition);    //  попробовать тут
+				cPlaylist.EffectAdd(cPart, cPart.nTransition);    //  попробовать тут
+			}
         }
         private void FileCache()
         {
@@ -625,9 +652,9 @@ namespace replica
                 {
                     try
                     {
-						cLogger.WriteDebug("попытка добавить файл в кэш: [file = " + _sFile + "][cashed = " + sFileCached + "]" + sFileCached);
+						cLogger.WriteDebug("попытка переименовать файл в кэше: [file = " + _sFile + "][cashed = " + sFileCached + "]" + sFileCached);
                         System.IO.File.Move(_sFile, sFileCached);
-                        cLogger.WriteNotice("файл добавлен в кэш:" + sFileCached);
+                        cLogger.WriteNotice("файл переименован в кэше:" + sFileCached);
                         _sFile = sFileCached;
                     }
                     catch (Exception ex)
@@ -636,33 +663,86 @@ namespace replica
                     }
                 }
                 else
-                {
-                    cLogger.WriteNotice("файл не найден в кэше [cached:" + _sFile + "][original:" + (_sFile = _cPLI.cFile.sFile) + "]");//TODO LANG
-                    _bCached = false;
+				{
+					if (Player.Preferences.aIgnoreFiles.Contains(System.IO.Path.GetFileName(_cPLI.cFile.sFile).ToLower()))
+						cLogger.WriteNotice("файл не найден в кэше, т.к. он в игнор-листе - даём оригинал [original:" + (_sFile = _cPLI.cFile.sFile) + "]");//TODO LANG
+					else
+						cLogger.WriteError("файл не найден в кэше-2. Даём оригинал! [cached:" + _sFile + "][original:" + (_sFile = _cPLI.cFile.sFile) + "]");//TODO LANG
+					_bCached = false;
                 }
             }
             else
-                cLogger.WriteNotice("файл в кэше уже существует:" + (_sFile = sFileCached));
+                cLogger.WriteWarning("переименованный файл в кэше уже существует:" + (_sFile = sFileCached));   // после перезапуска, например
         }
-        static public void Dispose()
-        {
-            FilesDelete();
+		static public void CheckCacheAndCopy(PlaylistItem cPLI)  // в FileCache нельзя - он под локом
+		{
+#if DEBUG
+            return; //DNF
+#endif
+            if (Player.Preferences.aIgnoreFiles.Contains(System.IO.Path.GetFileName(cPLI.cFile.sFile).ToLower()))
+			{
+				(new Logger("CheckCacheAndCopy")).WriteDebug("файл найден в игнорлисте (см. preferences.xml) и не будет закеширован = " + cPLI.cFile.sFile);
+				return;
+			}
+			Player.Logger cLogger = new Player.Logger();
+			string sExtension = System.IO.Path.GetExtension(cPLI.cFile.sFilename);
+			string sFileCached = System.IO.Path.Combine(Player.Preferences.sCacheFolder, "_" + cPLI.nID + sExtension);
+			try
+			{
+				if (!System.IO.File.Exists(sFileCached))
+				{
+					string sFileInCache = System.IO.Path.Combine(Player.Preferences.sCacheFolder, cPLI.nID + sExtension);
+					if (!System.IO.File.Exists(sFileInCache))
+					{
+						cLogger.WriteWarning("файл не найден в кэше - будем экстренно копировать! [cached:" + sFileInCache + "][original:" + cPLI.cFile.sFile + "]");//TODO LANG
+						System.IO.File.Copy(cPLI.cFile.sFile, sFileCached);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				cLogger.WriteError("CheckCacheAndCopy [" + cPLI.nID + "][" + cPLI.cFile.sFile + "]", ex);
+			}
+		}
+		static public void Dispose()
+		{
+			FilesDelete();
             _aFilesForDelete = null;
         }
         static public void FilesDelete()
         {
-			string sDir;
+            string sDir, sName, sFileNew, sLogInfo;
+            bool bCached;
+            bool bDoNotDelete = FailoverConstants.IsFilesDoNotRemoveMode(Player.Preferences.sCacheFolder, out sLogInfo);
             lock (_aFilesForDelete)
             {
                 foreach (string sFile in _aFilesForDelete.ToArray())
                 {
                     try
                     {
-                        System.IO.File.Delete(sFile);
-                        (new Player.Logger()).WriteNotice("файл удален из кэша:" + sFile);
+                        bCached = false;
+                        sDir = Path.GetDirectoryName(sFile);
+                        sName = Path.GetFileName(sFile);
+                        if (PathsAreEqual(sDir, Player.Preferences.sCacheFolder) && sName.StartsWith("_"))
+                            bCached = true;
+
+                        if (bDoNotDelete && bCached)
+                        {
+                            (new Player.Logger()).WriteError("обнаружен флаг: 'не удалять файлы из кэша' " + sLogInfo);
+                            //sFileNew = Path.Combine(Player.Preferences.sCacheFolder, sName.Substring(1));
+                            //File.Move(sFile, sFileNew);
+                            File.SetCreationTime(sFile, DateTime.Now);
+                            File.SetLastWriteTime(sFile, DateTime.Now);
+                            (new Player.Logger()).WriteWarning("файл оставлен в кэше: [cached=" + sFile + "]"); //[new=" + sFileNew + "]
+                        }
+                        else
+                        {
+                            System.IO.File.Delete(sFile);
+                            (new Player.Logger()).WriteNotice("файл удален из кэша:" + sFile);
+                        }
+
                         _aFilesForDelete.Remove(sFile);
-						sDir = Path.GetDirectoryName(sFile);
-						if (!Directory.EnumerateFileSystemEntries(sDir).Any())
+						if (!PathsAreEqual(sDir, Player.Preferences.sCacheFolder) && !Directory.EnumerateFileSystemEntries(sDir).Any())  // удаляем временные папки всякие, кроме папки кэша, даже если она пустая
 						{
 							Directory.Delete(sDir);
 							(new Player.Logger()).WriteNotice("пустая директория удалена:" + sDir);
@@ -674,6 +754,12 @@ namespace replica
                 }
             }
         }
+		static public bool PathsAreEqual(string sPath1, string sPath2)
+		{
+			if (0 == String.Compare(System.IO.Path.GetFullPath(sPath1).TrimEnd('\\'), System.IO.Path.GetFullPath(sPath2).TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase))
+				return true;
+			return false;
+		}
         static public void Playlist_EffectAdded(ingenie.userspace.Container cSender, Effect cEffect)
         {
             try
@@ -703,7 +789,7 @@ namespace replica
                 lock (_aStore)
 					if (null == (cProxy = _aStore.FirstOrDefault(o => null != o._aParts && o._aParts.Contains(cEffect))))
                         throw new Exception("указан незарегистрированный элемент плейлиста ingenie:" + cEffect); //TODO LANG
-				cProxy._dtPlannedStop = (cEffect.nDuration == ulong.MaxValue ? DateTime.MaxValue : DateTime.Now.AddMilliseconds(cEffect.nDuration * 40));
+				cProxy._dtPlannedStop = (cEffect.nDuration == ulong.MaxValue ? DateTime.MaxValue : DateTime.Now.AddMilliseconds(cEffect.nDuration * (ulong)Player.Preferences.nFrameMs));
                 if (cEffect != cProxy._aParts[0])
                 {
                     cProxy._nPartCurrent++;

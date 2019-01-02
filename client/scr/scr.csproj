@@ -25,7 +25,7 @@
     <TestPageFileName>scrTestPage.html</TestPageFileName>
     <CreateTestPage>true</CreateTestPage>
     <ValidateXaml>true</ValidateXaml>
-    <EnableOutOfBrowser>false</EnableOutOfBrowser>
+    <EnableOutOfBrowser>true</EnableOutOfBrowser>
     <OutOfBrowserSettingsFile>Properties\OutOfBrowserSettings.xml</OutOfBrowserSettingsFile>
     <UsePlatformExtensions>false</UsePlatformExtensions>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
@@ -136,6 +136,8 @@
       <DependentUpon>SCR.resx</DependentUpon>
     </Compile>
     <Compile Include="globalization\SCR.cs" />
+    <Compile Include="lib\LivePLItem.cs" />
+    <Compile Include="lib\LPLWatcher.cs" />
     <Compile Include="Views\editors.xaml.cs">
       <DependentUpon>editors.xaml</DependentUpon>
     </Compile>
@@ -288,6 +290,7 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <None Include="Properties\OutOfBrowserSettings.xml" />
     <Content Include="ServiceReferences.ClientConfig">
       <SubType>Designer</SubType>
     </Content>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -26,6 +27,7 @@ namespace replica.sl
         }
         private Progress _dlgProgress;
         private DBInteract _cDBI;
+		private IdNamePair[] _aStatuses;
 
         public Statistics()
         {
@@ -40,11 +42,13 @@ namespace replica.sl
             _ui_rpMessages.Visibility = Preferences.cServer.bStatisticsMessagesVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
             _ui_rpMessages.IsOpen = false;
 
+			App.Current.Host.Content.Resized += new EventHandler(BrowserWindow_Resized);
+			_ui_svMainViewer.MaxHeight = UI_Sizes.GetPossibleHeightOfPlaylistScrollViewer();
+
 			try
 			{
 				_dlgProgress = new Progress();
 				_cDBI = new DBInteract();
-				_cDBI.DBCredentialsSetCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_DBCredentialsSetCompleted);
 
 				#region pl
 				_ui_dtpFilterStartFrom.SelectedDate = DateTime.Now.AddHours(-1);
@@ -59,6 +63,7 @@ namespace replica.sl
 				_cDBI.StatGetCompleted += new EventHandler<StatGetCompletedEventArgs>(_cDBI_StatGetCompleted);
 				_cDBI.ClassesGetCompleted += new EventHandler<ClassesGetCompletedEventArgs>(_cDBI_ClassesGetCompleted);
 				_cDBI.StatusesGetCompleted += new EventHandler<StatusesGetCompletedEventArgs>(_cDBI_StatusesGetCompleted);
+				_cDBI.StatusesClearGetCompleted += _cDBI_StatusesClearGetCompleted;
 				#endregion
 
 				#region messages
@@ -93,7 +98,6 @@ namespace replica.sl
                 #endregion
 
                 //_dlgProgress.Show();
-				//_cDBI.DBCredentialsSetAsync("replica_client");
 			}
 			catch { }
         }
@@ -101,11 +105,15 @@ namespace replica.sl
 		#region event handlers
 		#region UI
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+		protected override void OnNavigatedTo(NavigationEventArgs e)
         {
         }
+		void BrowserWindow_Resized(object sender, EventArgs e)
+		{
+			_ui_svMainViewer.MaxHeight = UI_Sizes.GetPossibleHeightOfPlaylistScrollViewer();
+		}
 
-        private void _ui_dgStat_Loaded(object sender, RoutedEventArgs e)
+		private void _ui_dgStat_Loaded(object sender, RoutedEventArgs e)
         {
 			_dlgProgress.Show();
 			KeyValuePair<string, DBFiltersOperators>[] aKVP = new KeyValuePair<string, DBFiltersOperators>[2];
@@ -115,7 +123,10 @@ namespace replica.sl
 			_ui_ddlFilterStatusOperator.ItemsSource = aKVP;
 			_ui_ddlFilterStatusOperator.SelectedIndex = 0;
 
-			_ui_ddlFilterClassOperator.ItemsSource = aKVP;
+            aKVP[0] = new KeyValuePair<string, DBFiltersOperators>(g.Common.sContains, DBFiltersOperators.tinparraycontainsid);
+            aKVP[1] = new KeyValuePair<string, DBFiltersOperators>(g.Replica.sNoticeStat1 + g.Common.sContains, DBFiltersOperators.tinparraynotcontainsid);
+
+            _ui_ddlFilterClassOperator.ItemsSource = aKVP;
 			_ui_ddlFilterClassOperator.SelectedIndex = 0;
 
 			aKVP = new KeyValuePair<string, DBFiltersOperators>[4];
@@ -221,7 +232,7 @@ namespace replica.sl
 			if ((bool)_ui_cbFilterName.IsChecked)
 			{
 				bFilters = true;
-				cCurrentFilter.sName = "sName";
+				cCurrentFilter.sName = "`sName`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterNameOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterName.Text;
 				cParentFilter = cCurrentFilter;
@@ -236,7 +247,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "sFilename";
+				cCurrentFilter.sName = "`sFilename`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterFileOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterFile.Text;
 				cParentFilter = cCurrentFilter;
@@ -251,7 +262,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "idStatuses";
+				cCurrentFilter.sName = "`idStatuses`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterStatusOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = ((IdNamePair)_ui_ddlFilterStatus.SelectedItem).nID;
 				cParentFilter = cCurrentFilter;
@@ -266,7 +277,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "idClasses";
+				cCurrentFilter.sName = "`aClasses`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterClassOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = ((Class)_ui_ddlFilterClass.SelectedItem).nID;
 				cParentFilter = cCurrentFilter;
@@ -281,7 +292,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "nFramesQty";
+				cCurrentFilter.sName = "`nFramesQty`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterFramesQtyOperator.SelectedItem).Value;
 				try
 				{
@@ -316,7 +327,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "dtStartPlanned";
+				cCurrentFilter.sName = "`dtStartPlanned`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterStartFromOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterStartFrom.Text;
 				cParentFilter = cCurrentFilter;
@@ -344,7 +355,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "dtStopPlanned";
+				cCurrentFilter.sName = "`dtStopPlanned`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterStopFromOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterStopFrom.Text;
 				cParentFilter = cCurrentFilter;
@@ -503,8 +514,8 @@ namespace replica.sl
 					sExcelBody += "<Cell ss:StyleID=\"plib\"><Data ss:Type=\"String\">" + cPLI.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
 					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cFile.sFilename.Replace("&", "&amp;") + "</Data></Cell>\r\n";
 					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cStatus.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cClass.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.nFramesQty.ToFramesString(false,false,true,false,true) + "</Data></Cell>\r\n";
+                    sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.aClasses.Select(o => o.sName).ToEnumerationString(true).Replace("&", "&amp;") + "</Data></Cell>\r\n";
+                    sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.nFramesQty.ToFramesString(false,false,true,false,true) + "</Data></Cell>\r\n";
 					sExcelBody += "<Cell ss:StyleID=\"dtb\"><Data ss:Type=\"DateTime\">" + cPLI.dtStartPlanned.ToString("yyyy-MM-ddTHH:mm:ss.000") + "</Data></Cell>\r\n";
 					sExcelBody += "<Cell ss:StyleID=\"dt\"><Data ss:Type=\"DateTime\">" + (cPLI.dtStartPlanned.AddMilliseconds((cPLI.nFrameStop - cPLI.nFrameStart + 1) *40)).ToString("yyyy-MM-ddTHH:mm:ss.000") + "</Data></Cell>\r\n"; //TODO FPS
 					sExcelBody += "</Row>\r\n";
@@ -591,7 +602,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "dtRegister";
+				cCurrentFilter.sName = "`dtRegister`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterRegisteredFromOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterRegisteredFrom.Text;
 				cParentFilter = cCurrentFilter;
@@ -619,7 +630,7 @@ namespace replica.sl
 					cParentFilter.cNext = cCurrentFilter;
 				}
 
-				cCurrentFilter.sName = "dtDisplay";
+				cCurrentFilter.sName = "`dtDisplay`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterDisplayedFromOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterDisplayedFrom.Text;
 				cParentFilter = cCurrentFilter;
@@ -640,7 +651,13 @@ namespace replica.sl
 			if ((bool)_ui_cbFilterSource.IsChecked)
 			{
 				bFilters = true;
-				cCurrentFilter.sName = "nSource";
+				if (null != cParentFilter)
+				{
+					cCurrentFilter = new DBFilter();
+					cCurrentFilter.eBind = Binds.and;
+					cParentFilter.cNext = cCurrentFilter;
+				}
+				cCurrentFilter.sName = "CAST(`nSource` AS TEXT)";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterSourceOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterSource.Text;
 				cParentFilter = cCurrentFilter;
@@ -648,7 +665,13 @@ namespace replica.sl
 			if ((bool)_ui_cbFilterTarget.IsChecked)
 			{
 				bFilters = true;
-				cCurrentFilter.sName = "nTarget";
+				if (null != cParentFilter)
+				{
+					cCurrentFilter = new DBFilter();
+					cCurrentFilter.eBind = Binds.and;
+					cParentFilter.cNext = cCurrentFilter;
+				}
+				cCurrentFilter.sName = "CAST(`nTarget` AS TEXT)";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterTargetOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterTarget.Text;
 				cParentFilter = cCurrentFilter;
@@ -656,7 +679,13 @@ namespace replica.sl
 			if ((bool)_ui_cbFilterText.IsChecked)
 			{
 				bFilters = true;
-				cCurrentFilter.sName = "nText";
+				if (null != cParentFilter)
+				{
+					cCurrentFilter = new DBFilter();
+					cCurrentFilter.eBind = Binds.and;
+					cParentFilter.cNext = cCurrentFilter;
+				}
+				cCurrentFilter.sName = "`sText`";
 				cCurrentFilter.eOP = ((KeyValuePair<string, DBFiltersOperators>)_ui_ddlFilterTextOperator.SelectedItem).Value;
 				cCurrentFilter.cValue = _ui_tbFilterText.Text;
 				cParentFilter = cCurrentFilter;
@@ -665,7 +694,6 @@ namespace replica.sl
 		}
 		private void _ui_btnMessagesExport_Click(object sender, RoutedEventArgs e)
 		{
-			return;
 			SaveFileDialog cSFD = new SaveFileDialog();
 			//cSFD.Filter = "XML files | *.xml";
 			cSFD.DefaultExt = ".xls";
@@ -738,7 +766,7 @@ namespace replica.sl
 				sExcelStyle += "    <Border ss:Position=\"Right\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\"/>\r\n";
 				sExcelStyle += "    <Border ss:Position=\"Top\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\"/>\r\n";
 				sExcelStyle += "   </Borders>\r\n";
-				sExcelStyle += "   <Font ss:FontName=\"Arial\" x:CharSet=\"204\" x:Family=\"Swiss\" ss:Size=\"12\" ss:Bold=\"1\"/>\r\n";
+				sExcelStyle += "   <Font ss:FontName=\"Arial\" x:CharSet=\"204\" x:Family=\"Swiss\" ss:Size=\"12\" ss:Bold=\"0\"/>\r\n";
 				sExcelStyle += "   <Interior ss:Color=\"#DBE5F1\" ss:Pattern=\"Solid\"/>\r\n";
 				sExcelStyle += "   <NumberFormat/>\r\n";
 				sExcelStyle += "   <Protection/>\r\n";
@@ -747,28 +775,34 @@ namespace replica.sl
 				sExcelStyle += " </Styles>\r\n";
 				#endregion
 
-				String sExcelBody = "<Worksheet ss:Name=\"replica_stat_" + DateTime.Now.ToString("yyyy-MM-dd") + "\">\r\n";
-				sExcelBody += "<Table>\r\n";
-				sExcelBody += "<Row>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sName + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sFile + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sStatus + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Helper.sClass + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Helper.sFramesQty + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Helper.sStart + "</Data></Cell>\r\n";
-                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Helper.sStop + "</Data></Cell>\r\n";
+				String sExcelBody = "<Worksheet ss:Name=\"replica_sms_stat_" + DateTime.Now.ToString("yyyy-MM-dd") + "\">\r\n";
+				sExcelBody += "<Table  ss:DefaultColumnWidth=\"130\" ss:DefaultRowHeight=\"15\" >\r\n";
+
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"61\"/>";
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"130\"/>";
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"130\"/>";
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"753\"/>";
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"130\"/>";
+				sExcelBody += "<Column ss:AutoFitWidth=\"0\" ss:Width=\"130\"/>";
+
+				sExcelBody += "<Row  ss:Height=\"24\">\r\n";
+				sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + "ID" + "</Data></Cell>\r\n";
+                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sRegistrationDate + "</Data></Cell>\r\n";
+                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sDisplayDate + "</Data></Cell>\r\n";
+                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sText + "</Data></Cell>\r\n";
+                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sSourceNumber + "</Data></Cell>\r\n";
+                sExcelBody += "<Cell ss:StyleID=\"header\"><Data ss:Type=\"String\">" + g.Common.sTargetNumber + "</Data></Cell>\r\n";
 				sExcelBody += "</Row>\r\n";
 
-				foreach (PlaylistItem cPLI in _ui_dgStat.ItemsSource)
+				foreach (Message cMess in _ui_dgStatMessages.ItemsSource)
 				{
 					sExcelBody += "<Row>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cFile.sFilename.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cStatus.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.cClass.sName.Replace("&", "&amp;") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cPLI.nFramesQty.ToString() + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"dt\"><Data ss:Type=\"DateTime\">" + cPLI.dtStartPlanned.ToString("yyyy-MM-ddTHH:mm:ss.000") + "</Data></Cell>\r\n";
-					sExcelBody += "<Cell ss:StyleID=\"dt\"><Data ss:Type=\"DateTime\">" + (cPLI.dtStartPlanned.AddMilliseconds((cPLI.nFrameStop - cPLI.nFrameStart + 1) * 40)).ToString("yyyy-MM-ddTHH:mm:ss.000") + "</Data></Cell>\r\n";
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.nID.ToString() + "</Data></Cell>\r\n";
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.sRegisterDT.Replace("&", "&amp;") + "</Data></Cell>\r\n"; 
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.sDisplayDT.Replace("&", "&amp;") + "</Data></Cell>\r\n";
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.sText.Replace("&", "&amp;") + "</Data></Cell>\r\n";
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.nSourceNumber.ToString() + "</Data></Cell>\r\n";
+					sExcelBody += "<Cell ss:StyleID=\"pli\"><Data ss:Type=\"String\">" + cMess.nTargetNumber.ToString() + "</Data></Cell>\r\n";
 					sExcelBody += "</Row>\r\n";
 				}
 
@@ -805,8 +839,20 @@ namespace replica.sl
 				MessageBox.Show(ex.Message);
 			}
 		}
-        void _cDBI_StatusesGetCompleted(object sender, StatusesGetCompletedEventArgs e)
-        {
+		void _cDBI_StatusesClearGetCompleted(object sender, StatusesClearGetCompletedEventArgs e)
+		{
+			if (null == _aStatuses)
+				_aStatuses = e.Result;
+			if (null != e.UserState)
+				switch ((string)e.UserState)
+				{
+					case "RAO":
+						RAOFiltersApply();
+						return;
+				}
+		}
+		void _cDBI_StatusesGetCompleted(object sender, StatusesGetCompletedEventArgs e)
+		{
 			try
 			{
 				_ui_ddlFilterStatus.ItemsSource = e.Result;
@@ -818,7 +864,7 @@ namespace replica.sl
 			}
 			_dlgProgress.Close();
 		}
-        void _cDBI_StatGetCompleted(object sender, StatGetCompletedEventArgs e)
+		void _cDBI_StatGetCompleted(object sender, StatGetCompletedEventArgs e)
         {
 			try
 			{
@@ -871,84 +917,98 @@ namespace replica.sl
 			}
             _dlgProgress.Close();
         }
-        void _cDBI_WorkerProgressGetCompleted(object sender, WorkerProgressGetCompletedEventArgs e)
-        {
-            _dlgProgress.Set(e.Result);
-            WorkerInfo cWI = (WorkerInfo)e.UserState;
-            if (100 > e.Result)
-                _cDBI.WorkerProgressGetAsync(cWI.nID, cWI);
-            else
-                _cDBI.ExportResultGetAsync(cWI.nID, cWI);
-        }
-        #endregion
-
-        private void _ui_btnRAOFiltersApply_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog cSFD = new SaveFileDialog();
-            cSFD.Filter = "xls files | *.xls";
-            cSFD.DefaultExt = ".xls";
-            if ((bool)cSFD.ShowDialog())
+		void _cDBI_WorkerProgressGetCompleted(object sender, WorkerProgressGetCompletedEventArgs e)
+		{
+			_dlgProgress.Set(e.Result);
+			WorkerInfo cWI = (WorkerInfo)e.UserState;
+			if (100 > e.Result)
+				_cDBI.WorkerProgressGetAsync(cWI.nID, cWI);
+			else
+				_cDBI.ExportResultGetAsync(cWI.nID, cWI);
+		}
+		#endregion
+		SaveFileDialog _cSFD;
+		private void RAOFiltersApply()
+		{
+			IdNamePair cSatusPlayed = _aStatuses.FirstOrDefault(o => o.sName == "played");
+			if (null == cSatusPlayed)
 			{
-				_dlgProgress.Show();
+				(new MsgBox()).ShowError(g.Replica.sErrorStat1);
+				return;
+			}
+			_dlgProgress.Show();
 
-				DBFilters cFilters = new DBFilters();
-				cFilters.cGroup = new DBFiltersGroup();
-				DBFilter cCurrentFilter = new DBFilter(), cParentFilter = null;
-				DBFiltersGroup cParentFiltersG = null;
-				cFilters.cGroup.cValue = cCurrentFilter;
+			DBFilters cFilters = new DBFilters();
+			cFilters.cGroup = new DBFiltersGroup();
+			DBFilter cCurrentFilter = new DBFilter(), cParentFilter = null;
+			DBFiltersGroup cParentFiltersG = null;
+			cFilters.cGroup.cValue = cCurrentFilter;
 
-				cCurrentFilter.sName = "idStatuses";
+			cCurrentFilter.sName = "`idStatuses`";
+			cCurrentFilter.eOP = DBFiltersOperators.equal;
+
+			cCurrentFilter.cValue = cSatusPlayed.nID; //UNDONE надо заменить константу
+			cParentFilter = cCurrentFilter;
+
+			DBFiltersGroup cCurrentFiltersG = new DBFiltersGroup();
+			cParentFilter.cNext = cCurrentFiltersG;
+			cCurrentFiltersG.eBind = Binds.and;
+			cCurrentFilter = new DBFilter();
+			cCurrentFiltersG.cValue = cCurrentFilter;
+			{
+				cCurrentFilter.sName = "`sVideoTypeName`";
 				cCurrentFilter.eOP = DBFiltersOperators.equal;
-				cCurrentFilter.cValue = 5; //UNDONE надо заменить константу
+				cCurrentFilter.cValue = "clip";
 				cParentFilter = cCurrentFilter;
-
-				DBFiltersGroup cCurrentFiltersG = new DBFiltersGroup();
-				cParentFilter.cNext = cCurrentFiltersG;
-				cCurrentFiltersG.eBind = Binds.and;
-				cCurrentFilter = new DBFilter();
-				cCurrentFiltersG.cValue = cCurrentFilter;
-				{
-					cCurrentFilter.sName = "sVideoTypeName";
-					cCurrentFilter.eOP = DBFiltersOperators.equal;
-					cCurrentFilter.cValue = "clip";
-					cParentFilter = cCurrentFilter;
-
-					cCurrentFilter = new DBFilter();
-					cParentFilter.cNext = cCurrentFilter;
-					cCurrentFilter.eBind = Binds.or;
-					cCurrentFilter.sName = "sVideoTypeName";
-					cCurrentFilter.eOP = DBFiltersOperators.equal;
-					cCurrentFilter.cValue = "program";
-				}
-				cParentFiltersG = cCurrentFiltersG;
-
-				cCurrentFilter = new DBFilter();
-				cParentFiltersG.cNext = cCurrentFilter;
-				cCurrentFilter.eBind = Binds.and;
-				cCurrentFilter.sName = "dtStartReal";
-				cCurrentFilter.eOP = DBFiltersOperators.more;
-				cCurrentFilter.cValue = _ui_tbRAOFilterStartFrom.Text;
-				cParentFilter = cCurrentFilter;
-
 
 				cCurrentFilter = new DBFilter();
 				cParentFilter.cNext = cCurrentFilter;
-				cCurrentFilter.eBind = Binds.and;
-				cCurrentFilter.sName = cParentFilter.sName;
-				cCurrentFilter.eOP = DBFiltersOperators.less;
-				cCurrentFilter.cValue = _ui_tbRAOFilterStartUpto.Text;
-				cParentFilter = cCurrentFilter;
-				try
-				{
-					_cDBI.ExportAsync("export.RAO", cFilters, new WorkerInfo(new System.IO.StreamWriter(cSFD.OpenFile())));
-				}
-				catch (Exception ex)
-				{
-                    (new MsgBox()).ShowError(ex);
-					_dlgProgress.Close();
-				}
+				cCurrentFilter.eBind = Binds.or;
+				cCurrentFilter.sName = "`sVideoTypeName`";
+				cCurrentFilter.eOP = DBFiltersOperators.equal;
+				cCurrentFilter.cValue = "program";
 			}
-        }
+			cParentFiltersG = cCurrentFiltersG;
+
+			cCurrentFilter = new DBFilter();
+			cParentFiltersG.cNext = cCurrentFilter;
+			cCurrentFilter.eBind = Binds.and;
+			cCurrentFilter.sName = "`dtStartReal`";
+			cCurrentFilter.eOP = DBFiltersOperators.more;
+			cCurrentFilter.cValue = _ui_tbRAOFilterStartFrom.Text;
+			cParentFilter = cCurrentFilter;
+
+
+			cCurrentFilter = new DBFilter();
+			cParentFilter.cNext = cCurrentFilter;
+			cCurrentFilter.eBind = Binds.and;
+			cCurrentFilter.sName = cParentFilter.sName;
+			cCurrentFilter.eOP = DBFiltersOperators.less;
+			cCurrentFilter.cValue = _ui_tbRAOFilterStartUpto.Text;
+			cParentFilter = cCurrentFilter;
+			try
+			{
+				_cDBI.ExportAsync("export.RAO", cFilters, new WorkerInfo(new System.IO.StreamWriter(_cSFD.OpenFile())));
+			}
+			catch (Exception ex)
+			{
+				(new MsgBox()).ShowError(ex);
+				_dlgProgress.Close();
+			}
+		}
+		private void _ui_btnRAOFiltersApply_Click(object sender, RoutedEventArgs e)
+		{
+			_cSFD = new SaveFileDialog();
+			_cSFD.Filter = "xls files | *.xls";
+			_cSFD.DefaultExt = ".xls";
+			if ((bool)_cSFD.ShowDialog())
+			{
+				if (null == _aStatuses)
+					_cDBI.StatusesClearGetAsync("RAO");
+				else
+					RAOFiltersApply();
+			}
+		}
 		#endregion
 
 

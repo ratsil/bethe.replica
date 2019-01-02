@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <preferences>
 	<replica>
-		<player fps="25" threshold="00:00:00.5" cache="d:/cache/pl/">
-			<playlist length="5" safe="00:03:00" durmin="00:00:01" />
+		<player fps="25" threshold="00:00:00.5" cache="/path" opacity="true" ignor_files="megamix.mov, megamix.mxf">
+			<playlist dur_queue_min="00:20:00" dur_enqueue="00:07:00" safe="00:03:00" durmin="00:00:01" durclipmin="00:00:48.8" />
 		</player>
-		<failover main="main.video.replica" clips="e:/storages/clips/" adjustment="00:00:05">
-			<sync margin="00:10:00" tries="5" />
+		<failover main="main.video.replica" clips="/path" adjustment="00:00:05">   <!--  replace="e:%d:"  main and clips are not used now  -->
+			<sync margin="00:10:00" tries="5" deep_check="true" sync_period_err="00:00:10" sync_period_short="00:00:20" sync_period_long="01:00:00" sync_dur_max="00:01:30" pl_count_safe="3" pl_dur_safe="00:03:00" pl_count_min="3" pl_dur_min="00:06:00" block_elem_dur_max="00:03:00" plget_dur_short="02:00:00" plget_dur_long="3.00:00:00" info_path="/path" sync_path="/path" />
 			<defaults>
 				<class id="0" name="default">
 					<binds>
-						<template path="d:/cues/logo.xml" key="start_offset" value="0" />
+						<template path="/path" key="start_offset" value="0" />
 					</binds>
 				</class>
-				<plug id="0" file="e:/storages/design/megamix.mov" class="design_common" />
+				<cues drive_letter="DRIVE" />
+				<plug id="0" file="/path" class="design_common" />
 				<statuses>
 					<failed id="0" name="failed" />
 					<played id="1" name="played" />
@@ -45,8 +46,8 @@
 	<helpers>
 		<common>
 			<database server="db.channel.replica" port="5432" name="replica" user="replica_failover" password="" timeout="240" />
-			<logger level="debug1">
-				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
+			<logger>
+				<mail subject="CHANNEL:failover" source="alerting@example.com" server="smtp.example.com" password="">
 					<targets>
 						<target level="warning">user1@example.com,user2@example.com</target>
 						<target level="error">user@example.com</target>

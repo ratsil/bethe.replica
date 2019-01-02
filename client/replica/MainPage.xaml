@@ -30,9 +30,9 @@
             <Border x:Name="BrandingBorder" Style="{StaticResource BrandingBorderStyle}">
                 <StackPanel x:Name="BrandingStackPanel" Style="{StaticResource BrandingStackPanelStyle}">
 
-                    <ContentControl Style="{StaticResource LogoIcon}" />
-                    <TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" 
-                               Text="replica" />
+					<!-- <ContentControl Style="{StaticResource LogoIcon}" />    -->
+					<TextBlock x:Name="ui_tbR" Style="{StaticResource ReplicaStyle}" Text="R" />
+					<TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" Text="replica" />
 
                 </StackPanel>
             </Border>
@@ -67,7 +67,11 @@
                         <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/sms" TargetName="ContentFrame" Content="SMS" />
                         <Rectangle Style="{StaticResource DividerStyle}" />
                     </StackPanel>
-                    <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/profile" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProfile, Source={StaticResource g}}" />
+					<StackPanel Orientation="Horizontal">
+						<HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/artist_search" TargetName="ContentFrame" Content="Artists" />
+						<Rectangle Style="{StaticResource DividerStyle}" />
+					</StackPanel>
+					<HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/profile" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sProfile, Source={StaticResource g}}" />
 					<Rectangle Style="{StaticResource DividerStyle}" />
                     <HyperlinkButton Style="{StaticResource LinkStyle}" NavigateUri="/auth" TargetName="ContentFrame" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sExit, Source={StaticResource g}}" />
                 </StackPanel>

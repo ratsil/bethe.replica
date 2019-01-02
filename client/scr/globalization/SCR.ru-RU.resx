@@ -162,6 +162,12 @@
   <data name="sError22" xml:space="preserve">
     <value>Во время получения списка клипов из БД произошли ошибки!</value>
   </data>
+  <data name="sError23" xml:space="preserve">
+    <value>Не удалось получить фрагмент текущего линейного плейлиста</value>
+  </data>
+  <data name="sError24" xml:space="preserve">
+    <value>Пытаетесь добавить клип, который, возможно, не в кеше.{0}Безопаснее добавлять из списка закешированных</value>
+  </data>
   <data name="sError3" xml:space="preserve">
     <value>Во время обращения к сервису БД возникла ошибка...{0}скопируйте и сохраните текст ошибки!{0}{0}ЭТО ОКНО МОЖНО ЗАКРЫВАТЬ...{0}Перезапускать программу не надо, если только эта ошибка не будет слишком частой!</value>
   </data>
@@ -309,6 +315,15 @@
   <data name="sNotice41" xml:space="preserve">
     <value>Продолжить этот прямой эфир?{0}Если нажать OK, то запустится автоматизация эфира!</value>
   </data>
+  <data name="sNotice42" xml:space="preserve">
+    <value>поверх всего</value>
+  </data>
+  <data name="sNotice43" xml:space="preserve">
+    <value>проиграть с</value>
+  </data>
+  <data name="sNotice44" xml:space="preserve">
+    <value>закэшировать</value>
+  </data>
   <data name="sNotice5" xml:space="preserve">
     <value>загрузка привязок расположения...</value>
   </data>
@@ -335,6 +350,9 @@
   </data>
   <data name="sNoticeAdvertsBlockChooser11" xml:space="preserve">
     <value>выбранный блок:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser12" xml:space="preserve">
+    <value>выбранный клип:</value>
   </data>
   <data name="sNoticeAdvertsBlockChooser2" xml:space="preserve">
     <value>загрузка элементов плейлиста - {0} --- {1} |</value>

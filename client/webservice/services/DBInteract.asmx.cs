@@ -7,13 +7,14 @@ using System.Web.Services;
 using helpers;
 using helpers.extensions;
 using helpers.replica;
+using helpers.replica.pl;
 using cues = helpers.replica.cues;
 using helpers.replica.cues;
 using helpers.replica.mam;
 using helpers.replica.media;
-using helpers.replica.pl;
 using helpers.replica.hk;
 using helpers.replica.scr;
+using helpers.replica.tsr;
 using SIO = System.IO;
 
 using g = globalization;
@@ -170,8 +171,10 @@ namespace webservice.services
 				contains,
 				notcontains,
 				more,
-				less
-			}
+				less,
+                tinparraycontainsid,
+                tinparraynotcontainsid,
+            }
 			public enum Binds
 			{
 				and,
@@ -246,28 +249,30 @@ namespace webservice.services
 						string sRetVal = "";
 						if (null != eBind)
 							sRetVal += " " + eBind.Value.ToString().ToUpper() + " ";
-						sRetVal += "`" + sName + "`";
+						sRetVal += "(";  //"`" + sName + "`"
+                        bool bFinish = false;
+                        object cValueTmp = cValue;
 
-						#region operator proccessing
-						switch (eOP)
+                        #region operator proccessing
+                        switch (eOP)
 						{
 							case Operators.equal:
 								if (null != cValue)
-									sRetVal += " = ";
+									sRetVal += sName + " = ";
 								else
-									sRetVal += " IS NULL";
+									sRetVal += sName + " IS NULL";
 								break;
 							case Operators.notequal:
 								if (null != cValue)
-									sRetVal += " <> ";
+									sRetVal += sName + " <> ";
 								else
-									sRetVal += " IS NOT NULL";
+									sRetVal += sName + " IS NOT NULL";
 								break;
 							case Operators.contains:
 								if (null != cValue && cValue is string)
 								{
-									sRetVal += " ILIKE ";
-									cValue = "%" + cValue.ToString() + "%";
+									sRetVal += sName + " ILIKE ";
+                                    cValueTmp = "%" + cValue.ToString() + "%";
 								}
 								else
 									return "";
@@ -275,35 +280,54 @@ namespace webservice.services
 							case Operators.notcontains:
 								if (null != cValue && cValue is string)
 								{
-									sRetVal += " NOT ILIKE ";
-									cValue = "%" + cValue.ToString() + "%";
+									sRetVal += sName + " NOT ILIKE ";
+                                    cValueTmp = "%" + cValue.ToString() + "%";
 								}
 								else
 									return "";
 								break;
 							case Operators.more:
 								if (null != cValue)
-									sRetVal += " > ";
+									sRetVal += sName + " > ";
 								else
 									return "";
 								break;
 							case Operators.less:
 								if (null != cValue)
-									sRetVal += " < ";
+									sRetVal += sName + " < ";
 								else
 									return "";
 								break;
-						}
-						#endregion
+                            case Operators.tinparraycontainsid:
+                                if (null != cValue && cValue is long)
+                                {
+                                    sRetVal += "`fTinpsArrayContains`(" + sName + ", " + cValue.ToID() + ")" + ")";
+                                    bFinish = true;
+                                }
+                                else
+                                    return "";
+                                break;
+                            case Operators.tinparraynotcontainsid:
+                                if (null != cValue && cValue is string)
+                                {
+                                    sRetVal += "NOT `fTinpsArrayContains`(" + sName + ", " + cValue.ToID() + ")" + ")";
+                                    bFinish = true;
+                                }
+                                else
+                                    return "";
+                                break;
+                        }
+                        #endregion
 
-						if (null != cValue)
+                        if (!bFinish && null != cValueTmp)
 						{
-							if (cValue is string)
-								sRetVal += "'" + cValue.ToString().Replace("`", "'").Replace("'", "''") + "'";
-							else if (cValue is DateTime)
-								sRetVal += "'" + ((DateTime)cValue).ToString("yyyy-MM-dd HH:mm:ss") + "'";
+							if (cValueTmp is string)
+								sRetVal += "'" + cValueTmp.ToString().Replace("`", "'").Replace("'", "''") + "'";
+							else if (cValueTmp is DateTime)
+								sRetVal += "'" + ((DateTime)cValueTmp).ToString("yyyy-MM-dd HH:mm:ss") + "'";
 							else
-								sRetVal += cValue.ToString();
+								sRetVal += cValueTmp.ToString();
+							sRetVal += ")";
 						}
 
 						if (null != cNext)
@@ -377,6 +401,7 @@ namespace webservice.services
 
 		private DateTime _dtPLUpdated;
 		private SessionInfo _cSI;
+		static private string _sImportLog;
 		static object cSyncRoot;
 		static private List<object> _aIntermediateObjectsStorage;
 		static public DateTime _dtNearestAdvertsBlock;
@@ -392,14 +417,18 @@ namespace webservice.services
 				_dtNearestAdvertsBlock = value;
 			}
 		}
+        static private string _sVersionOfXapReplica;
+        static private object _oLockVersion;
 
-		static DBInteract()
+        static DBInteract()
 		{
-			(new Logger()).WriteDebug("constructor:in");
+			(new Logger()).WriteDebug("static_constructor:in");
 			cSyncRoot = new object();
 			_aIntermediateObjectsStorage = new List<object>();
 			dtNearestAdvertsBlock = DateTime.MinValue;
-		}
+            _sVersionOfXapReplica = null;
+            _oLockVersion = new object();
+        }
 		public DBInteract()
 		{
 			lock (cSyncRoot)
@@ -422,9 +451,9 @@ namespace webservice.services
 						(new Logger()).WriteDebug3("preferences is null [hc:" + GetHashCode() + "]");
 				}
 				catch (Exception ex)
-				{
-					WebServiceError.Add(_cSI, ex);
-				}
+                {
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                }
 			}
 		}
 
@@ -502,6 +531,18 @@ namespace webservice.services
 			return WebServiceError.LastGet(_cSI);
 		}
 
+		[WebMethod(EnableSession = true)]
+		public void Logger_Notice(string sFrom, string sText)
+		{
+			(new Logger()).WriteNotice("[from_client: " + sFrom + "]  " + sText);
+		}
+
+		[WebMethod(EnableSession = true)]
+		public void Logger_Error(string sFrom, string sEx)
+		{
+			(new Logger()).WriteError("[from_client: " + sFrom + "]  " + sEx);
+		}
+
 		#endregion
 
 		#region authentication
@@ -516,35 +557,41 @@ namespace webservice.services
 			catch { }
 		}
 		[WebMethod(EnableSession = true)]
-		public bool Init(string sName, string sPassword)
+		public string Init(string sName, string sPassword, string sClientVersion)
 		{
+			(new Logger()).WriteDebug("INIT: " + "[name=" + sName + "]");
 			if (null == sName || null == sPassword)
-				return false;
-			bool bRetVal = true;
+				return "name or password is empty";
+			string sRetVal = null;
 			try
 			{
-				if (null == _cSI)
+                if (sClientVersion != "DO_NOT_CHECK_VERSION")
+                {
+                    if (_sVersionOfXapReplica == null)
+                        _sVersionOfXapReplica = helpers.replica.scr.XAP.GetVersionOfDll(@"ClientBin\replica.xap", @"ClientBin\replica.dll");
+                    if (_sVersionOfXapReplica != sClientVersion)
+                        return "client's version doesn't match [server=" + _sVersionOfXapReplica + "]";
+                }
+                if (null == _cSI)
 					_cSI = new SessionInfo();
 				_cDB.CredentialsSet(_cSI.cDBCredentials = webservice.Preferences.DBCredentialsGet(sName, sPassword));
 				Profile cProfile = new Profile(sName, sPassword);
 				_cSI.cProfile = cProfile;
 				access.scopes.init(AccessScopesGet());
-				if ("user" == sName)
-					DBCredentialsSet("user");
 			}
 			catch (Exception ex)
 			{
 				try
-				{
-					WebServiceError.Add(_cSI, ex);
-				}
+                {
+                    WebServiceError.Add(_cSI, ex, "[user=" + (_cSI.cProfile == null ? "NULL" : _cSI.cProfile.sUsername) + "][server=" + (_cSI.cDBCredentials == null ? "NULL" : _cSI.cDBCredentials.sServer) + ":" + (_cSI.cDBCredentials == null ? "NULL" : "" + _cSI.cDBCredentials.nPort) + "]");
+                }
 				catch { }
-				bRetVal = false;
-			}
-			return bRetVal;
+				sRetVal = "name or password is incorrect";
+            }
+			return sRetVal;
 		}
 
-		public string[] WebPagesAccessGet()
+        public string[] WebPagesAccessGet()
 		{
 			try
 			{
@@ -552,7 +599,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -566,16 +613,9 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
-		}
-
-		[WebMethod(EnableSession = true)]
-		public void DBCredentialsSet(string sUsername)
-		{
-			_cSI.cDBCredentials = webservice.Preferences.DBCredentialsGet(sUsername, null);
-			_cDB.CredentialsSet(_cSI.cDBCredentials.sUser, _cSI.cDBCredentials.sPassword);
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -588,7 +628,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -617,7 +657,7 @@ namespace webservice.services
 				}
 				catch (Exception ex)
 				{
-                    WebServiceError.Add(_cSI, ex);
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 					aRes.Add("ID=" + cAsset.nID + " Name=" + cAsset.sName); // эти  строки не удалились
 				}
 			}
@@ -651,7 +691,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -665,7 +705,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -743,27 +783,69 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
-
-		[WebMethod(EnableSession = true)]
+        [WebMethod(EnableSession = true)]
+        public Asset[] ClassesSet(Asset[] aAssets)
+        {
+            if (!access.scopes.assets.classes.bCanUpdate)
+            {
+                WebServiceError.Add(_cSI, "no rights to save classes [user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                return aAssets;
+            }
+            List<Asset> aRetVal = new List<Asset>();
+            foreach (Asset cAsset in aAssets)
+            {
+                try
+                {
+                    AssetClassSave(cAsset);
+                }
+                catch(Exception ex)
+                {
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "][asset=" + cAsset.sName + "]");
+                    aRetVal.Add(cAsset);
+                }
+            }
+            return aRetVal.Count == 0 ? null : aRetVal.ToArray();
+        }
+        [WebMethod(EnableSession = true)]
+        public Clip[] RotationsSet(Clip[] aClips)
+        {
+            if (!access.scopes.assets.custom_values.bCanUpdate)
+            {
+                WebServiceError.Add(_cSI, "no rights to save rotations [user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                return aClips;
+            }
+            List<Clip> aRetVal = new List<Clip>();
+            foreach (Clip cClip in aClips)
+            {
+                try
+                {
+                    if (null != cClip.cRotation)
+                        _cDB.Perform("SELECT mam.`fAssetRotationSet`(" + cClip.nID + "," + cClip.cRotation.nID + ")");
+                }
+                catch (Exception ex)
+                {
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "][asset=" + cClip.sName + "]");
+                    aRetVal.Add(cClip);
+                }
+            }
+            return aRetVal.Count == 0 ? null : aRetVal.ToArray();
+        }
+        [WebMethod(EnableSession = true)]
 		public IdNamePair[] StatusesGet()
 		{
-			IdNamePair[] aRetVal = null;
-			Queue<Hashtable> aqStatuses = null;
-			Hashtable ahRow = null;
-			if (null != (aqStatuses = _cDB.Select("SELECT * FROM pl.`tStatuses` ORDER BY `sName`")))
-			{
-				aRetVal = new IdNamePair[aqStatuses.Count];
-				int nIndx = 0;
-				while (0 < aqStatuses.Count)
-				{
-					ahRow = aqStatuses.Dequeue();
-					aRetVal[nIndx++] = new IdNamePair(ahRow["id"], webservice.Preferences.cDBKeysMap.GetTitle(DBKeysMap.MapClass.pli_status, ahRow["sName"].ToString()));
-				}
-			}
+			IdNamePair[] aRetVal = base.PlaylistItemsStatusesGet();
+			foreach (IdNamePair cIP in aRetVal)
+				cIP.sName = webservice.Preferences.cDBKeysMap.GetTitle(DBKeysMap.MapClass.pli_status, cIP.sName);
+			return aRetVal;
+		}
+		[WebMethod(EnableSession = true)]
+		public IdNamePair[] StatusesClearGet()
+		{
+			IdNamePair[] aRetVal = base.PlaylistItemsStatusesGet();
 			return aRetVal;
 		}
 
@@ -776,28 +858,13 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
 
 		[WebMethod(EnableSession = true)]
-		public Class ProgramWithChatClassGet() //EMERGENCY:l это очень плохая, никуда негодная функция!!! ее надо уничтожить.
-		{
-			helpers.replica.pl.Class cRetVal = null;
-			try
-			{
-				cRetVal = base.ClassGet("program_with_chat");
-			}
-			catch (Exception ex)
-			{
-				WebServiceError.Add(_cSI, ex);
-			}
-			return cRetVal;
-		}
-
-		[WebMethod(EnableSession = true)]
-		public bool ChatInOutsSave(Asset cAsset, ChatInOut[] aChatInOuts)
+		new public bool ChatInOutsSave(Asset cAsset, ChatInOut[] aChatInOuts)
 		{
 			if (!access.scopes.programs.chatinouts.bCanUpdate)
 				return false;
@@ -807,7 +874,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return false;
 			}
 			return true;
@@ -819,7 +886,7 @@ namespace webservice.services
 			_cDB.TransactionBegin();
 			try
 			{
-				if (null == cClip.cClass)
+				if (null == cClip.aClasses)
 					throw new Exception(g.Webservice.sErrorDBInteract8);
 				base.AssetClassSet(cClip);
 				_cDB.Select("DELETE FROM cues.`tRingtones` WHERE `nBindCode` = " + cClip.stCues.sAlbum.ToInt32());
@@ -829,13 +896,13 @@ namespace webservice.services
 				if (null != (aqPLIs = PlaylistItemsGet(cClip)))
 				{
 					while (0 < aqPLIs.Count)
-						PLIClassChange(aqPLIs.Dequeue().nID, cClip.cClass.nID);
+						PLIClassChange(aqPLIs.Dequeue().nID, cClip.aClasses);
 				}
 				_cDB.TransactionCommit();
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				_cDB.TransactionRollBack();
 			}
 		}
@@ -850,7 +917,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -873,12 +940,12 @@ namespace webservice.services
 			try
 			{
 				Program cResult = base.ProgramGet(nAssetID);
-				cResult.RAOInfoLoad();
+				cResult.ClipsFragmentsLoad();
 				return cResult;
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return null;
 			}
 		}
@@ -906,30 +973,30 @@ namespace webservice.services
 			catch (Exception ex)
 			{
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return null;
 			}
 		}
 
 		[WebMethod(EnableSession = true)]
-		public bool AssetParametersToPlaylistSave(long nAssID)  //EMERGENCY:l убрать long, принимать Asset (меж.прочим, nAssID - это ID жопы))  :==))))
+		public bool AssetParametersToPlaylistSave(long nAssetID)  //EMERGENCY:l убрать long, принимать Asset (меж.прочим, nAssID - это ID жопы))  :==))))
 		{
-			(new Logger()).WriteNotice("we are changing playlist items with asset [id = " + nAssID + "][user = " + _cSI.cDBCredentials.sUser + "]");
+			(new Logger()).WriteNotice("we are changing playlist items with asset [id = " + nAssetID + "][user = " + _cSI.cDBCredentials.sUser + "]");
 			bool bRetVal = true;
 			Queue<Hashtable> ahRow;
 			try
 			{
 
 				//select id from pl."vPlayListResolvedOrdered" where "idAssets" = 1233
-				ahRow = _cDB.Select("select id from pl.`vPlayListResolvedOrdered` where `idAssets` = " + nAssID);
+				ahRow = _cDB.Select("select id from pl.`vPlayListResolvedOrdered` where `idAssets` = " + nAssetID);
 				if (null == ahRow || 0 >= ahRow.Count)
 				{
-					(new Logger()).WriteNotice("there are no pl-items with this asset id: " + nAssID + ", so there is nothing to do.");
+					(new Logger()).WriteNotice("there are no pl-items with this asset id: " + nAssetID + ", so there is nothing to do.");
 					return true;
 				}
 
-													//select pl."fItemClassSet"(plr.id, ar."idClasses"), pl."fItemFileSet"(plr.id, ar."idFiles"), pl."fItemTimingsSet"(plr.id, 1,			ar."nFramesQty"), pl."fItemNameSet"(plr.id, ar."sName") from pl."vPlayListResolved" plr, mam."vAssetsResolved" ar where plr."idAssets"=ar.id AND plr."sStatusName"='planned' AND ar.id=    1176
-				ahRow = _cDB.Select("select pl.`fItemClassSet`(plr.id, ar.`idClasses`), pl.`fItemFileSet`(plr.id, ar.`idFiles`), pl.`fItemTimingsSet`(plr.id, ar.`nFrameIn`, ar.`nFrameOut`, ar.`nFramesQty`), pl.`fItemNameSet`(plr.id, ar.`sName`) from pl.`vPlayListResolved` plr, mam.`vAssetsResolved` ar where plr.`idAssets`=ar.id AND plr.`sStatusName`='planned' AND ar.id=" + nAssID);
+                                          //pl."fItemClassesSet"(plr.id, "fTinpsArrayToIdsArray"(ar."aClasses")), pl."fItemFileSet"(plr.id, ar."idFiles"), pl."fItemTimingsSet"(plr.id, 1,			ar."nFramesQty"), pl."fItemNameSet"(plr.id, ar."sName") from pl."vPlayListResolved" plr, mam."vAssetsResolved" ar where plr."idAssets"=ar.id AND plr."sStatusName"='planned' AND ar.id=    1176
+                ahRow = _cDB.Select("select pl.`fItemClassesSet`(plr.id, `fTinpsArrayToIdsArray`(ar.`aClasses`)), pl.`fItemFileSet`(plr.id, ar.`idFiles`), pl.`fItemTimingsSet`(plr.id, ar.`nFrameIn`, ar.`nFrameOut`, ar.`nFramesQty`), pl.`fItemNameSet`(plr.id, ar.`sName`) from pl.`vPlayListResolved` plr, mam.`vAssetsResolved` ar where plr.`idAssets`=ar.id AND plr.`sStatusName`='planned' AND ar.id=" + nAssetID);
 				string sErr = "AssetParametersToPlaylistSave: ";
 				if (null != ahRow && 0 < ahRow.Count)
 				{
@@ -953,7 +1020,7 @@ namespace webservice.services
 			catch (Exception ex)
 			{
 				bRetVal = false;
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -968,7 +1035,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -986,7 +1053,7 @@ namespace webservice.services
 			catch (Exception ex)
 			{
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return false;
 			}
 			return true;
@@ -1002,7 +1069,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -1017,7 +1084,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -1032,7 +1099,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -1074,7 +1141,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -1091,7 +1158,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -1125,6 +1192,11 @@ namespace webservice.services
 		{
 			return base.PalettesGet();
 		}
+		[WebMethod(EnableSession = true)]
+		new public IdNamePair[] SexGet()
+		{
+			return base.SexGet();
+		}
 
 		[WebMethod(EnableSession = true)]
 		new public IdNamePair[] SoundsGet()
@@ -1141,8 +1213,19 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return null;
+			}
+		}
+		new public void CustomsLoad(Asset[] aAssets)
+		{
+			try
+			{
+				base.CustomsLoad(aAssets);
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 		}
 
@@ -1165,7 +1248,7 @@ namespace webservice.services
 				}
 				catch (Exception ex)
 				{
-                    WebServiceError.Add(_cSI, ex);
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 					sName = "";
 				}
 				sName = null == sName || "" == sName ? "" : sName;
@@ -1174,32 +1257,51 @@ namespace webservice.services
 			return aRetVal.ToArray();
 		}
 
-		//[WebMethod(EnableSession = true)]
-		//public Clip[] ClipsInProgramGet(long nAssetID)
-		//{ 
-		//    return new Clip[4];
-		//}
-		//[WebMethod(EnableSession = true)]
-		//public bool ClipsInProgramSet(Clip[] aClips)
-		//{
-		//    return false;
-		//}
+        [WebMethod(EnableSession = true)]
+        public int? FilesAgeGet(Asset cAsset)
+        {
+            try
+            {
+                Queue<Hashtable> ahRows = _cDB.Select("SELECT `nValue` FROM mam.`tAssetAttributes` WHERE `idAssets` = " + cAsset.nID + " AND `sKey` = 'nFilesAge'");
+                if (ahRows.IsNullOrEmpty())
+                    return null;
+                int nValue = ahRows.Dequeue()["nValue"].ToInt();
+                if (nValue == int.MaxValue)
+                    return null;
+                return nValue;
+            }
+            catch (Exception ex)
+            {
+                WebServiceError.Add(_cSI, ex, "[asset_id=" + cAsset.nID + "][asset_name=" + cAsset.sName + "]");
+            }
+            return null;
+        }
+        [WebMethod(EnableSession = true)]
+        public void FilesAgeSet(Asset cAsset, int nAge)
+        {
+            try
+            {
+                _cDB.Perform("SELECT mam.`fAssetAttributeSet`(" + cAsset.nID + ",'nFilesAge'," + nAge + ")");
+            }
+            catch (Exception ex)
+            {
+                WebServiceError.Add(_cSI, ex, "[asset_id=" + cAsset.nID + "][asset_name=" + cAsset.sName + "]");
+            }
+        }
 
-		public void AssetClassChange(int idAssets, int idClasses)
+        // not used:
+        public void AssetClassChange(int idAssets, int idClasses)
 		{
-			_cDB.Perform("SELECT mam.`fAssetClassSet`(" + idAssets + "," + idClasses + ")");
+			//_cDB.Perform("SELECT mam.`fAssetClassSet`(" + idAssets + "," + idClasses + ")");
 		}
-
 		public void AssetVideoTypeChange(int idAssets, int idVideoTypes)
 		{
 			_cDB.Perform("SELECT mam.`fAssetVideoTypeSet`(" + idAssets + "," + idVideoTypes + ")");
 		}
-
 		public void CuesTemplateShow(string sTemplateFile)
 		{
 			_cDB.Perform("SELECT adm.`fCuesTemplateProcess`('" + sTemplateFile + "', true)");
 		}
-
 		public void CuesTemplateHide(string sTemplateFile)
 		{
 			_cDB.Perform("SELECT adm.`fCuesTemplateProcess`('" + sTemplateFile + "', false)");
@@ -1221,7 +1323,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -1237,55 +1339,112 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                throw;
 			}
 			return aRetVal;
 		}
+        [WebMethod(EnableSession = true)]
+        public File[] FilesWithSourcesGet(long nStorageID)
+        {
+            File[] aRetVal = null;
+            Dictionary<long, File> ahFiles = null;
+            try
+            {
+                if (null != (ahFiles = base.FilesGet(nStorageID)))
+                    aRetVal = ahFiles.Values.ToArray();
+                //SELECT "idFiles", "oValue" AS "sSource" FROM media."tFileAttributes" mfa LEFT JOIN media."tStrings" ms ON mfa."nValue"=ms.id WHERE "sKey"='source' AND "idFiles" IN (5563)
+                Queue<Hashtable> ahRows = base._cDB.Select("SELECT `idFiles`, `oValue` AS `sSource` FROM media.`tFileAttributes` mfa LEFT JOIN media.`tStrings` ms ON mfa.`nValue`= ms.id WHERE `sKey`='source' AND `idFiles` IN (" + ahFiles.Keys.ToEnumerationString(true) + ")");
+                long nFID;
+                if (!ahRows.IsNullOrEmpty())
+                {
+                    foreach(Hashtable aRow in ahRows)
+                    {
+                        nFID = aRow["idFiles"].ToLong();
+                        ahFiles[nFID].sSourceFile = aRow["sSource"].ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                throw;
+            }
+            return aRetVal;
+        }
+        [WebMethod(EnableSession = true)]
+		public void FilesRemove(long[] aFileIDs)
+		{
+			if (aFileIDs.IsNullOrEmpty())
+				return;
+			string sWhere = aFileIDs.ToEnumerationString(true);
+			if (!sWhere.IsNullOrEmpty())
+				base._cDB.Select("SELECT media.`fFileAttributeAdd`(ss.id, 'to_delete', 1) FROM (SELECT DISTINCT `idFiles` AS id FROM media.`tFileAttributes` WHERE `idFiles` IN (" + sWhere + ")) ss");
+		}
 		[WebMethod(EnableSession = true)]
-		public long FileDurationQuery(long nFileID)
+		public File FileAdditionalInfoGet(File cFile, RegisteredTable cRTStrings, RegisteredTable cRTAssets, RegisteredTable cRTDates)
+		{
+			if (cFile == null || cFile.nID < 1)
+				return cFile;
+			string sSQL = "SELECT * FROM media.`tFileAttributes` tfa ";
+			sSQL += "LEFT JOIN (SELECT ts.id, ts.`oValue` FROM media.`tFileAttributes` tfa LEFT JOIN media.`tStrings` ts ON tfa.`nValue` = ts.id WHERE `idFiles` = " + cFile.nID + " AND `idRegisteredTables` = " + cRTStrings.nID + ") AS tss ON tfa.`nValue` = tss.id ";
+			sSQL += "LEFT JOIN (SELECT ta.id, ta.`sName` FROM media.`tFileAttributes` tfa LEFT JOIN mam.`tAssets` ta ON tfa.`nValue` = ta.id WHERE `idFiles` = " + cFile.nID + " AND `idRegisteredTables` = " + cRTAssets.nID + ") AS taa ON tfa.`nValue` = taa.id ";
+            sSQL += "LEFT JOIN (SELECT td.id, td.dt FROM media.`tFileAttributes` tfa LEFT JOIN media.`tDates` td ON tfa.`nValue` = td.id WHERE `idFiles` = " + cFile.nID + " AND `idRegisteredTables` = " + cRTDates.nID + ") AS tad ON tfa.`nValue` = tad.id ";
+			sSQL += "WHERE  `idFiles` = " + cFile.nID;
+			cFile.FileAdditionalInfoSet(base._cDB.Select(sSQL));
+			return cFile;
+		}
+        [WebMethod(EnableSession = true)]
+		new public FileIsInPlaylist FileCheckIsInPlaylist(long nFileID, int nMinutes)
+		{
+            try
+            {
+                return base.FileCheckIsInPlaylist(nFileID, nMinutes);
+            }
+            catch (Exception ex)
+            {
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                throw; // сам иксепшн всё-равно не пройдет в SL - там будет "not found" всегда
+            }
+		}
+		[WebMethod(EnableSession = true)]
+		public new long FileDurationQuery(long nFileID)
 		{
 			try
 			{
-				//_cDB.RoleSet("replica_adm");
-				Hashtable ahRow = _cDB.GetRow("SELECT `bValue`, `nValue` FROM adm.`fFileDurationGet`(" + nFileID + ")");
-				if (ahRow["bValue"].ToBool())
-				{
-					return ahRow["nValue"].ToID();
-				}
+				return base.FileDurationQuery(nFileID);
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return -1;
 		}
 		[WebMethod(EnableSession = true)]
-		public IdNamePair CommandStatusGet(long nCommandsQueueID)
+		public new IdNamePair CommandStatusGet(long nCommandsQueueID)
 		{
 			try
 			{
-				//_cDB.RoleSet("replica_adm");
-				return new IdNamePair(_cDB.GetRow("SELECT * FROM adm.`fCommandsQueueStatusGet`(" + nCommandsQueueID + ")"));
+				return base.CommandStatusGet(nCommandsQueueID);
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
 		[WebMethod(EnableSession = true)]
-		public string FramesQtyGet(long nCommandsQueueID)
+		public long FramesQtyGet(long nCommandsQueueID)
 		{
 			try
 			{
-				//_cDB.RoleSet("replica_adm");
-				return _cDB.GetValue("SELECT `sValue` FROM adm.`fCommandParametersGet`(" + nCommandsQueueID + ", 'nFramesQty')");
+				return base.FileDurationResultGet(nCommandsQueueID);
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
-			return null;
+			return -1;
 		}
 		[WebMethod(EnableSession = true)]
 		public File[] StorageFilesUnusedGet(long nStorageID)
@@ -1302,16 +1461,114 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return null;
 			}
 			return aRetVal.ToArray();
 		}
+		[WebMethod(EnableSession = true)]
+		public long[] FileIDsInStockGet(long[] aFileIDs)
+		{
+			try
+			{
+                if (aFileIDs==null)
+                    return _cDB.Select("SELECT id from media.`vFiles` WHERE `nStatus` = 1").Select(o => o["id"].ToLong()).ToArray();
+                else
+                {
+                    string sFileIDs = aFileIDs.ToEnumerationString("'", true);
+                    return _cDB.Select("SELECT id from media.`vFiles` WHERE id IN (" + sFileIDs + ") AND `nStatus` = 1").Select(o => o["id"].ToLong()).ToArray();
+                }
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+				return null;
+			}
+		}
 		#endregion
 
 		#region ingest
-
 		[WebMethod(EnableSession = true)]
+		public TSRItem[] TSRItemsGet(string[] aFilenames)
+		{
+			Dictionary<string, string> ahVICodes_Names = aFilenames.ToDictionary(o => TSRItem.VICodeGet(o), o => o);
+            List<string> aFilesTMP = ahVICodes_Names.Keys.ToList();
+            List<TSRItem> aTSRIs = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, ahVICodes_Names.Keys.ToList());
+			foreach (TSRItem cTSRI in aTSRIs)
+			{
+				cTSRI.oTag = ahVICodes_Names[cTSRI.sVI_Code];
+                aFilesTMP.Remove(cTSRI.sVI_Code);
+            }
+            if (!aFilesTMP.IsNullOrEmpty())
+            {
+                List<string> aFilesTMP2 = aFilesTMP.Select(o => o + ".mov").ToList();
+                List<TSRItem> aTSRIs2 = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, aFilesTMP2);
+                foreach (TSRItem cTSRI in aTSRIs2)
+                {
+                    cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
+                    aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                }
+                aTSRIs.AddRange(aTSRIs2);
+            }
+            if (!aFilesTMP.IsNullOrEmpty())
+            {
+                List<string> aFilesTMP3 = aFilesTMP.Select(o => o + ".mxf").ToList();
+                List<TSRItem> aTSRIs3 = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, aFilesTMP3);
+                foreach (TSRItem cTSRI in aTSRIs3)
+                {
+                    cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
+                    aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                }
+                aTSRIs.AddRange(aTSRIs3);
+            }
+            return aTSRIs.ToArray();
+		}
+        [WebMethod(EnableSession = true)]
+        public bool IngestForReplacedFile(File cFile)
+        {
+            bool cRetVal = false;
+            try
+            {
+                TransactionBegin();
+                List<string> aFieldsFailed = new List<string>();
+                string sSQL = "SELECT `bValue` FROM media.`fFileAttributeSet`(:idFiles, ";
+                string sSQLForString = sSQL + ":sKey, :sValue)";
+                string sSQLForDate = sSQL + ":sKey, :sValue::timestamp with time zone)";
+                Dictionary<string, object> ahParams = new Dictionary<string, object>();
+                ahParams.Add("idFiles", cFile.nID);
+                ahParams.Add("sKey", null);
+                ahParams.Add("nValue", null);
+                ahParams.Add("sValue", null);
+
+                ahParams["sKey"] = "source";
+                ahParams["sValue"] = cFile.sSourceFile;
+                if (!_cDB.GetValueBool(sSQLForString, ahParams))
+                    aFieldsFailed.Add("sOriginalFile");
+
+                ahParams["sKey"] = "modification";
+                ahParams["sValue"] = cFile.dtModification.ToString("yyyy-MM-dd HH:mm:ss");
+                if (!_cDB.GetValueBool(sSQLForDate, ahParams))
+                    aFieldsFailed.Add("sOriginalFile");
+
+                if (0 < aFieldsFailed.Count)
+                {
+                    TransactionRollBack();
+                    WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] errors occurred while processing next fields: " + string.Join(",", aFieldsFailed));
+                }
+                else
+                {
+                    TransactionCommit();
+                    cRetVal = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                TransactionRollBack();
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+            }
+            return cRetVal;
+        }
+        [WebMethod(EnableSession = true)]
         public File Ingest(File.Ingest cInfo)
 		{
             File cRetVal = null;
@@ -1323,14 +1580,21 @@ namespace webservice.services
                     List<string> aFieldsFailed = new List<string>();
                     //_cDB.RoleSet("replica_ingest");
 					string sFilename = SIO.Path.GetFileName(cInfo.sFilename);
+					Queue<Asset> ahAsset = null;
                     if (null == (cRetVal = File.Load(cInfo.cStorage, sFilename)))
-                        cRetVal = File.Create(cInfo.cStorage, sFilename);
+					{
+						cRetVal = File.Create(cInfo.cStorage, sFilename);
+					}
+					else
+						ahAsset = base.AssetsGet(cRetVal);
 
+					cRetVal.StatusSet(File.Status.Waiting);
                     string sSQL = "SELECT `bValue` FROM media.`fFileAttributeSet`(:idFiles, ";
                     string sSQLForInt = sSQL + ":sKey, :nValue::int)";
                     string sSQLForString = sSQL + ":sKey, :sValue)";
                     string sSQLForBool = sSQL + ":sKey, 1)";
-					string sSQLForRT = "SELECT `bValue` FROM media.`fFileAttributeSet`(:idFiles, :idRegisteredTables::int, :sKey, :nValue::int)";
+					string sSQLForRT = sSQL + ":idRegisteredTables::int, :sKey, :nValue::int)";
+                    string sSQLForDate = sSQL + ":sKey, :sValue::timestamp with time zone)";
                     Dictionary<string, object> ahParams = new Dictionary<string, object>();
                     ahParams.Add("idFiles", cRetVal.nID);
                     ahParams.Add("sKey", null);
@@ -1340,6 +1604,11 @@ namespace webservice.services
                     ahParams["sKey"] = "source";
                     ahParams["sValue"] = cInfo.sOriginalFile;
                     if (!_cDB.GetValueBool(sSQLForString, ahParams))
+                        aFieldsFailed.Add("sOriginalFile");
+
+                    ahParams["sKey"] = "modification";
+                    ahParams["sValue"] = cInfo.dtSourceModification.ToString("yyyy-MM-dd HH:mm:ss");
+                    if (!_cDB.GetValueBool(sSQLForDate, ahParams))
                         aFieldsFailed.Add("sOriginalFile");
 
                     ahParams["sKey"] = "age";
@@ -1361,15 +1630,18 @@ namespace webservice.services
                             aFieldsFailed.Add("nVersion");
                     }
 
-                    ahParams["sKey"] = "format";
-                    ahParams["nValue"] = cInfo.nFormat;
-                    if (!_cDB.GetValueBool(sSQLForInt, ahParams))
-                        aFieldsFailed.Add("nFormat");
+					if (false)  // это всё пишет синкер
+					{
+						ahParams["sKey"] = "format";
+						ahParams["nValue"] = cInfo.nFormat;
+						if (!_cDB.GetValueBool(sSQLForInt, ahParams))
+							aFieldsFailed.Add("nFormat");
 
-                    ahParams["sKey"] = "fps";
-                    ahParams["nValue"] = cInfo.nFPS;
-                    if (!_cDB.GetValueBool(sSQLForInt, ahParams))
-                        aFieldsFailed.Add("nFPS");
+						ahParams["sKey"] = "fps";
+						ahParams["nValue"] = cInfo.nFPS;
+						if (!_cDB.GetValueBool(sSQLForInt, ahParams))
+							aFieldsFailed.Add("nFPS");
+					}
 
                     if (cInfo is File.Ingest.Clip)
                     {
@@ -1394,7 +1666,15 @@ namespace webservice.services
                         if (!_cDB.GetValueBool(sSQLForInt, ahParams))
                             aFieldsFailed.Add("nQuality");
 
-                        if (cInfoClip.bLocation)
+                        if (webservice.Preferences.cClientReplica.bIsPgIdNeeded)
+                        {
+                            ahParams["sKey"] = "pg_id";
+                            ahParams["nValue"] = cInfoClip.nPG_ID;
+                            if (!_cDB.GetValueBool(sSQLForInt, ahParams))
+                                aFieldsFailed.Add("nPG_ID");
+                        }
+
+						if (cInfoClip.bLocation)
                         {
                             ahParams["sKey"] = "location";
                             if (!_cDB.GetValueBool(sSQLForBool, ahParams))
@@ -1428,33 +1708,94 @@ namespace webservice.services
                             if (!_cDB.GetValueBool(sSQLForBool, ahParams))
                                 aFieldsFailed.Add("bForeign");
                         }
+						string sName = "";
+                        foreach (Person sP in cInfoClip.aArtists)
+						{
+							if (0 < sName.Length)
+								sName += " feat ";
+                            sName += sP.sName.ToUpperFirstLetterEveryWord(false);
+                        }
 
-                    }
-                    else if(cInfo is File.Ingest.Advertisement)
+
+						if (cInfo.bCreateAsset)
+						{
+							if (ahAsset == null || ahAsset.Count <= 0)
+							{
+								Clip cAsset = new Clip()
+								{
+									aPersons = cInfoClip.aArtists,
+                                    aCustomValues = webservice.Preferences.cClientReplica.bIsPgIdNeeded ? (new CustomValue[] { new CustomValue("id", cInfoClip.nPG_ID.ToString().ToUpper()) }) : null,
+                                    cFile = cRetVal,
+									nID = -1,
+									sName = sName + " : " + cInfoClip.sSongName,
+									stVideo = new Video(-1, sName + " : " + cInfoClip.sSongName, base.VideoTypeGet("clip")),
+									stCues = new Cues(-1, cInfoClip.sSongName, sName, null, -1, null),
+                                    aClasses = ClassesGet("`sName` in ('clip_with_socials')").ToArray(),
+                                    cRotation = RotationGet("стоп"),
+								};
+								base.ClipSave(cAsset);
+							}
+							else
+							{
+                                if (webservice.Preferences.cClientReplica.bIsPgIdNeeded)
+                                    base.AssetCustomValueSet(ahAsset.Dequeue(), "id", cInfoClip.nPG_ID.ToString());
+							}
+						}
+					}
+					else if(cInfo is File.Ingest.Advertisement)
                     {
                         File.Ingest.Advertisement cInfoAdvertisement = (File.Ingest.Advertisement)cInfo;
 
-						ahParams["sKey"] = "company";
-						ahParams["sValue"] = cInfoAdvertisement.sCompany;
-						if (!_cDB.GetValueBool(sSQLForString, ahParams))
-							aFieldsFailed.Add("sCompany");
+						if (!cInfoAdvertisement.sCompany.IsNullOrEmpty())
+						{
+							ahParams["sKey"] = "company";
+							ahParams["sValue"] = cInfoAdvertisement.sCompany;
+							if (!_cDB.GetValueBool(sSQLForString, ahParams))
+								aFieldsFailed.Add("sCompany");
+						}
+						if (!cInfoAdvertisement.sCampaign.IsNullOrEmpty())
+						{
+							ahParams["sKey"] = "campaign";
+							ahParams["sValue"] = cInfoAdvertisement.sCampaign;
+							if (!_cDB.GetValueBool(sSQLForString, ahParams))
+								aFieldsFailed.Add("sCampaign");
+						}
 
-						ahParams["sKey"] = "campaign";
-						ahParams["sValue"] = cInfoAdvertisement.sCampaign;
-						if (!_cDB.GetValueBool(sSQLForString, ahParams))
-							aFieldsFailed.Add("sCampaign");
-						
 						if (!cInfoAdvertisement.sID.IsNullOrEmpty())
-                        {
-                            ahParams["sKey"] = "id";
-                            ahParams["sValue"] = cInfoAdvertisement.sID;
-                            if (!_cDB.GetValueBool(sSQLForString, ahParams))
-                                aFieldsFailed.Add("sID");
-                        }
-                    }
-                    else if(cInfo is File.Ingest.Program)
-                    {
-                        File.Ingest.Program cInfoProgram = (File.Ingest.Program)cInfo;
+						{
+							ahParams["sKey"] = "id";
+							ahParams["sValue"] = cInfoAdvertisement.sID;
+							if (!_cDB.GetValueBool(sSQLForString, ahParams))
+								aFieldsFailed.Add("sID");
+						}
+
+						if (cInfo.bCreateAsset)
+						{
+							string sName; // = SIO.Path.GetFileName(cInfo.sOriginalFile);
+										  //PlaylistImport.TSRItem cTSRI = PlaylistImport.TSRItem.ItemGetByVICode(PlaylistImport.TSRItem.VICodeGet(sName));   // на данный момент может не быть еще инфы в TSR ((  - добавим инфу при импорте. 
+
+							sName = SIO.Path.GetFileNameWithoutExtension(cInfo.sOriginalFile).ToLower();                                // для массового добавления уже есть инфа. 
+							if (ahAsset == null || ahAsset.Count <= 0)
+							{
+                                Class cClass = cInfoAdvertisement.cTSR == null ? ClassGet("advertisement_with_logo") : (cInfoAdvertisement.cTSR.eType == TSRItem.Type.МОСКВА ? ClassGet("advertisement_without_logo") : ClassGet("advertisement_with_logo"));
+                                Advertisement cAsset = new Advertisement()
+								{
+									aCustomValues = cInfoAdvertisement.sID.IsNullOrEmpty() ? null : new CustomValue[] { new CustomValue("vi_id", cInfoAdvertisement.sID) },
+									cFile = cRetVal,
+									nID = -1,
+									sName = sName,
+									stVideo = new Video(-1, sName, base.VideoTypeGet("advertisement")),
+                                    aClasses = new Class[1] { cClass },
+                                };
+								base.AdvertisementSave(cAsset);
+							}
+							//else
+							//base.AssetCustomValueSet(ahAsset.Dequeue(), "vi_id", cTSRI.sS_Code);
+						}
+					}
+					else if (cInfo is File.Ingest.Program)
+					{
+						File.Ingest.Program cInfoProgram = (File.Ingest.Program)cInfo;
 
                         ahParams["idRegisteredTables"] = RegisteredTableGet("mam", "tAssets").nID;
                         ahParams["sKey"] = "series";
@@ -1467,14 +1808,32 @@ namespace webservice.services
                         if (!_cDB.GetValueBool(sSQLForRT, ahParams))
                             aFieldsFailed.Add("cEpisode");
 
-                        if (0 < cInfoProgram.nPart)
+                        if (!cInfoProgram.sPart.IsNullOrEmpty())
                         {
                             ahParams["sKey"] = "id";
-                            ahParams["nValue"] = cInfoProgram.nPart;
+                            ahParams["sValue"] = cInfoProgram.sPart;
                             if (!_cDB.GetValueBool(sSQLForInt, ahParams))
-                                aFieldsFailed.Add("nPart");
+                                aFieldsFailed.Add("sPart");
                         }
-                    }
+						if (cInfo.bCreateAsset)
+						{
+							if (ahAsset == null || ahAsset.Count <= 0)
+							{
+								string sName = cInfoProgram.cEpisode.sName + " : " + cInfoProgram.sPart;
+                                Class[] aClasses = cInfoProgram.aClasses == null ? new Class[1] { ClassGet("program_with_logo") } : cInfoProgram.aClasses;
+                                Program cAsset = new Program()
+								{
+									cFile = cRetVal,
+									nID = -1,
+									sName = sName,
+									nIDParent = cInfoProgram.cEpisode.nID,
+									stVideo = new Video(-1, sName, base.VideoTypeGet("program")),
+                                    aClasses = aClasses,
+                                };
+								base.ProgramSave(cAsset);
+							}
+						}
+					}
                     else if(cInfo is File.Ingest.Design)
                     {
                         File.Ingest.Design cInfoDesign = (File.Ingest.Design)cInfo;
@@ -1504,22 +1863,88 @@ namespace webservice.services
                         ahParams["sValue"] = cInfoDesign.sName;
                         if (!_cDB.GetValueBool(sSQLForString, ahParams))
                             aFieldsFailed.Add("sName");
-                    }
+
+						if (cInfo.bCreateAsset)
+						{
+							if (ahAsset == null || ahAsset.Count <= 0)
+							{
+								Design cAsset = new Design()
+								{
+									cFile = cRetVal,
+									nID = -1,
+                                    sName = cInfoDesign.sName,
+                                    stVideo = new Video(-1, cInfoDesign.sName, base.VideoTypeGet("design")),
+                                    aClasses = ClassesGet("`sName` in ('design_common')").ToArray(),
+                                };
+								base.DesignSave(cAsset);
+							}
+						}
+					}
 					if (0 < aFieldsFailed.Count)
 					{
 						TransactionRollBack();
-						WebServiceError.Add(_cSI, "errors occurred while processing next fields:" + string.Join(",", aFieldsFailed));
-					}
+						cRetVal = null;
+                        WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] errors occurred while processing next fields:" + string.Join(",", aFieldsFailed));
+                    }
 					else
 						TransactionCommit();
-                }
-            }
-            catch (Exception ex)
-            {
+				}
+			}
+			catch (Exception ex)
+			{
 				TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
-            }
-            return cRetVal;
+				if (null != cRetVal)
+					File.CreateRollBack(cRetVal.nID);
+				cRetVal = null;
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return cRetVal;
+		}
+		[WebMethod(EnableSession = true)]
+		public bool IsThereSameFile(string sFilename)
+		{
+			return (null != base.FileGet(sFilename));
+		}
+		[WebMethod(EnableSession = true)]
+		public string[] AreThereSameFiles(string[] sFilenames)
+		{
+            if (sFilenames.IsNullOrEmpty())
+                return null;
+			string sWhere = sFilenames.ToEnumerationString(",", "'", null, null, true);
+			string[] aRetVal = null;
+			Queue<Hashtable> ahFiles = _cDB.Select("select `sFilename` from media.`tFiles` where `sFilename` in (" + sWhere + ")");
+			if (!ahFiles.IsNullOrEmpty())
+				aRetVal = ahFiles.Select(o => o["sFilename"].ToString()).ToArray();
+			return aRetVal;
+		}
+		[WebMethod(EnableSession = true)]
+		public Asset IsThereSameCustomValue(string sName, string sValue)
+		{
+			long nAssetID = _cDB.GetValueLong("SELECT id FROM mam.`vAssetsCustomValues` WHERE `sCustomValueName`='" + sName + "' AND `sCustomValue` = '" + sValue.ToUpper() + "'");
+			if (nAssetID < long.MaxValue)
+				return (base.AssetGet(nAssetID));
+			else
+				return null;
+		}
+		[WebMethod(EnableSession = true)]
+		public Asset[] IsThereSameCustomValues(string sName, string[] sValues)
+		{
+			string sWhere = sValues.ToEnumerationString(",", "'", null, null, true);
+			Asset[] aRetVal = null;
+			if (sWhere.IsNullOrEmpty())
+				return aRetVal;
+			Queue<Hashtable> ahFiles = _cDB.Select("select a.id, `sCustomValueName`, `sCustomValue`, `sName` from mam.`vAssetsCustomValues` acv left join mam.`tAssets` a on acv.id=a.id where `sCustomValueName` = '" + sName + "' and `sCustomValue` in (" + sWhere.ToUpper() + ")");
+			if (!ahFiles.IsNullOrEmpty())
+				aRetVal = ahFiles.Select(o => new Asset() { sName = o["sName"].ToString(), nID = o["id"].ToLong(), aCustomValues = new CustomValue[1] { new CustomValue(o["sCustomValueName"].ToString(), o["sCustomValue"].ToString()) } }).ToArray();
+			return aRetVal;
+		}
+		#endregion
+
+		#region hk
+		[WebMethod(EnableSession = true)]
+		public RegisteredTable[] RegisteredTablesGet()
+		{
+			return base.RegisteredTablesGet(null).ToArray();
 		}
 		#endregion
 
@@ -1542,20 +1967,20 @@ namespace webservice.services
 			_cDB.Perform("SELECT adm.`fPlayerSkip`(" + nID + ")");
 		}
 
-		public bool PLIClassChange(long nItemID, long nClassID)
+		public bool PLIClassChange(long nItemID, Class[] aClasses)
 		{
 			try
-			{
-				Hashtable ahRes = _cDB.Select("SELECT pl.`fItemClassSet`(" + nItemID + "," + nClassID + ")").Dequeue();
-				string sRes = (string)ahRes["fItemClassSet"];
-				if ('t' == sRes[sRes.Length - 2])
-					return true;
-				else
+            {
+                Hashtable ahRes = _cDB.Select("SELECT pl.`fItemClassesSet`(" + nItemID + "," + aClasses.ToIdsArrayForDB() + ")").Dequeue();
+                int[] aRes = (int[])ahRes["fItemClassesSet"];  // <NULL>  or   {2347937,2347938,2347939}
+                if (!aRes.IsNullOrEmpty() && aRes.Length == aClasses.Length)   // all updated well
+                    return true;
+                else
 					return false;
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return false;
 			}
 		}
@@ -1578,38 +2003,23 @@ namespace webservice.services
 		{
 			List<PlaylistItem> aPLIs = new List<PlaylistItem>();
 			aPLIs.AddRange(base.PlaylistItemsWithRotationsGet(aStatuses).ToArray());
-	
-			//DateTime dtBegin = DateTime.Now;
-			//DateTime dtEnd = DateTime.Now.AddHours(3);
-			//Queue<Hashtable> aqDBValues = _cDB.Select("SELECT DISTINCT *, ass.`nValue` AS `nRotation`, cat.`sValue` AS `sRotation` FROM (SELECT DISTINCT * FROM pl.`vPlayListResolved` WHERE `dtStartPlanned` > '" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartPlanned` < '" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `sStatusName` = 'planned') pl LEFT JOIN (SELECT `idAssets`, `nValue` FROM mam.`tAssetAttributes` WHERE mam.`tAssetAttributes`.`sKey`='rotation') ass ON pl.`idAssets`= ass.`idAssets` LEFT JOIN (SELECT id AS `nCatValID`, `sValue` FROM mam.`tCategoryValues`) cat ON cat.`nCatValID`=ass.`nValue` ORDER BY `dtStartReal`,`dtStartQueued`,`dtStartPlanned`");
-			//Hashtable ahRow;
-			//PlaylistItem cPLI;
-			//LinkedList<PlaylistItem> aPLIsPlan = new LinkedList<PlaylistItem>();
-			//while (0 < aqDBValues.Count)
-			//{
-			//    ahRow = aqDBValues.Dequeue();
-			//    cPLI = new PlaylistItem(ahRow);
-			//    if (ahRow.ContainsKey("nRotation") && ahRow.ContainsKey("sRotation") && null != ahRow["nRotation"] && null != cPLI.cAsset)
-			//            cPLI.cAsset = new Clip() { nID = cPLI.cAsset.nID, cRotation = new IdNamePair() { nID = ahRow["nRotation"].ToID(), sName = ahRow["sRotation"].ToString() } };
-			//    aPLIsPlan.AddLast(cPLI);
-			//}
-			//SetCached(aPLIsPlan.ToArray());
-			//List<PlaylistItem> aPlugsInTheEnd = new List<PlaylistItem>();
-			//foreach (PlaylistItem cPlan in aPLIsPlan)
-			//    if (cPlan.bCached)
-			//    {
-			//        aPLIs.Add(cPlan);
-			//        if (cPlan.bPlug)
-			//            aPlugsInTheEnd.Add(cPlan);
-			//        else if (0 < aPlugsInTheEnd.Count())
-			//            aPlugsInTheEnd.Clear();
-			//    }
-			//foreach (PlaylistItem cPlug in aPlugsInTheEnd)  // убираем плаги в конце - они пусть попадут в список пленнед...
-			//    aPLIs.Remove(cPlug);
-
-			return aPLIs.ToArray();
+            SetCached(aPLIs.ToArray());
+            return aPLIs.ToArray();
 		}
-
+		[WebMethod(EnableSession = true)]
+		public PlaylistItem PlaylistItemMinimumForImmediatePLGet() // второй запрепарленный - это и есть минимальный ПЛИ
+		{
+			IdNamePair[] aNP = new IdNamePair[2];
+			aNP[0] = new IdNamePair(); aNP[0].nID = 2; aNP[0].sName = "queued"; // DB request will on sStatusName field only! (not on idStatuses)
+            aNP[1] = new IdNamePair(); aNP[1].nID = 3; aNP[1].sName = "prepared";
+			int nI = 0;
+			foreach (PlaylistItem cPLI in base.PlaylistItemsGet(aNP))
+			{
+				if (1 == nI++)
+					return cPLI;
+			}
+			return null;
+        }
 		[WebMethod(EnableSession = true)]
 		public PlaylistItem[] PlaylistItemsArchGet(DateTime dtBegin, DateTime dtEnd)
 		{
@@ -1761,7 +2171,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -1799,14 +2209,14 @@ namespace webservice.services
 							dtNextBlock = aPLI[ni - 1].dtStartPlanned.AddSeconds((aPLI[ni - 1].nFrameStop - aPLI[ni - 1].nFrameStart + 1) / 25);
 						//if (DateTime.MaxValue > dtNearestAdvertsBlock)
 						dtNearestAdvertsBlock = dtNextBlock;
-						(new Logger()).WriteNotice("nearest_block: " + dtNearestAdvertsBlock);
+						(new Logger()).WriteNotice("nearest_block_detected: " + dtNearestAdvertsBlock);
 						return dtNextBlock;
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return DateTime.Now.AddHours(3); // на эфире сразу станет ясно, что произошла хуйня - ближайший блок не найден
 		}
@@ -1840,20 +2250,47 @@ namespace webservice.services
 				return null;
 			List<IdNamePair> aRetVal = new List<IdNamePair>();
 			_cDB.TransactionBegin();
-			foreach (IdNamePair cID in aIDs)
+            DateTime dtMax = base.PlaylistFirstPlannedDateGet().Add(webservice.Preferences.tsSafeRange);
+            List<long> aSafeIDs = base.PlaylistItemsFastGet(DateTime.Now.AddDays(-1), dtMax).Select(o => o.nID).ToList();
+            foreach (IdNamePair cID in aIDs)
 			{
 				try
 				{
-					if (!base.PlaylistItemDelete(cID.nID))
+                    if (aSafeIDs.Contains(cID.nID))
+                    {
+                        WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] this pli is in safe zone: [id=" + cID.nID + "][name=" + cID.sName + "][safe_max=" + dtMax.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+                        aRetVal.Add(cID);
+                        continue;
+                    }
+                    base.PlaylistItemUncahe(cID.nID);
+                    if (!base.PlaylistItemDelete(cID.nID))
 						aRetVal.Add(cID);
 				}
-				catch
-				{
-					aRetVal.Add(cID);
+                catch (Exception ex)
+                {
+                    WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+                    aRetVal.Add(cID);
 				}
 			}
 			_cDB.TransactionCommit();
 			return aRetVal.ToArray();
+		}
+		[WebMethod(EnableSession = true)]
+		public bool PlaylistItemsTimingsSet(PlaylistItem[] aPLIs)
+		{
+			try
+			{
+				foreach (PlaylistItem cPLI in aPLIs)
+				{
+					base.PlaylistItemStartsSet(cPLI.nID, cPLI.dtStartPlanned, cPLI.dtStartHard, cPLI.dtStartSoft);
+				}
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+				return false;
+			}
+			return true;
 		}
 		[WebMethod(EnableSession = true)]
 		public DateTime PlaylistItemStartsSet(long nItemID, DateTime dtStartPlanned, DateTime dtOld)
@@ -1876,7 +2313,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return DateTime.MaxValue;
 		}
@@ -1904,7 +2341,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			_cDB.TransactionRollBack();
 			return -1;
@@ -1916,14 +2353,16 @@ namespace webservice.services
 		{
 			try
 			{
+				(new Logger()).WriteDebug("PlaylistItemAddWorker:start");
 				webservice.DBInteract cDBI = new webservice.DBInteract(_cCredentialsForAdd.sUser, _cCredentialsForAdd.sPassword);
+				(new Logger()).WriteDebug("PlaylistItemAddWorker:after cDBI [" + (cDBI == null ? "NULL" : "not null") + "]");
 				cDBI.PlaylistItemsAdd(_aPLIs);
 				_sPlaylistItemAddResult = "succeed";
-				(new Logger()).WriteNotice("PlaylistItemsAdd:succeed");
+				(new Logger()).WriteNotice("PlaylistItemAddWorker:succeed");
 			}
 			catch (Exception ex)
 			{
-				(new Logger()).WriteError(ex);
+				(new Logger()).WriteError("PlaylistItemAddWorker: ", ex);
 				_sPlaylistItemAddResult = "failed" + ex.Message;
 			}
 		}
@@ -1939,17 +2378,24 @@ namespace webservice.services
 			return sRetVal;
 		}
 		[WebMethod(EnableSession = true)]
-		new public void PlaylistItemsAdd(PlaylistItem[] aPLIs)
+		public void PlaylistItemsAddWorker(PlaylistItem[] aPLIs)
 		{
+			(new Logger()).WriteDebug("PlaylistItemsAdd: start. before lock");
 			lock (_aPLIs)
 			{
+				(new Logger()).WriteDebug("PlaylistItemsAdd: _sPlaylistItemAddResult [" + (_sPlaylistItemAddResult == null ? "NULL" : _sPlaylistItemAddResult) + "]");
 				if (_sPlaylistItemAddResult == null)
 				{
 					(new Logger()).WriteNotice("PlaylistItemsAdd:proccessing");
 					_sPlaylistItemAddResult = "proccessing";
 					_aPLIs = aPLIs;
-					_cCredentialsForAdd = _cSI.cDBCredentials;
-					System.Threading.ThreadPool.QueueUserWorkItem(PlaylistItemAddWorker);
+					if (null != _cSI)
+					{
+						_cCredentialsForAdd = _cSI.cDBCredentials;
+						System.Threading.ThreadPool.QueueUserWorkItem(PlaylistItemAddWorker);
+					}
+					else
+						_sPlaylistItemAddResult = "failed - _cSI==null";
 				}
 			}
 		}
@@ -1967,7 +2413,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -1983,6 +2429,26 @@ namespace webservice.services
 			for (int ni = 0; ni < nCopiesQty; ni++)
 				aAllAssets.AddRange(aAssets);
 			return PlaylistInsert(aAllAssets.ToArray(), cPLIPreceding);
+		}
+		[WebMethod(EnableSession = true)]
+		public string InsertInBlock(PlaylistItem[] aPLIsToAdd, PlaylistItem[] aPLIsToMove)
+		{
+			try
+			{
+				_cDB.TransactionBegin();
+				string sRes = GroupMoving(aPLIsToMove);
+				if (null != sRes)
+					throw new Exception(sRes);
+				base.PlaylistItemsAdd(aPLIsToAdd);
+				_cDB.TransactionCommit();
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+				_cDB.TransactionRollBack();
+				return ex.Message + ex.InnerException == null ? "" : Environment.NewLine + ex.InnerException.Message;
+			}
+			return null;
 		}
 		[WebMethod(EnableSession = true)]
 		public string GroupMoving(PlaylistItem[] aPLIs)
@@ -2003,22 +2469,23 @@ namespace webservice.services
 
 				string sBegin = aPLIs[0].dtStartHardSoft.ToString("yyyy-MM-dd HH:mm:ss");
 				string sEnd = aPLIs[aPLIs.Length - 1].dtStartHardSoft.AddSeconds(5).ToString("yyyy-MM-dd HH:mm:ss");
+				string sEndHS = aPLIs[aPLIs.Length - 1].dtStartHardSoft.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (aPLIs[aPLIs.Length - 1].dtStartHardSoft < DateTime.Now)
+				if (aPLIs[aPLIs.Length - 1].dtStartHardSoft < DateTime.Now)
                     return g.Webservice.sErrorDBInteract5 + " [begin: " + sBegin + "] [end: " + sEnd + "]";
 
 				aqPLI = base.PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `dtStartPlanned`<'" + sEnd + "' AND `dtStopPlanned`>'" + sBegin + "'");
 				if (0 < aqPLI.Count && null != aqPLI.FirstOrDefault(o => aCached.Contains(o.nID)))
                     return g.Webservice.sErrorDBInteract6 + " [begin: " + sBegin + "] [end: " + sEnd + "]";
 
-				//DNF - разкомментить это всё!!
-				//aqPLI = base.PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `dtStartHard`>'" + sBegin + "' AND `dtStartHard`<'" + sEnd + "' OR `dtStartSoft`>'" + sBegin + "' AND `dtStartSoft`<'" + sEnd + "'");
-				//if (0 < aqPLI.Count && null != aqPLI.FirstOrDefault(o => null == aPLIs.FirstOrDefault(oo => oo.nID == o.nID))) // перемещать сами в себя можно, но не в других
-                //    return "Целевой диапазон перемещения содержит другие блоки: [begin: " + sBegin + "] [end: " + sEnd + "]";  //TODO LANG
+				PlaylistItem cElement;
+				aqPLI = base.PlaylistItemsGet("SELECT * FROM pl.`vPlayListResolvedOrdered` WHERE `dtStartHard`>='" + sBegin + "' AND `dtStartHard`<='" + sEndHS + "' OR `dtStartSoft`>='" + sBegin + "' AND `dtStartSoft`<='" + sEndHS + "'");
+				if (0 < aqPLI.Count && null != (cElement = aqPLI.FirstOrDefault(o => null == aPLIs.FirstOrDefault(oo => oo.nID == o.nID)))) // перемещать сами в себя можно, но не в других
+					return "Целевой диапазон перемещения содержит другие блоки: [begin: " + sBegin + "] [end: " + sEndHS + "][plid=" + cElement.nID + "]";  //TODO LANG
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return ex.Message + ex.InnerException == null ? "" : Environment.NewLine + ex.InnerException.Message;
 			}
 
@@ -2038,7 +2505,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				_cDB.TransactionRollBack();
 				return ex.Message + ex.InnerException == null ? "" : Environment.NewLine + ex.InnerException.Message;
 			}
@@ -2051,7 +2518,7 @@ namespace webservice.services
 			_cDB.TransactionBegin();
 			try
 			{
-				if (PLIClassChange(cPLI.nID, cPLI.cClass.nID))
+				if (PLIClassChange(cPLI.nID, cPLI.aClasses))
 					bRetVal = true;
 
 				_cDB.TransactionCommit();
@@ -2060,7 +2527,7 @@ namespace webservice.services
 			{
 				bRetVal = false;
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2084,12 +2551,16 @@ namespace webservice.services
 			//select id from pl."vPlayListResolvedOrdered" where "dtStartHard">'2014-09-12 23:07:29+04' AND "dtStartHard"<'2014-09-13 04:07:29+04' OR "dtStartSoft">'2014-09-12 23:07:29+04' AND "dtStartSoft"<'2014-09-13 04:07:29+04';
 
 			(new Logger()).WriteNotice("BeforeAddCheckRange - [begin = " + dtBegin + "] [end = " + dtEnd + "]");
-
-			//select "dtStopPlanned" from pl."vPlayListResolved" where "sStatusName"='onair' or "sStatusName"='prepared' or "sStatusName"='queued' or "sStatusName"='planned' and id in (select "idItems" from pl."tItemsCached") order by "dtStopPlanned" desc limit 1
-			string sCachedEnd = _cDB.GetValue("select `dtStopPlanned` from pl.`vPlayListResolved` where `sStatusName`='onair' or `sStatusName`='prepared' or `sStatusName`='queued' or `sStatusName`='planned' and id in (select `idItems` from pl.`tItemsCached`) order by `dtStopPlanned` desc limit 1");
+			(new Logger()).WriteDebug("BeforeAddCheckRange [_cDB=" + (_cDB == null ? "NULL" : "not null") + "]");
+											 //select "dtStopPlanned" from pl."vPlayListResolved" where "sStatusName"='onair' or "sStatusName"='prepared' or "sStatusName"='queued' or "sStatusName"='planned' and id in (select "idItems" from pl."tItemsCached") order by "dtStopPlanned" desc limit 1
+			string sCachedEnd = _cDB.GetValue("select `dtStopPlanned` from pl.`vPlayListResolved` where `sStatusName`='onair' or `sStatusName`='prepared' or `sStatusName`='queued' order by `dtStopPlanned` desc limit 1");
+			(new Logger()).WriteDebug("BeforeAddCheckRange [sQueuedEnd=" + sCachedEnd + "]");
 			DateTime dtCachedEnd = DateTime.Now;
 			if (null != sCachedEnd)
 				dtCachedEnd = sCachedEnd.ToDT();
+
+			dtCachedEnd = dtCachedEnd.AddMinutes(15);   // плеер сосёт теперь 10-минутными блоками и принудительно кэширует незакэшированное, поэтому кэш можно не так плотно блюсти.
+
 			if (dtBegin < dtCachedEnd)
 			{
 				(new Logger()).WriteNotice("BeforeAddCheckRange - there are cached or queued items in range [cached_or_queued_end = " + dtCachedEnd + "]");
@@ -2097,6 +2568,7 @@ namespace webservice.services
 			}
 
 			aqDBValues = _cDB.Select("select id from pl.`vPlayListResolvedOrdered` where `dtStartHard`>'" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartHard`<'" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "' OR `dtStartSoft`>'" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartSoft`<'" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "';");
+			(new Logger()).WriteDebug("BeforeAddCheckRange [aqDBValues=" + aqDBValues.Count + "]");
 			Hashtable hPLI;
 			if (null == aqDBValues || 0 == aqDBValues.Count)
 				bRetVal = true;
@@ -2105,10 +2577,116 @@ namespace webservice.services
 				hPLI = aqDBValues.Peek();
 				(new Logger()).WriteNotice("BeforeAddCheckRange - there is timed item in range [id[0]=" + hPLI["id"] + "]");
 			}
+			(new Logger()).WriteDebug("BeforeAddCheckRange [bRetVal=" + bRetVal + "]");
 			return bRetVal;
 		}
 
-		#region import
+		[WebMethod(EnableSession = true)]
+		public cues.plugins.Playlist[] AdvancedPlaylistsGet(DateTime dtBegin, DateTime dtEnd)
+		{
+			try
+			{
+				cues.plugins.Playlist[] aPLsAll = cues.plugins.Playlist.Get();
+				List<cues.plugins.Playlist> aRetVal = new List<cues.plugins.Playlist>();
+				if (aPLsAll != null)
+					foreach (cues.plugins.Playlist cPL in aPLsAll)
+						if (cPL.dtStop > dtBegin && cPL.dtStart < dtEnd || cPL.dtStart == DateTime.MaxValue)
+							aRetVal.Add(cPL);
+				return aRetVal.ToArray();
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return null;
+		}
+		[WebMethod(EnableSession = true)]
+		public cues.plugins.Playlist AdvancedPlaylistGet(cues.plugins.Playlist cPL)
+		{
+			try
+			{
+				return cues.plugins.Playlist.Load(cPL.nID);
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return null;
+		}
+		[WebMethod(EnableSession = true)]
+		public long AdvancedPlaylistAddReplace(cues.plugins.Playlist cPL)
+		{
+			try
+			{
+				cues.plugins.Playlist cRetVal = cPL.Save();
+				if (null == cRetVal)
+					return -1;
+				return cRetVal.nID;
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return long.MinValue;
+		}
+		[WebMethod(EnableSession = true)]
+		public bool AdvancedPlaylistDelete(cues.plugins.Playlist cPL)
+		{
+			try
+			{
+				cPL.Delete();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return false;
+		}
+		[WebMethod(EnableSession = true)]
+		public bool AdvancedPlaylistRename(cues.plugins.Playlist cPL)
+		{
+			try
+			{
+				cPL.SaveOnly();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return false;
+		}
+		[WebMethod(EnableSession = true)]
+		public bool AdvancedPlaylistStart(cues.plugins.Playlist cPL)
+		{
+			try
+			{
+				cPL.Start();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return false;
+		}
+		[WebMethod(EnableSession = true)]
+		public bool AdvancedPlaylistItemSave(cues.plugins.PlaylistItem cPLI)
+		{
+			try
+			{
+				cPLI.Save();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return false;
+		}
+		#endregion
+		#region pl.import
 		[WebMethod(EnableSession = true)]
 		public int PowerGoldFileParse(string sFile)
 		{
@@ -2119,12 +2697,13 @@ namespace webservice.services
 				_aIntermediateObjectsStorage.Add(aqPGAssets);
 				string sNewLine = "<br>" + Environment.NewLine;
 				foreach(string sMessage in cPlaylistImport.aMessages)
-					WebServiceError.Add(_cSI, sMessage.Replace(Environment.NewLine, sNewLine));
+					WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] " + sMessage.Replace(Environment.NewLine, sNewLine), true);
+				_sImportLog += cPlaylistImport.sLog;
 				return _aIntermediateObjectsStorage.IndexOf(aqPGAssets);
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return -1;
 		}
@@ -2135,16 +2714,17 @@ namespace webservice.services
 			try
 			{
 				PlaylistImport cPlaylistImport = new PlaylistImport(this);
-				PlaylistImport.VIPlaylist cVIPlaylist = cPlaylistImport.VideoInternationalFileParse(sFile);
+				VIPlaylist cVIPlaylist = cPlaylistImport.VideoInternationalFileParse(sFile);
 				_aIntermediateObjectsStorage.Add(cVIPlaylist);
 				string sNewLine = "<br>" + Environment.NewLine;
 				foreach (string sMessage in cPlaylistImport.aMessages)
-					WebServiceError.Add(_cSI, sMessage.Replace(Environment.NewLine, sNewLine));
+					WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] " + sMessage.Replace(Environment.NewLine, sNewLine), true);
+				_sImportLog += cPlaylistImport.sLog;
 				return _aIntermediateObjectsStorage.IndexOf(cVIPlaylist);
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return -1;
 		}
@@ -2159,12 +2739,13 @@ namespace webservice.services
 				_aIntermediateObjectsStorage.Add(ahDesignAssets);
 				string sNewLine = "<br>" + Environment.NewLine;
 				foreach (string sMessage in cPlaylistImport.aMessages)
-					WebServiceError.Add(_cSI, sMessage.Replace(Environment.NewLine, sNewLine));
+					WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] " + sMessage.Replace(Environment.NewLine, sNewLine), true);
+				_sImportLog += cPlaylistImport.sLog;
 				return _aIntermediateObjectsStorage.IndexOf(ahDesignAssets);
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return -1;
 		}
@@ -2172,39 +2753,46 @@ namespace webservice.services
 		[WebMethod(EnableSession = true)]
 		public List<PlaylistItem> PlaylistsMerge(int nPGAssetsHandle, int nVIAssetsHandle, DateTime dtAdvertisementBind, int nDesignAssetsHandle)
 		{
-			List<PlaylistItem> aRetVal = null;
+            List<PlaylistItem> aRetVal = null;
 			try
 			{
 				Queue<Asset> aqPGPL = null;
-				PlaylistImport.VIPlaylist cVIPL = null;
+				VIPlaylist cVIPL = null;
 				Dictionary<TimeSpan, Queue<Asset>> ahDsgnPL = null;
 				try
 				{
 					aqPGPL = (Queue<Asset>)_aIntermediateObjectsStorage[nPGAssetsHandle];
 					_aIntermediateObjectsStorage[nPGAssetsHandle] = null;
-					cVIPL = (PlaylistImport.VIPlaylist)_aIntermediateObjectsStorage[nVIAssetsHandle];
+					cVIPL = (VIPlaylist)_aIntermediateObjectsStorage[nVIAssetsHandle];
 					_aIntermediateObjectsStorage[nVIAssetsHandle] = null;
 					ahDsgnPL = (Dictionary<TimeSpan, Queue<Asset>>)_aIntermediateObjectsStorage[nDesignAssetsHandle];
 					_aIntermediateObjectsStorage[nDesignAssetsHandle] = null;
 				}
-				catch
+				catch (Exception ex)
 				{
+					WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 					throw new Exception("can't find one of the intermediate PLs");
 				}
 				PlaylistImport cPlaylistImport = new PlaylistImport(this);
 				aRetVal = cPlaylistImport.PlaylistsMerge(aqPGPL, cVIPL, dtAdvertisementBind, ahDsgnPL);
 				string sNewLine = "<br>" + Environment.NewLine;
 				foreach (string sMessage in cPlaylistImport.aMessages)
-					WebServiceError.Add(_cSI, sMessage.Replace(Environment.NewLine, sNewLine));
-			}
+					WebServiceError.Add(_cSI, "[user=" + _cSI.cProfile.sUsername + "] " + sMessage.Replace(Environment.NewLine, sNewLine), true);
+				_sImportLog += cPlaylistImport.sLog;
+            }
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
+		[WebMethod(EnableSession = true)]
+		public string ImportLogGet()
+		{
+			return _sImportLog;
+        }
 		#endregion
-		#endregion
+
 
 		#region templates
 		[WebMethod(EnableSession = true)]
@@ -2232,7 +2820,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return null;
 			}
 		}
@@ -2253,7 +2841,7 @@ namespace webservice.services
 			{
 				bRetVal = false;
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2283,7 +2871,7 @@ namespace webservice.services
 			{
 				bRetVal = false;
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2305,7 +2893,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -2329,7 +2917,7 @@ namespace webservice.services
 			{
 				bRetVal = false;
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2366,7 +2954,7 @@ namespace webservice.services
 			{
 				bRetVal = false;
 				_cDB.TransactionRollBack();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2383,7 +2971,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aResult.ToArray();
 		}
@@ -2399,7 +2987,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -2414,7 +3002,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2429,7 +3017,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return bRetVal;
 		}
@@ -2443,7 +3031,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -2463,7 +3051,7 @@ namespace webservice.services
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return new Message[0];
 		}
@@ -2511,7 +3099,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 				return -1;
 			}
 		}
@@ -2530,7 +3118,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -2565,7 +3153,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return new Cues();
 			//Dictionary<string, string> ahRetVal = new Dictionary<string, string>();
@@ -2589,7 +3177,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal.ToArray();
 		}
@@ -2599,26 +3187,31 @@ ORDER BY "dtStartPlanned";
 			LinkedList<bool> aRetVal = new LinkedList<bool>();
 			try
 			{
-				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT `sClassName` FROM cues.`vClassAndTemplateBinds` WHERE `sTemplateName` like '%Лого%' AND `sKey`='start_offset'");
-				Hashtable ahRow;
+				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT `sClassName` FROM cues.`vClassAndTemplateBinds` WHERE `sTemplateName` like '%Лого%' AND `sKey`='start_offset'"); //EMERGENCY:l и вот что мне с этим делать?! как мне перевести на английский?))
+                Hashtable ahRow;
 				LinkedList<string> aLogoBinding = new LinkedList<string>();
 				while (0 < aqDBValues.Count)
 				{
 					ahRow = aqDBValues.Dequeue();
 					aLogoBinding.AddLast(ahRow["sClassName"].ToString());
 				}
+                bool bContains;
 				foreach (PlaylistItem cPLI in aPLIs)
 				{
-					if (aLogoBinding.Contains(cPLI.cClass.sName))
-						aRetVal.AddLast(true);
-					else
-						aRetVal.AddLast(false);
+                    bContains = false;
+                    foreach (Class cC in cPLI.aClasses)
+                        if (aLogoBinding.Contains(cC.sName))
+                        {
+                            bContains = true;
+                            break;
+                        }
+                    aRetVal.AddLast(bContains);
 				}
 			}
 			catch (Exception ex)
 			{
 				aRetVal.Clear();
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal.ToArray();
 		}
@@ -2644,11 +3237,31 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 		}
-
-        #endregion
+		[WebMethod(EnableSession = true)]
+		public PlaylistItem[] PLFragmentGet(DateTime dtBegin, DateTime dtEnd)
+		{
+			(new Logger()).WriteNotice("PLFragmentGet: [begin=" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "][end=" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+			try
+			{
+				Queue<PlaylistItem> ahPL = base.PlaylistItemsFastGet(dtBegin, dtEnd);
+				if (!ahPL.IsNullOrEmpty())
+				{
+					(new Logger()).WriteDebug("got PL Fragment [begin=" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "][end=" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "][qty=" + ahPL.Count() + "]");
+					return ahPL.Where(o => o.cFile.cStorage.sName == "клипы").ToArray();
+				}
+				else
+					(new Logger()).WriteDebug("got null PL Fragment [begin=" + dtBegin.ToString("yyyy-MM-dd HH:mm:ss") + "][end=" + dtEnd.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+			}
+			catch (Exception ex)
+			{
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+			}
+			return null;
+		}
+		#endregion
 
 		#region stat
 		private PlaylistItem[] PlaylistGet(DBFilters cFilters)
@@ -2669,25 +3282,80 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
-		private PlaylistItem[] PlaylistWithAssetsGet(DBFilters cFilters)
+		private PlaylistItem[] RemoveUnderSCR_PLIs(PlaylistItem[] aSourcePLIs, out string[] aErrors)
+		{
+            aErrors = null;
+            Dictionary<long, string> ahErrors = new Dictionary<long, string>();
+            if (null == aSourcePLIs || 1 > aSourcePLIs.Length)
+				return aSourcePLIs;
+
+			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
+			aSourcePLIs = aSourcePLIs.OrderBy(o => o.dtStartReal).ToArray();
+			PlaylistItem[] aStartRealPLIs = aSourcePLIs.Where(o => o.dtStartReal > DateTime.MinValue && o.dtStartReal < DateTime.MaxValue).ToArray();
+			Shift[] aShifts = base.ShiftsGet(aStartRealPLIs.Min(o => o.dtStartReal), aStartRealPLIs.Max(o => o.dtStartReal));
+			int nCurShift = 0;
+			if (0 == aShifts.Length)
+				return aSourcePLIs;
+			for (int ni = 0; ni < aSourcePLIs.Length; ni++)
+			{
+				if (aSourcePLIs[ni].dtStartReal < aShifts[nCurShift].dtStart)
+					aRetVal.Add(aSourcePLIs[ni]);
+				else if (aSourcePLIs[ni].dtStartReal < aShifts[nCurShift].dtStop)
+                {
+                    if (aShifts[nCurShift].dtStop.Subtract(aShifts[nCurShift].dtStart).TotalHours > 12 && !ahErrors.ContainsKey(aShifts[nCurShift].nID))
+                        ahErrors.Add(aShifts[nCurShift].nID, "AIR WAS TOO LONG. [id=" + aShifts[nCurShift].cPreset.nID + "][name=" + aShifts[nCurShift].cPreset.sName + "][start=" + aShifts[nCurShift].dtStart.ToString("yyyy-MM-dd HH:mm:ss") + "][stop=" + aShifts[nCurShift].dtStop.ToString("yyyy-MM-dd HH:mm:ss") + "][diff=" + aShifts[nCurShift].dtStop.Subtract(aShifts[nCurShift].dtStart).TotalHours + " hours]");
+                    continue;
+                }
+				else if (nCurShift + 1 < aShifts.Length)
+				{
+					nCurShift++;
+					ni--;
+					continue;
+				}
+				else
+					aRetVal.Add(aSourcePLIs[ni]);
+			}
+            if (!ahErrors.IsNullOrEmpty())
+                aErrors = ahErrors.Values.ToArray();
+            return aRetVal.ToArray();
+		}
+        public enum ArchiveWithAssetsSource
+        {
+            archive,
+            scr,
+        }
+		private PlaylistItem[] ArchivePlaylistWithAssetsGet(DBFilters cFilters, ArchiveWithAssetsSource eSource)
 		{
 			PlaylistItem[] aRetVal = null;
 			string sQuery = "";
 			if (null != cFilters)
-				sQuery = " WHERE " + cFilters.sSQL;
-			try
+                sQuery = " WHERE " + cFilters.sSQL;
+            Hashtable ahRow;
+            int nIndx;
+            try
 			{
 				Queue<Hashtable> aqDBValues = null;
-				if (null != (aqDBValues = _cDB.Select("SELECT * FROM archive.`vPlayListWithAssetsResolvedFull`" + sQuery)))
-				{
+                string sSource = "";
+                switch (eSource)
+                {
+                    case ArchiveWithAssetsSource.archive:
+                        sSource = "archive.`vPlayListWithAssetsResolvedFull`";
+                        break;
+                    case ArchiveWithAssetsSource.scr:
+                        sSource = "logs.`vScrPlayListWithAssetsResolved`";
+                        break;
+                }
+                if (null != (aqDBValues = _cDB.Select("SELECT * FROM " + sSource + sQuery)))
+                {
 					aRetVal = new PlaylistItem[aqDBValues.Count];
 					Dictionary<long, Asset> ahAssets = new Dictionary<long, Asset>();
-					int nIndx = 0;
-					Hashtable ahRow = null;
+					List<Program> aPrograms = new List<Program>();
+                    ahRow = null;
+                    nIndx = 0;
 					while (0 < aqDBValues.Count)
 					{
 						ahRow = aqDBValues.Dequeue();
@@ -2703,8 +3371,8 @@ ORDER BY "dtStartPlanned";
 								else if ("program" == ahRow["sVideoTypeName"].ToString()) //UNDONE
 								{
 									Program cProg = new Program(ahRow);
-									cProg.aRAOInfo = ProgramRAOInfo_old_and_new_Get(cProg).ToArray();
 									ahAssets.Add(aRetVal[nIndx].cAsset.nID, cProg);
+									aPrograms.Add(cProg);
 								}
 								else
 									ahAssets.Add(aRetVal[nIndx].cAsset.nID, new Asset(ahRow));
@@ -2713,128 +3381,41 @@ ORDER BY "dtStartPlanned";
 						}
 						nIndx++;
 					}
+					ProgramRAOInfoGet(aPrograms);
 				}
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
-		}
-		private PlaylistItem[] RemoveUnderSCR_PLIs(PlaylistItem[] aSourcePLIs)
-		{
-			if (null == aSourcePLIs || 1 > aSourcePLIs.Length)
-				return aSourcePLIs;
-
-			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
-			aSourcePLIs = aSourcePLIs.OrderBy(o => o.dtStartReal).ToArray();
-			PlaylistItem[] aStartRealPLIs = aSourcePLIs.Where(o => o.dtStartReal > DateTime.MinValue && o.dtStartReal < DateTime.MaxValue).ToArray();
-			Shift[] aShifts = base.ShiftsGet(aStartRealPLIs.Min(o => o.dtStartReal), aStartRealPLIs.Max(o => o.dtStartReal));
-			int nCurShift = 0;
-			if (0 == aShifts.Length)
-				return aSourcePLIs;
-			for (int ni = 0; ni < aSourcePLIs.Length; ni++)
-			{
-				if (aSourcePLIs[ni].dtStartReal < aShifts[nCurShift].dtStart)
-					aRetVal.Add(aSourcePLIs[ni]);
-				else if (aSourcePLIs[ni].dtStartReal < aShifts[nCurShift].dtStop)
-					continue;
-				else if (nCurShift + 1 < aShifts.Length)
-				{
-					nCurShift++;
-					ni--;
-					continue;
-				}
-				else
-					aRetVal.Add(aSourcePLIs[ni]);
-			}
-			return aRetVal.ToArray();
-		}
-		private PlaylistItem[] AddSCR_PLIs(PlaylistItem[] aSourcePLIs, DBFilters cFilters)
-		{
-			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
-			PlaylistItem[] aSCR_PLIs = new PlaylistItem[0];
-			string sQuery = "";
-			int nI;
-			if (null != cFilters)
-				sQuery = " WHERE " + cFilters.sSQL.Replace("dtStartPlanned", "dtStartReal").Replace("dtStopPlanned", "dtStopReal").Replace("`sName` ILIKE", "mam.`vAssetsResolved`.`sName` ILIKE");
-			//SELECT scr.*, pl."tStatuses"."sName" AS "sStatusName", mam."vAssetsResolved".*, 1 as "nFrameStart", "nFramesQty" as "nFrameStop" FROM 
-			//(SELECT "dtStart" as "dtStartReal", "dtStop" as "dtStopReal", 5 as "idStatuses", "idAssets"  FROM logs."tSCR") scr 
-			//LEFT JOIN pl."tStatuses" ON scr."idStatuses" = pl."tStatuses".id
-			//LEFT JOIN mam."vAssetsResolved" ON scr."idAssets"=mam."vAssetsResolved".id 
-			//WHERE "sVideoTypeName" = 'clip';
-			try
-			{
-				Queue<Hashtable> aqDBValues = null;
-				if (null != (aqDBValues = _cDB.Select("SELECT scr.*, pl.`tStatuses`.`sName` AS `sStatusName`, mam.`vAssetsResolved`.*, 1 as `nFrameStart`, `nFramesQty` as `nFrameStop` FROM " +
-														"(SELECT `dtStart` as `dtStartReal`, `dtStop` as `dtStopReal`, 5 as `idStatuses`, `idAssets`  FROM logs.`tSCR`) scr " +
-														"LEFT JOIN pl.`tStatuses` ON scr.`idStatuses` = pl.`tStatuses`.id " +
-														"LEFT JOIN mam.`vAssetsResolved` ON scr.`idAssets`=mam.`vAssetsResolved`.id " +
-														sQuery)))
-				{
-					aSCR_PLIs = new PlaylistItem[aqDBValues.Count];
-					Dictionary<long, Asset> ahAssets = new Dictionary<long, Asset>();
-					int nIndx = 0;
-					Hashtable ahRow = null;
-					while (0 < aqDBValues.Count)
-					{
-						ahRow = aqDBValues.Dequeue();
-						ahRow["id"] = long.MaxValue;
-						aSCR_PLIs[nIndx] = new PlaylistItem(ahRow);
-						aSCR_PLIs[nIndx].dtStartPlanned = aSCR_PLIs[nIndx].dtStartReal;
-						if (null != aSCR_PLIs[nIndx].cAsset)
-						{
-							if (!ahAssets.ContainsKey(aSCR_PLIs[nIndx].cAsset.nID))
-							{
-								ahRow["id"] = ahRow["idAssets"];
-								ahRow["nFramesQty"] = ahRow["nAssetFramesQty"];
-								if ("clip" == ahRow["sVideoTypeName"].ToString()) //UNDONE
-									ahAssets.Add(aSCR_PLIs[nIndx].cAsset.nID, new Clip(ahRow));
-								else if ("program" == ahRow["sVideoTypeName"].ToString()) //UNDONE
-								{
-									Program cProg = new Program(ahRow);
-									cProg.aRAOInfo= ProgramRAOInfo_old_and_new_Get(cProg).ToArray();
-									ahAssets.Add(aSCR_PLIs[nIndx].cAsset.nID, cProg);
-								}
-								else
-									ahAssets.Add(aSCR_PLIs[nIndx].cAsset.nID, new Asset(ahRow));
-							}
-							aSCR_PLIs[nIndx].cAsset = ahAssets[aSCR_PLIs[nIndx].cAsset.nID];
-						}
-						nIndx++;
-						nI = nIndx;
-					}
-				}
-
-			}
-			catch (Exception ex)
-			{
-				WebServiceError.Add(_cSI, ex);
-			}
-			aRetVal.AddRange(aSourcePLIs);
-			aRetVal.AddRange(aSCR_PLIs);
-			aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
-			return aRetVal.ToArray();
 		}
 
 		[WebMethod(EnableSession = true)]
 		public PlaylistItem[] StatGet(DBFilters cFilters)
 		{
-			PlaylistItem[] aRetVal = null;
+			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
+            PlaylistItem[] aPLIs;
 			try
 			{
-				aRetVal = PlaylistGet(cFilters);
-
-				aRetVal = this.RemoveUnderSCR_PLIs(aRetVal);
-				aRetVal = this.AddSCR_PLIs(aRetVal, cFilters);
-				for (int nIndx = 0; aRetVal.Length > nIndx; nIndx++)
+                string[] aErrs = null;
+                aPLIs = this.RemoveUnderSCR_PLIs(PlaylistGet(cFilters), out aErrs);
+                if (!aErrs.IsNullOrEmpty())
+                WebServiceError.Add(_cSI, "StatGet error:\n\t\t" + aErrs.ToEnumerationString("\n\t\t", "", true));
+                if (!aPLIs.IsNullOrEmpty())
+                    aRetVal.AddRange(aPLIs);
+                aPLIs = this.ArchivePlaylistWithAssetsGet(cFilters, ArchiveWithAssetsSource.scr);
+                if (!aPLIs.IsNullOrEmpty())
+                    aRetVal.AddRange(aPLIs);
+                aRetVal.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
+                for (int nIndx = 0; aRetVal.Count > nIndx; nIndx++)
 					aRetVal[nIndx].cStatus.sName = webservice.Preferences.cDBKeysMap.GetTitle(DBKeysMap.MapClass.pli_status, aRetVal[nIndx].cStatus.sName);
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
-			return aRetVal;
+			return aRetVal.ToArray();
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -2844,16 +3425,31 @@ ORDER BY "dtStartPlanned";
 			try
 			{
 				Queue<Hashtable> aqDBValues = null;
-				if (null == (aqDBValues = _cDB.Select("SELECT DISTINCT * FROM ia.`vMessagesResolved` WHERE ", (null == cFilters ? null : cFilters.sSQL), "`dtRegister` DESC", 0, 0, null)))
+				Queue<Hashtable> aqDBValuesArch = null;
+
+				aqDBValuesArch = _cDB.Select("SELECT DISTINCT * FROM archive.`ia.tMessages` ", (null == cFilters ? null : cFilters.sSQL), "`dtRegister` DESC", 0, 0, null);
+				aqDBValues = _cDB.Select("SELECT DISTINCT * FROM ia.`vMessagesResolved` ", (null == cFilters ? null : cFilters.sSQL), "`dtRegister` DESC", 0, 0, null);
+
+				if (null == aqDBValuesArch && null == aqDBValues)
 					return null;
-				aRetVal = new Message[aqDBValues.Count];
+
+				if (aqDBValuesArch == null)
+					aqDBValuesArch = new Queue<Hashtable>();
+				if (aqDBValues == null)
+					aqDBValues = new Queue<Hashtable>();
+
+				aRetVal = new Message[aqDBValuesArch.Count + aqDBValues.Count];
+
 				int nIndx = 0;
+				while (0 < aqDBValuesArch.Count)
+					aRetVal[nIndx++] = new Message(aqDBValuesArch.Dequeue());
+
 				while (0 < aqDBValues.Count)
 					aRetVal[nIndx++] = new Message(aqDBValues.Dequeue());
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -2946,8 +3542,8 @@ ORDER BY "dtStartPlanned";
 				(new Logger()).WriteDebug3("in [tpl:" + _sTemplate + " ]");
 				cSemaphore.WaitOne();
 				(new Logger()).WriteDebug4("after semaphor [tpl:" + _sTemplate + " ]");
-				string sResult = null;
-				string sErrors = "", sHeader = "", sErrRow="<Row> <Cell ss:MergeAcross='9' ss:StyleID='cell_left'> <Data ss:Type='String'>{%ERROR%}</Data> </Cell> </Row>";
+				//string sResult = null;
+				string sErrors = "", sHeader = "", sBody = "", sErrRow="<Row> <Cell ss:MergeAcross='9' ss:StyleID='cell_left'> <Data ss:Type='String'>{%ERROR%}</Data> </Cell> </Row>";
 				Clip cCurrentClip = null;
 				try
 				{
@@ -2961,7 +3557,7 @@ ORDER BY "dtStartPlanned";
 							while (true)
 							{
 								(new Logger()).WriteDebug4("while(true). [iteration = " + niter++ + " ][cDBF.sName = " + cDBF.sName + " ]");
-								if ("dtStartReal" == cDBF.sName)
+								if ("`dtStartReal`" == cDBF.sName)
 								{
 									switch (cDBF.eOP)
 									{
@@ -2982,19 +3578,32 @@ ORDER BY "dtStartPlanned";
 								cDBF = (DBFilters.DBFilter)cDBFG.cNext;
 							}
 							double nProgressStep = 90 / (dtStop.Subtract(dtStart).TotalHours / 2);
-							if (1 < nProgressStep)
-								nProgressStep = 1;
+							//if (1 < nProgressStep)
+							//	nProgressStep = 1;
+							nProgressStep = 3;
 							ProgressAsync cProgressAsync = new ProgressAsync(this, nProgressStep, 90);
-							PlaylistItem[] aPLIs = _cDBI.PlaylistWithAssetsGet(_cFilters);
-							aPLIs = _cDBI.RemoveUnderSCR_PLIs(aPLIs);
-							aPLIs = _cDBI.AddSCR_PLIs(aPLIs, _cFilters);
-							(new Logger()).WriteDebug4("[aPLIs.count = " + aPLIs.Length + " ][nProgressStep = " + nProgressStep + " ]");
-							cProgressAsync.Stop();
+                            List<PlaylistItem> aPLIsTMP = new List<PlaylistItem>();
+                            PlaylistItem[] aPLIs;
+                            string[] aErrScr = null;
+                            aPLIs = _cDBI.RemoveUnderSCR_PLIs(_cDBI.ArchivePlaylistWithAssetsGet(_cFilters, ArchiveWithAssetsSource.archive), out aErrScr);
+                            if (!aErrScr.IsNullOrEmpty())
+                                foreach (string sS in aErrScr)
+                                    sErrors += Environment.NewLine + sErrRow.Replace("{%ERROR%}", sS);
+                            if (!aPLIs.IsNullOrEmpty())
+                                aPLIsTMP.AddRange(aPLIs);
+                            aPLIs = _cDBI.ArchivePlaylistWithAssetsGet(_cFilters, ArchiveWithAssetsSource.scr);
+                            if (!aPLIs.IsNullOrEmpty())
+                                aPLIsTMP.AddRange(aPLIs);
+                            aPLIsTMP.Sort((pli1, pli2) => pli1.dtStartPlanned.CompareTo(pli2.dtStartPlanned));
+                            aPLIs = aPLIsTMP.ToArray();
+
+                            (new Logger()).WriteDebug4("[aPLIs.count = " + aPLIs.Length + " ][nProgressStep = " + nProgressStep + " ]");
+                            cProgressAsync.Stop();
 							nProgressStep = (95 - nProgress) / (double)aPLIs.Length;
 							Dictionary<long, int> ahClipsCounts = new Dictionary<long, int>();
 							Dictionary<long, Clip> ahClips = new Dictionary<long, Clip>();
-							Dictionary<long, Program.RAOInfo>  ahRAOInfo;
-							List<Clip> aClips;
+							Dictionary<long, Program.ClipsFragment>  ahRAOInfo;
+							List<Clip> aClips = new List<Clip>();
 							
 
 							{
@@ -3002,10 +3611,10 @@ ORDER BY "dtStartPlanned";
 								long nFramesQty;
 								foreach (PlaylistItem cPLI in aPLIs)
 								{
-									aClips = new List<Clip>();
-									ahRAOInfo=new Dictionary<long,Program.RAOInfo>();
-									if (null != cPLI.cAsset && cPLI.cAsset is Program && null != ((Program)cPLI.cAsset).aRAOInfo)
-										foreach (Program.RAOInfo cRAOI in ((Program)cPLI.cAsset).aRAOInfo)
+									aClips.Clear();
+									ahRAOInfo=new Dictionary<long,Program.ClipsFragment>();
+									if (null != cPLI.cAsset && cPLI.cAsset is Program && null != ((Program)cPLI.cAsset).aClipsFragments)
+										foreach (Program.ClipsFragment cRAOI in ((Program)cPLI.cAsset).aClipsFragments)
 										{
 											aClips.Add(cRAOI.cClip);
 											ahRAOInfo.Add(cRAOI.cClip.nID, cRAOI);
@@ -3019,7 +3628,6 @@ ORDER BY "dtStartPlanned";
 										{
 											cClipToDict = cClip;
 											cClipToDict.nFramesQty = 0;
-											cClipToDict.aCustomValues = _cDBI.CustomsLoad(cClipToDict.nID);
 											ahClips.Add(cClipToDict.nID, cClipToDict);
 											ahClipsCounts.Add(cClipToDict.nID, 1);
 										}
@@ -3057,9 +3665,10 @@ ORDER BY "dtStartPlanned";
 									}
 									nProgress += nProgressStep;
 								}
+								_cDBI.CustomsLoad(ahClips.Values.Select(o=>(Asset)o).ToArray());
 							}
 							nProgressStep = (100 - nProgress) / (double)ahClips.Count;
-							sResult = sHeader = templates.export_rao_header.Replace("{%DATE_START%}", dtStart.ToString("dd-MM-yyyy")).Replace("{%DATE_STOP%}", dtStop.ToString("dd-MM-yyyy"));
+							sHeader = templates.export_rao_header.Replace("{%DATE_START%}", dtStart.ToString("dd-MM-yyyy")).Replace("{%DATE_STOP%}", dtStop.ToString("dd-MM-yyyy"));
 							string sRow = templates.export_rao_row;
 							IEnumerable<Clip> aClipsOrdered = ahClips.Values.OrderBy(row => row.stCues.sArtist).ThenBy(row => row.stCues.sSong);
 							CustomValue cMusic, cLyrics;
@@ -3070,9 +3679,13 @@ ORDER BY "dtStartPlanned";
 								if (null != cClip.aCustomValues)
 								{
 									cMusic = cClip.aCustomValues.FirstOrDefault(o => o.sName == "author_of_music");
+                                    if (cMusic.sValue == null)
+                                        cMusic.sValue = "";
 									cLyrics = cClip.aCustomValues.FirstOrDefault(o => o.sName == "author_of_lyrics");
-								}
-								else
+                                    if (cLyrics.sValue == null)
+                                        cLyrics.sValue = "";
+                                }
+                                else
 								{
 									cMusic = new CustomValue("", "");
 									cLyrics = new CustomValue("", "");
@@ -3082,21 +3695,20 @@ ORDER BY "dtStartPlanned";
                                     sErrors += Environment.NewLine + sErrRow.Replace("{%ERROR%}", "ОБЩИЙ ХРОНОМЕТРАЖ КЛИПА НЕ МОЖЕТ БЫТЬ РАВЕН 00:00 !!!!\t[name=" + cClip.sName + "]\t[id=" + cClip.nID + "]"); //не переводим, т.к. это РАО для России
 
 								if (null == cClip.cFile)
-									sSeconds = "03:33";    // т.к. РАО не приемлет ничего кроме циферок, а 0 им не подходит, то договорились заменять на 3:33. Деньги все-равно идут с колонки SECONDS_TOTAL
+									sSeconds = "03:33";  // а теперь просят писать туда среднее арифм. в любом случае ))   // т.к. РАО не приемлет ничего кроме циферок, а 0 им не подходит, то договорились заменять на 3:33. Деньги все-равно идут с колонки SECONDS_TOTAL
 								else
 									sSeconds = (DateTime.MinValue.AddSeconds((cClip.nFrameOut - cClip.nFrameIn + 1) / 25)).ToString("mm:ss");
 
-								sResult += sRow.Replace("{%ARTIST_NAME%}", cClip.stCues.sArtist)
+								sBody += sRow.Replace("{%ARTIST_NAME%}", cClip.stCues.sArtist)
 												.Replace("{%SONG_NAME%}", cClip.stCues.sSong)
 												.Replace("{%SECONDS_TOTAL%}", (DateTime.MinValue.AddSeconds(cClip.nFramesQty / 25)).ToString("H:mm:ss"))
 												.Replace("{%AUTHOR_OF_MUSIC%}", cMusic.sValue)
 												.Replace("{%AUTHOR_OF_LYRICS%}", cLyrics.sValue)
 												.Replace("{%RELISES_QTY%}", ahClipsCounts[cClip.nID].ToString())
-												.Replace("{%SECONDS%}", sSeconds)
-                                                .Replace("{%GENRE%}", "песня"); //не переводим, т.к. это РАО для России
+												.Replace("{%SECONDS%}", (DateTime.MinValue.AddSeconds(cClip.nFramesQty / ahClipsCounts[cClip.nID] / 25)).ToString("H:mm:ss"))
+                                                .Replace("{%GENRE%}", "песня"); //не переводим, т.к. это РАО для России только
 								nProgress += nProgressStep;
 							}
-							sResult += templates.export_rao_footer;
 							break;
 					}
 				}
@@ -3109,10 +3721,12 @@ ORDER BY "dtStartPlanned";
 					nProgress = 100;
 					return;
 				}
+
 				if (0 < sErrors.Length)
-					cResult = sHeader + "\n\n" + sErrors + templates.export_rao_footer;
+					cResult = sHeader + "\n\n" + sErrors + "\n\n\n\n\n\n\n\n" + sBody + templates.export_rao_footer;
 				else
-					cResult = sResult;
+					cResult = sHeader + sBody + templates.export_rao_footer;
+
 				nProgress = 100;
 				(new Logger()).WriteDebug4("return");
 			}
@@ -3126,7 +3740,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return byte.MaxValue;
 		}
@@ -3142,7 +3756,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			(new Logger()).WriteDebug4("return 0");
 			return 0;
@@ -3159,7 +3773,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-                WebServiceError.Add(_cSI, ex);
+                WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -3186,7 +3800,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal;
 		}
@@ -3204,7 +3818,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -3220,7 +3834,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return null;
 		}
@@ -3233,7 +3847,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 		}
 		#endregion
@@ -3254,7 +3868,7 @@ ORDER BY "dtStartPlanned";
 			}
 			catch (Exception ex)
 			{
-				WebServiceError.Add(_cSI, ex);
+				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
 			return aRetVal.ToArray();
 		}
@@ -3265,5 +3879,10 @@ ORDER BY "dtStartPlanned";
 			return DateTime.Now;
 		}
 
-	}
+        [WebMethod(EnableSession = true)]
+        public void ErrorLogging(string sError)
+        {
+            (new Logger()).WriteError("Client error. " + (sError == null ? "NULL" : sError));
+        }
+    }
 }

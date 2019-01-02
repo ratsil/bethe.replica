@@ -30,10 +30,13 @@
             <Border x:Name="BrandingBorder" Style="{StaticResource BrandingBorderStyle}">
                 <StackPanel x:Name="BrandingStackPanel" Style="{StaticResource BrandingStackPanelStyle}">
 
-                    <ContentControl Style="{StaticResource LogoIcon}"/>
-                    <TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" Text="{Binding Path=cSCR.sNotice0, Source={StaticResource g}}"/>
+					<!-- <ContentControl Style="{StaticResource LogoIcon}"/>
+					<TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" Text="{Binding Path=cSCR.sNotice0, Source={StaticResource g}}"/>   -->
 
-                </StackPanel>
+					<TextBlock x:Name="ui_tbR" Style="{StaticResource ReplicaStyle}" Text="R" />
+					<TextBlock x:Name="ApplicationNameTextBlock" Style="{StaticResource ApplicationNameStyle}" Text="replica" />
+
+				</StackPanel>
             </Border>
 
             <Border x:Name="LinksBorder" Style="{StaticResource LinksBorderStyle}">

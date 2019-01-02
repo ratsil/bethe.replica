@@ -5,14 +5,152 @@
 		<fallback>
 			<video file="{%RUNTIME::PLAYER::PROXY::FILE%}" opacity="true" start="-399" duration="300" />
 		</fallback>
-		<data blend="d:/cues/blender/sd.blend" threads="16" output="{%RUNTIME::PLAYER::PROXY::FILE::FOLDERED%}">
+		<data blend="d:\cues\blender\comingup\SD_comingup_credits.blend" threads="16" output="{%RUNTIME::PLAYER::PROXY::FILE::FOLDERED%}">
 			<python>
-# ВНИМАНИЕ! результат надо брать со 2-го кадра (т.е. без 0-го и 1-го). 3 последних кадра будут пустые!!
+# ВНИМАНИЕ! результат надо брать со 2-го кадра (т.е. без 0-го и 1-го) и хронометраж жёстко ставить 300 кадров, т.к. 3 последних будут пустые!!
 
 import bpy
 import os
 import sys
 import datetime
+
+# ПЕРЕКЛЮЧАТЬ СЕЗОНЫ ТУТ!!!!!!
+sLayer02 = "music_comingup_pal_fall_layer02.mov"
+sCuShort = "music_cu_short_pal_fall.mov"
+sCuLong = "music_cu_long_pal_fall.mov"
+
+
+# credits
+bpy.context.scene.objects.active = bpy.context.scene.objects['artist_title']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::PLI::CUES::ARTIST::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['song_title']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::PLI::CUES::SONG::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+
+bLong=False
+if bpy.data.objects["artist_title"].dimensions.x > 2.34 or bpy.data.objects["song_title"].dimensions.x > 2.34:
+	bLong = True
+else:
+	bLong = False
+
+bpy.context.scene.sequence_editor.sequences_all["gra_short"].mute = bLong
+bpy.context.scene.sequence_editor.sequences_all["gra_long"].mute = not bLong
+
+bpy.data.objects["plane_short"].location[2]=10*int(bLong)+ 0.1
+bpy.data.objects["plane_long"].location[2]=10*int(not bLong)+ 0.1
+
+
+# comingup
+def logger(sModule, sStatus, sLogString):
+	try:
+		if os.path.exists(r"c:\logs"):
+			dtNow = datetime.datetime.now()
+			sLog = r"c:\logs\python_" + dtNow.strftime("%Y_%m_%d") + ".log"
+			f = open(sLog, 'a')
+			f.write("[" + dtNow.strftime("%Y-%m-%d %H:%M:%S") + "] [" + sStatus + "] [" + sModule + "] [" + sLogString + "]\n")
+			f.close()
+	except Exception as ex:
+		return
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['artist_1']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+1)::CUES::ARTIST::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['song_1']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+1)::CUES::SONG::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['artist_2']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+2)::CUES::ARTIST::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['song_2']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+2)::CUES::SONG::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['artist_3']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+3)::CUES::ARTIST::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['song_3']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+3)::CUES::SONG::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['artist_4']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+4)::CUES::ARTIST::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+bpy.context.scene.objects.active = bpy.context.scene.objects['song_4']
+bpy.ops.object.editmode_toggle()
+bpy.ops.font.delete()
+bpy.ops.font.text_insert(text="{%MACRO::REPLICA::CU(+4)::CUES::SONG::CAPS|ESCAPED%}")
+bpy.ops.object.editmode_toggle()
+
+
+bpy.context.scene.sequence_editor.sequences_all["over_clips"].filepath = "//\\" + sLayer02
+bpy.context.scene.sequence_editor.sequences_all["gra_long"].filepath = "//\\" + sCuLong
+bpy.context.scene.sequence_editor.sequences_all["gra_short"].filepath = "//\\" + sCuShort
+
+aFiles = []
+aFiles.append("{%RUNTIME::PLAYER::PROXY::FILE::ESCAPED%}")
+aFiles.append("{%MACRO::REPLICA::CU(+1)::MEDIA::FILE::ESCAPED%}")
+aFiles.append("{%MACRO::REPLICA::CU(+2)::MEDIA::FILE::ESCAPED%}")
+aFiles.append("{%MACRO::REPLICA::CU(+3)::MEDIA::FILE::ESCAPED%}")
+aFiles.append("{%MACRO::REPLICA::CU(+4)::MEDIA::FILE::ESCAPED%}")
+
+for sF in aFiles:
+	if not os.path.exists(sF):
+		logger("comingup", "error", "file \"" + sF +" does not exists! render aborted!")
+		sys.exit(0)
+
+nStart = {%RUNTIME::PLAYER::PROXY::VIDEO(0)::STOP%} - 1
+bpy.context.scene.sequence_editor.sequences_all["background"].filepath = aFiles[0]
+bpy.context.scene.sequence_editor.sequences_all["background"].animation_offset_start = nStart   # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["background"].frame_final_duration = 300   # не меняем
+bpy.context.scene.sequence_editor.sequences_all["sound"].filepath = aFiles[0]
+bpy.context.scene.sequence_editor.sequences_all["sound"].animation_offset_start = nStart   # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["sound"].frame_final_duration = 302   # не меняем
+
+bpy.context.scene.sequence_editor.sequences_all["clip_1"].filepath = aFiles[1]
+bpy.context.scene.sequence_editor.sequences_all["clip_1"].animation_offset_start = 300      # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["clip_1"].frame_final_duration = 137   # не меняем
+
+bpy.context.scene.sequence_editor.sequences_all["clip_2"].filepath = aFiles[2]
+bpy.context.scene.sequence_editor.sequences_all["clip_2"].animation_offset_start = 300   # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["clip_2"].frame_final_duration = 137   # не меняем
+
+bpy.context.scene.sequence_editor.sequences_all["clip_3"].filepath = aFiles[3]
+bpy.context.scene.sequence_editor.sequences_all["clip_3"].animation_offset_start = 300   # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["clip_3"].frame_final_duration = 137   # не меняем
+
+bpy.context.scene.sequence_editor.sequences_all["clip_4"].filepath = aFiles[4]
+bpy.context.scene.sequence_editor.sequences_all["clip_4"].animation_offset_start = 300   # НАЧАЛЬНЫЙ КАДР.  первый = 0
+bpy.context.scene.sequence_editor.sequences_all["clip_4"].frame_final_duration = 137   # не меняем
+
 
 bpy.context.screen.scene = bpy.data.scenes[0]
 bpy.context.scene.frame_start = 1

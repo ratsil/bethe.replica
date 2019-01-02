@@ -12,7 +12,7 @@
         xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
         xmlns:slc="clr-namespace:controls.sl;assembly=controls.sl"
         mc:Ignorable="d"
-        d:DesignWidth="640" d:DesignHeight="640">
+        d:DesignWidth="840" d:DesignHeight="840">
     <UserControl.Resources>
         <local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
         <local:Math xmlns:local="clr-namespace:helpers.sl.xaml;assembly=helpers.common.sl" x:Key="math" />
@@ -23,9 +23,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <slc:ReducePanel x:Name="_ui_rpFiles" Title="{Binding Path=cCommon.sFiles, Source={StaticResource g}}" Loaded="_ui_rpFiles_Loaded" Margin="3,10" IsOpen="True" HorizontalContentAlignment="Stretch">
+			<slc:ReducePanel Grid.Row="0" x:Name="_ui_rpFiles" Title="{Binding Path=cCommon.sFiles, Source={StaticResource g}}" Loaded="_ui_rpFiles_Loaded" Margin="3,4,3,0" IsOpen="True" HorizontalContentAlignment="Stretch">
                 <StackPanel Orientation="Vertical">
                     <Grid Background="#FF65829D">
                         <Grid.ColumnDefinitions>
@@ -34,8 +35,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{Binding Path=cReplica.sNoticeIngest1, Source={StaticResource g}}" VerticalAlignment="Center" Margin="5,0,10,0" />
-                        <TextBlock Grid.Column="1" Name="_ui_txtFilename" VerticalAlignment="Center" FontStyle="Italic" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sSelectFile, Source={StaticResource g}}" />
-                        <Button Grid.Column="2" x:Name="_ui_btnBrowse" Margin="0,5,5,5" Padding="5" MinWidth="75" VerticalAlignment="Stretch" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sBrowse, Source={StaticResource g}}" Click="_ui_btnBrowse_Click" />
+						<TextBox Grid.Column="1" Name="_ui_tbFilename" VerticalAlignment="Center" FontStyle="Italic"  Margin="0,0,10,0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sSelectFile, Source={StaticResource g}}" IsReadOnly="True" Background="#FF65829D" BorderThickness="0" />
+						<Button Grid.Column="2" x:Name="_ui_btnBrowse" Margin="0,5,5,5" Padding="5" MinWidth="75" VerticalAlignment="Stretch" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sBrowse, Source={StaticResource g}}" Click="_ui_btnBrowse_Click" />
                     </Grid>
                     <StackPanel Orientation="Horizontal" Background="#FF65829D" Margin="0,5,0,5">
                         <TextBlock Text="{Binding Path=cReplica.sNoticeIngest6, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10,10,10" />
@@ -44,17 +45,20 @@
                             <ComboBoxItem>
                                 <ComboBoxItem.Content>
                                     <Grid>
-                                        <itk:NumericUpDown Minimum="1" Maximum="99" Name="_ui_nudAge" ValueChanged="_ui_nud_ValueChanged" />
+                                        <itk:NumericUpDown Minimum="0" Maximum="99" Name="_ui_nudAge" ValueChanged="_ui_nud_ValueChanged" />
                                     </Grid>
                                 </ComboBoxItem.Content>
                             </ComboBoxItem>
                         </ComboBox>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Name="_ui_txtAction" Text="{Binding Path=cReplica.sNoticeIngest7, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
-                        <ComboBox Grid.Row="2" Grid.Column="1" Name="_ui_ddlAction" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10">
+                        <TextBlock Name="_ui_txtAction" Text="{Binding Path=cReplica.sNoticeIngest7, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+                        <ComboBox Name="_ui_ddlAction" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10">
                             <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sMove, Source={StaticResource g}}" />
                             <ComboBoxItem Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" />
                         </ComboBox>
-                    </StackPanel>
+						
+						<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.sNoAsset, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0,0,0" />
+						<CheckBox Name="_ui_cbNoAsset" Checked="cbNoAssetChecked" Unchecked="cbNoAssetChecked" Margin="6,4,0,5" VerticalAlignment="Center" />
+					</StackPanel>
                     <StackPanel Orientation="Horizontal" Background="#FF65829D">
                         <TextBlock Text="{Binding Path=cReplica.sNoticeIngest3, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,10,10,10" />
                         <ComboBox Name="_ui_ddlAir" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
@@ -71,11 +75,11 @@
                             </ComboBoxItem>
                         </ComboBox>
 
-                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sFormat, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
-                        <ComboBox Name="_ui_ddlFormat" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" />
+                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sFormat, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" Visibility="Collapsed" />
+                        <ComboBox Name="_ui_ddlFormat" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" Visibility="Collapsed" />
 
-                        <TextBlock Text="fps:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
-                        <ComboBox Name="_ui_ddlFPS" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" />
+                        <TextBlock Text="fps:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" Visibility="Collapsed" />
+                        <ComboBox Name="_ui_ddlFPS" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,5,10" Visibility="Collapsed" />
                     </StackPanel>
                     <sdk:TabControl TabStripPlacement="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5" Name="_ui_tcPresets" VerticalAlignment="Top" Background="#FF65829D" SelectionChanged="_ui_tcPresets_SelectionChanged">
 						<sdk:TabItem Name="_ui_tiPresetsNew" Header="  + " FontSize="12" Foreground="#FF456D89">
@@ -90,25 +94,42 @@
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
 									<RowDefinition />
 									<RowDefinition />
 								</Grid.RowDefinitions>
 
 								<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sFolder, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
-								<ScrollViewer Grid.Row="0" Grid.Column="1" Grid.RowSpan="4" Height="250" Margin="0,10,10,10" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+								<ScrollViewer Grid.Row="0" Grid.Column="1" Grid.RowSpan="5" Height="250" Margin="0,10,10,10" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 									<sdk:TreeView HorizontalAlignment="Stretch" Name="_ui_tvNewFolder" />
 								</ScrollViewer>
 
 								<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sType, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
-								<ComboBox Grid.Row="0" Grid.Column="3" Name="_ui_ddlNewTypes" DisplayMemberPath="sName" Margin="0,10,0,10" />
+								<ComboBox Grid.Row="0" Grid.Column="3" Name="_ui_ddlNewTypes" DisplayMemberPath="sName" Margin="0,5,0,5" />
 
 								<TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sStorage, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
-								<ComboBox Grid.Row="1" Grid.Column="3" Name="_ui_ddlNewStorages" DisplayMemberPath="sName" Margin="0,10,0,10" />
+								<ComboBox Grid.Row="1" Grid.Column="3" Name="_ui_ddlNewStorages" DisplayMemberPath="sName" Margin="0,5,0,5" />
 
 								<TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,10,10,10" />
-								<TextBox Grid.Row="2" Grid.Column="3" Name="_ui_tbNewCaption" Margin="0,10,0,10" />
+								<TextBox Grid.Row="2" Grid.Column="3" Name="_ui_tbNewCaption" Margin="0,5,0,5" />
 
-								<Button Grid.Row="3" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Padding="5" Margin="0,10,0,10" Click="TabAdd_Click" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sAdd, Source={StaticResource g}}" />
+								<TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sAdvanced, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
+								<CheckBox Grid.Row="3" Grid.Column="3" Name="_ui_cbAdvanced" Checked="cbAdvancedChecked" Unchecked="cbAdvancedChecked" Margin="0,10,0,5" />
+								
+								<StackPanel  Grid.Row="4" Grid.Column="2" Name="_ui_spAdv1" >
+									<HyperlinkButton  Name="_ui_hlPathAdverts" Margin="0,9,0,5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sPathAdvertisement, Source={StaticResource g}}" Click="hbPathAdvertsClick"  HorizontalAlignment="Right" Foreground="#FFACFFBF" FontWeight="Bold" />
+									<HyperlinkButton  Name="_ui_hlPathTrailers" Margin="0,13,0,5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sPathTrailers, Source={StaticResource g}}" Click="hbPathTrailersClick"  HorizontalAlignment="Right" Foreground="#FFACFFBF" FontWeight="Bold" />
+									<TextBlock  Margin="0,11,0,5" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sStorageAdvertisement, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+									<TextBlock  Margin="0,9,0,5" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sStorageTrailers, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+								</StackPanel>
+								<StackPanel  Grid.Row="4" Grid.Column="3" Name="_ui_spAdv2" >
+									<TextBox Name="_ui_tbPathAdverts" Margin="0,5,0,5" IsReadOnly="True" />
+									<TextBox Name="_ui_tbPathTrailers" Margin="0,5,0,5" IsReadOnly="True" />
+									<ComboBox Name="_ui_ddlStorageAdverts" DisplayMemberPath="sName" Margin="0,5,0,5" />
+									<ComboBox Name="_ui_ddlStorageTrailers" DisplayMemberPath="sName" Margin="0,5,0,5" />
+								</StackPanel>
+								
+								<Button Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Padding="5" Margin="0,10,0,10" Click="TabAdd_Click" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sAdd, Source={StaticResource g}}" />
 							</Grid>
 						</sdk:TabItem>
 					</sdk:TabControl>
@@ -117,16 +138,60 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Path=cReplica.sNoticeIngest5, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Left" />
                         <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" FontStretch="SemiExpanded" Name="_ui_txtTargetName" VerticalAlignment="Center" />
                         <Button Grid.Row="0" Grid.Column="2" x:Name="_ui_btnSave" MinWidth="75" Padding="5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sCopy, Source={StaticResource g}}" Click="_ui_btnSave_Click" IsEnabled="False" VerticalAlignment="Center" />
+						<Button Grid.Row="0" Grid.Column="3" x:Name="_ui_btnMove" Margin="2,0,0,0" MinWidth="75" Padding="5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sMove, Source={StaticResource g}}" Click="_ui_btnSave_Click" IsEnabled="False" VerticalAlignment="Center" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="1" Name="_ui_txtError" Visibility="Collapsed" />
+						<TextBlock Grid.Row="1" Grid.Column="1" Name="_ui_txtError" Visibility="Collapsed" />
                     </Grid>
                 </StackPanel>
             </slc:ReducePanel>
-            <slc:ReducePanel Grid.Row="1" x:Name="_ui_rpTasks" Title="{Binding Path=cCommon.sTasks, Source={StaticResource g}}" Margin="3,0" IsOpen="False" HorizontalContentAlignment="Stretch">
+			<slc:ReducePanel Grid.Row="1" x:Name="_ui_rpAdvanced" Title="{Binding Path=cCommon.sAdvanced, Source={StaticResource g}}" Margin="3,8,3,0" IsOpen="False" IsOpenChanged="rpAdvancedOpenedClosed" HorizontalContentAlignment="Stretch">
+				<ScrollViewer HorizontalScrollBarVisibility="Auto">
+					<Grid Name="_ui_gInfo" MinHeight="200">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*" />
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Grid Grid.Row="0" HorizontalAlignment="Stretch" >
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<slc:SearchControl Grid.Column="0" Grid.ColumnSpan="2" x:Name="_ui_scFilesSearch" Height="25" Margin="0,2,0,0" />
+						</Grid>
+						<ListBox Grid.Row="1" Grid.Column="0" Height="284" Name="_ui_lbFiles" DisplayMemberPath="sFilename" Margin="0,4,0,0" SelectionChanged="_ui_lbFilesChanged">
+							<itk:ContextMenuService.ContextMenu>
+								<itk:ContextMenu Name="_ui_cmFiles" Opened="_ui_cmFiles_Opened">
+									<itk:MenuItem Header="{Binding Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_cmFiles_Refresh" />
+									<itk:Separator/>
+									<itk:MenuItem Name="_ui_cmFileDelete" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_cmFiles_Delete" />
+								</itk:ContextMenu>
+							</itk:ContextMenuService.ContextMenu>
+						</ListBox>
+						<TextBox Grid.Column="2" Grid.RowSpan="2" Name="_ui_tbFileInfo" IsEnabled="True" TextChanged="_ui_tb_TextChanged" Margin="4,2,0,0" HorizontalAlignment="Stretch"  FontWeight="Bold" />
+						<Grid Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" >
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+							<TextBlock Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sReplaceSelectedFile, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,10,6,10" />
+							<Button  Grid.Column="1" x:Name="_ui_btnReplaceCopy" MinWidth="75" Padding="5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sCopy, Source={StaticResource g}}" Click="_ui_btnReplace_Click" IsEnabled="False" VerticalAlignment="Center" />
+							<Button  Grid.Column="2" x:Name="_ui_btnReplaceMove" Margin="2,0,0,0" MinWidth="75" Padding="5" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sMove, Source={StaticResource g}}" Click="_ui_btnReplace_Click" IsEnabled="False" VerticalAlignment="Center" />
+						</Grid>
+					</Grid>
+				</ScrollViewer>
+			</slc:ReducePanel>
+			<slc:ReducePanel Grid.Row="2" x:Name="_ui_rpTasks" Title="{Binding Path=cCommon.sTasks, Source={StaticResource g}}" Margin="3,8,3,0" IsOpen="False" HorizontalContentAlignment="Stretch">
 				<ScrollViewer HorizontalScrollBarVisibility="Auto">
 					<Grid Name="_ui_gTasksLayout" MaxWidth="1400">
 						<Grid.ColumnDefinitions>
@@ -219,7 +284,10 @@
 
 					<TextBlock Grid.Row="9" Grid.Column="0" Text="{Binding Path=cReplica.sNoticeIngest4, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
 					<ComboBox Grid.Row="9" Grid.Column="1" Name="_ui_ddlClipForeign" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
-				</Grid>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Name="_ui_txtClipPGID" Text="pg_id:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Name="_ui_tbClipPGID" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+                </Grid>
 			</Grid>
 			<Grid Name="_ui_gAdvertisement" Visibility="Collapsed">
 				<Grid.ColumnDefinitions>
@@ -227,6 +295,7 @@
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
@@ -240,9 +309,15 @@
 
 				<TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cReplica.sCampaign, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
 				<TextBox Grid.Row="2" Grid.Column="1" Name="_ui_tbAdvertisementCampaign" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+
+				<TextBlock Grid.Row="3" Grid.Column="0" Name="_ui_tbAdvertisementLogName" Text="log" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+				<ScrollViewer Grid.Row="3" Grid.Column="1" Name="_ui_svAdvertisementLog" HorizontalScrollBarVisibility="Auto" MaxHeight="200">
+					<TextBox  Name="_ui_tbAdvertisementLog" TextChanged="_ui_tb_TextChanged" MinHeight="100" AcceptsReturn="True" Margin="0,10,0,10" IsReadOnly="True" />
+				</ScrollViewer>
 			</Grid>
 			<Grid Name="_ui_gProgram" Visibility="Collapsed">
 				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
@@ -261,12 +336,17 @@
 
 				<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sSeries, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
 				<ComboBox Grid.Row="0" Grid.Column="1" Name="_ui_ddlProgramSeries" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+				<Button Grid.Row="0" Grid.Column="2" x:Name="_ui_btnProgramsReload" MinWidth="75" MaxWidth="100"  Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_btnProgramsReload_Click" IsEnabled="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" />
 
 				<TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sEpisode, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
 				<ComboBox Grid.Row="1" Grid.Column="1" Name="_ui_ddlProgramEpisodes" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
+				
+
 
 				<TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sPart, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
-				<itk:NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="99" Value="0" Name="_ui_nudProgramPart" ValueChanged="_ui_nud_ValueChanged" Background="White" Margin="0,10,0,10" />
+				<TextBox Grid.Row="2" Grid.Column="1" Name="_ui_tbProgramPart" Height="34" Width="400" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" FontSize="20" HorizontalAlignment="Left" Background="#FF35546A" Foreground="#FFFFF748" FontWeight="Bold"  />
+				<ComboBox Grid.Row="2" Grid.Column="2" Name="_ui_ddlProgramParts" DisplayMemberPath="sName"  Height="20" MaxWidth="400" Margin="10,10,20,10" />
+				<!--<itk:NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="99" Value="0" Height="30" Width="200"  Name="_ui_nudProgramPart" ValueChanged="_ui_nud_ValueChanged" Background="White" Margin="0,10,0,10" FontSize="20" HorizontalAlignment="Left" Foreground="#FFFFF748" FontWeight="Bold" />  -->
 			</Grid>
 			<Grid Name="_ui_gDesign" Visibility="Collapsed">
 				<Grid.ColumnDefinitions>
@@ -308,8 +388,12 @@
 				<TextBlock Grid.Row="2" Grid.Column="0" Text="dtmf" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,10,10,10" />
 				<ComboBox Grid.Row="2" Grid.Column="1" Name="_ui_ddlDesignDTMF" DisplayMemberPath="sName" SelectionChanged="_ui_ddl_SelectionChanged" Margin="0,10,0,10" />
 
-				<TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
-				<TextBox Grid.Row="3" Grid.Column="2" Name="_ui_tbDesignName" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sTags, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+                <TextBox Grid.Row="3" Grid.Column="2" Name="_ui_tbDesignTags" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" />
+                <TextBox Grid.Row="4" Grid.Column="2" Name="_ui_tbDesignName" TextChanged="_ui_tb_TextChanged" Margin="0,10,0,10" />
+
 			</Grid>
 		</Grid>
     </ScrollViewer>

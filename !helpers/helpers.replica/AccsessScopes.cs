@@ -322,36 +322,52 @@ namespace access
 		static public types.ADVERTISEMENTS advertisements = null;
 		static public types.PROGRAMS programs = null;
 		static public types.DESIGNS designs = null;
+
+		static private object _cLock;
+		static scopes()
+		{
+			_cLock = new object();
+		}
 #if SILVERLIGHT
 		static public void init(helpers.replica.services.dbinteract.AccessScope[] aDBIAccessScopes)
 		{
-			types.AccessScope[] aAccessScopes = new types.AccessScope[aDBIAccessScopes.Length];
-			for (int nIndx = 0; aDBIAccessScopes.Length > nIndx; nIndx++)
-				aAccessScopes[nIndx] = new types.AccessScope(aDBIAccessScopes[nIndx]);
-			init(aAccessScopes);
+			lock (_cLock)
+			{
+				types.AccessScope[] aAccessScopes = new types.AccessScope[aDBIAccessScopes.Length];
+				for (int nIndx = 0; aDBIAccessScopes.Length > nIndx; nIndx++)
+					aAccessScopes[nIndx] = new types.AccessScope(aDBIAccessScopes[nIndx]);
+				init(aAccessScopes);
+			}
 		}
 #endif
 		static public void init(types.AccessScope[] aAccessScopes)
 		{
-			types.ScopesProcessor.init(aAccessScopes);
+			lock (_cLock)
+			{
+				types.ScopesProcessor.init(aAccessScopes);
 
-			profile = new types.PROFILE();
-			ingest = new types.INGEST();
-			playlist = new types.PLAYLIST();
-			assets = new types.ASSETS();
-			stat = new types.STAT();
-			sms = new types.SMS();
-			rt = new types.RT();
+				profile = new types.PROFILE();
+				ingest = new types.INGEST();
+				playlist = new types.PLAYLIST();
+				assets = new types.ASSETS();
+				stat = new types.STAT();
+				sms = new types.SMS();
+				rt = new types.RT();
 
-			clips = new types.CLIPS();
-			advertisements = new types.ADVERTISEMENTS();
-			programs = new types.PROGRAMS();
-			designs = new types.DESIGNS();
+				clips = new types.CLIPS();
+				advertisements = new types.ADVERTISEMENTS();
+				programs = new types.PROGRAMS();
+				designs = new types.DESIGNS();
+			}
 		}
 		static public bool IsWebPageVisible(string sWebPage)
 		{
-			if (sWebPage == "msadv" || sWebPage == "artist_search")
-				return true;
+			if (sWebPage == "msadv")
+                return true;
+            if (sWebPage== "artist_search")
+            {
+                return types.ScopesProcessor.CanRead("assets");
+            }
 			return types.ScopesProcessor.CanRead(sWebPage);
 		}
 	}

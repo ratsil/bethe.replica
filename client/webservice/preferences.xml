@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <preferences locale="en">
-	<webservice>
+	<webservice name="CHANNEL - HD" >
+		<import pgid_assetid="true" column_pgid="0" make_advert_asset="false" tsr_connection="Server=tcp:127.0.0.1, 1433;Database=POWERGOLD;User Id=USER;Password=PASSWORD" />  <!-- pgid_assetid - а иначе pgid - это id привязки внутри ассета; column_pgid - номер столбца с id, 0 - это 1-й столбец; make_advert_asset - если нет ассета на рекламу делать ли его автоматически -->
+		<playlist safe_range="00:15:00" />	<!-- safe_range - from first planned in ordered PL (must be greater than 'dur_enqueue' from player service) -->
 		<storages>
 			<clips name="Clips" />
 		</storages>
 		<clients>
 			<replica>
-				<frames  minimum="100" />
+				<frames  minimum="50" base="25" />
 				<customs occurrence="6" />
 				<previews path="http://backup.video.replica/trailers/" />
-				<trailers path="d:/cues/footages/trailers/" />
-        <pages>
+				<trailers path="/path/" />
+				<context_menu_playlist delete_all="true" recalc_timeout="180" import_timeout="3600" />
+				<ingest pg_id_needed="false" files_filter="(*.*)|*.*|H264 files (*.mp4)|*.mp4|QuickTime Movies (*.mov)|*.mov|MPEG Files (*.mpg)|*.mpg|Material eXchange Format (*.mxf)|*.mxf|Audio Video Interleaved (*.avi)|*.avi|Windows Media Video (*.wmv)|*.wmv" />
+				<pages>
           <playlist>
             <menu deleteSince="true" />
           </playlist>
@@ -18,9 +22,13 @@
             <rao visible="true" />
             <messages visible="true" />
           </stat>
+					<assets>
+						<default_class clip="clip_with_socials" program="program_with_logo" design="comingup" advertisement="advertisement_without_logo" unknown="unknown" />
+					</assets>
         </pages>
 			</replica>
 		</clients>
+		<database server="127.0.0.1" port="5432" name="replica" user="" password="" timeout="240" />
 	</webservice>
 	<helpers>
 		<common>

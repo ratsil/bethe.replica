@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using helpers.replica.pl;
 
 namespace replica.failover
 {
-	class DBInteract : helpers.replica.DBInteract
+	public class DBInteract : helpers.replica.DBInteract
 	{
 		public delegate void PlayerSkipDelegate();
 		public delegate void FailoverSynchronizeDelegate();
@@ -26,7 +26,7 @@ namespace replica.failover
 			{
 				long nCommandQueueID = -1, nCommandStatusID;
 				string sCommandName = null;
-				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('failover_sync', 'failover_skip') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE сделать нормальную обработку символьных имен команд через Preferences
+				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('failover_sync', 'failover_skip') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РёРјРµРЅ РєРѕРјР°РЅРґ С‡РµСЂРµР· Preferences
 				if (null == aqDBValues)
 					return;
 				Hashtable ahRow = null;
@@ -37,7 +37,7 @@ namespace replica.failover
 					{
 						ahRow = aqDBValues.Dequeue();
 						sCommandName = ahRow["sCommandName"].ToString();
-						(new Logger("commands")).WriteNotice("Начало выполнения команды [" + sCommandName + "]");
+						(new Logger("commands")).WriteNotice("РќР°С‡Р°Р»Рѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "]");
 						nCommandQueueID = ahRow["id"].ToID();
 						_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=2 WHERE id=" + nCommandQueueID);
 						switch (sCommandName)
@@ -50,7 +50,7 @@ namespace replica.failover
 									nCommandStatusID = 4;
 								}
 								else
-									(new Logger("commands")).WriteError("отсутствует необходимый метод [FailoverSynchronize]");
+									(new Logger("commands")).WriteError("РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РЅРµРѕР±С…РѕРґРёРјС‹Р№ РјРµС‚РѕРґ [FailoverSynchronize]");
 								break;
 							case "failover_skip":
 								PlayerSkipDelegate PlayerSkip;
@@ -60,10 +60,10 @@ namespace replica.failover
 									nCommandStatusID = 4;
 								}
 								else
-									(new Logger("commands")).WriteError("отсутствует необходимый метод [PlayerSkip]");
-                                break;
+									(new Logger("commands")).WriteError("РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РЅРµРѕР±С…РѕРґРёРјС‹Р№ РјРµС‚РѕРґ [PlayerSkip]");
+								break;
 							default:
-								throw new Exception("неизвестная команда");
+								throw new Exception("РЅРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°");
 						}
 					}
 					catch (Exception ex)
@@ -80,7 +80,7 @@ namespace replica.failover
 						(new Logger("commands")).WriteError(ex);
 					}
 					if (null != sCommandName)
-						(new Logger("commands")).WriteNotice("завершение выполнения команды [" + sCommandName + "] [status=" + nCommandStatusID + "]");
+						(new Logger("commands")).WriteNotice("Р·Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "] [status=" + nCommandStatusID + "]");
 				}
 				Failover.ahErrors[Failover.ErrorTarget.dbi_framesinitial] = DateTime.MinValue;
 			}
@@ -130,7 +130,20 @@ namespace replica.failover
 					ahRetVal.Add(ahRow["id"].ToID(), new helpers.replica.mam.Cues(ahRow["idCues"], ahRow["sSong"], ahRow["sArtist"], ahRow["sAlbum"], ahRow["nYear"], ahRow["sPossesor"]));
 				}
 			}
-			return ahRetVal;
+            // Р±РµСЂРµРј С‚РёС‚СЂС‹ РїСЂРѕРіСЂР°РјРј Рё РІРµС€Р°РµРј РёС… РЅР° id Р°СЃСЃРµС‚Р° РїСЂРѕРіСЂР°РјРј, Р° РЅРµ РєР»РёРїРѕРІ (РґР»СЏ РєР°СЂР°РѕРєРµ, РЅР°РїСЂРёРјРµСЂ)
+            aqDBValues = _cDB.Select("SELECT saa.*, taa.`idAssets`, vac.* from (SELECT `idAssets` as `idAssetsSRC`, `nValue` FROM mam.`tAssetAttributes` WHERE `idAssets` in (SELECT `idAssets` FROM pl.`vComingUp` WHERE NOT `idAssets` IS NULL) AND `sKey`='clip' ORDER BY `nValue`) saa, mam.`tAssetAttributes` taa, mam.`vAssetsCues` vac WHERE taa.id = saa.`nValue` AND vac.id = taa.`idAssets`");
+            long nID;
+            if (null != aqDBValues)
+            {
+                while (0 < aqDBValues.Count)
+                {
+                    ahRow = aqDBValues.Dequeue();
+                    if (!ahRetVal.ContainsKey(nID = ahRow["idAssetsSRC"].ToID()))
+                        ahRetVal.Add(nID, new helpers.replica.mam.Cues(ahRow["idCues"], ahRow["sSong"], ahRow["sArtist"], ahRow["sAlbum"], ahRow["nYear"], ahRow["sPossesor"]));
+                }
+            }
+
+            return ahRetVal;
 		}
 	}
 }

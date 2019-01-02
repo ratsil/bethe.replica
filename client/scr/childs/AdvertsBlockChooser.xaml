@@ -8,14 +8,14 @@
         xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
         xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
         Width="925"
-        Background="#FFD0DFE5" BorderThickness="1">
+        Background="#FFD0DFE5" BorderThickness="0">
     <controls:ChildWindow.Resources>
         <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
     </controls:ChildWindow.Resources>
-    <Grid x:Name="LayoutRoot" Margin="0">
+    <Grid x:Name="LayoutRoot" Margin="0, -7, 0, 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical">
             <Grid x:Name="_ui_gClips" Height="311" Margin="0,0,0,0" Visibility="Collapsed">
@@ -79,12 +79,12 @@
                     </sdk:DataGrid.Columns>
                 </sdk:DataGrid>
             </Grid>
-            <Grid x:Name="_ui_gAdverts" Height="311" Visibility="Visible" Margin="0,0,0,0">
+			<Grid x:Name="_ui_gAdverts" Height="311" Visibility="Collapsed" Margin="0,0,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Height="30" Orientation="Horizontal" HorizontalAlignment="Left" Grid.ColumnSpan="1">
+                <StackPanel Grid.Row="0" Height="32" Orientation="Horizontal" HorizontalAlignment="Left" Grid.ColumnSpan="1">
                     <sdk:Label Height="20" Name="_ui_lblStartTime" Margin="10,0,6,4" Content="{Binding Path=cSCR.sNoticeAdvertsBlockChooser10, Source={StaticResource g}}" FontSize="14" FontFamily="Trebuchet MS" VerticalAlignment="Bottom" />
 					<sdk:DatePicker Height="23" Margin="0,0,6,2" Name="_ui_dpDate" Width="120"  VerticalAlignment="Bottom" />
 					<toolkit:TimePicker Height="20" Name="_ui_tpStartTime" Margin="0,0,6,3"  VerticalAlignment="Bottom" Culture="ru-RU" Background="White">
@@ -104,7 +104,25 @@
                 </StackPanel>
                 <sdk:DataGrid Grid.Row="1"  Margin="0,-1,0,0" AutoGenerateColumns="False" Height="281" Name="_ui_dgAdvPL" FontSize="11" IsReadOnly="True" SelectionChanged="_ui_dgAdvPL_SelectionChanged" TabIndex="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="0" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single">
                     <sdk:DataGrid.Columns>
-                        <sdk:DataGridTextColumn CanUserReorder="True" CanUserSort="False" Binding="{Binding sName}" Width="*">
+						<sdk:DataGridTemplateColumn IsReadOnly="True" Width="100" CanUserSort="False" CanUserReorder="False">
+							<sdk:DataGridTemplateColumn.HeaderStyle>
+								<Style TargetType="p:DataGridColumnHeader">
+									<Setter Property="ContentTemplate">
+										<Setter.Value>
+											<DataTemplate>
+												<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sCached, Source={StaticResource g}}"/>
+											</DataTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</sdk:DataGridTemplateColumn.HeaderStyle>
+							<sdk:DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBox Background="{Binding cBrush}" Text="{Binding sCachedInfo}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+								</DataTemplate>
+							</sdk:DataGridTemplateColumn.CellTemplate>
+						</sdk:DataGridTemplateColumn>
+						<sdk:DataGridTextColumn CanUserReorder="True" CanUserSort="False" Binding="{Binding sName}" Width="*">
                             <sdk:DataGridTextColumn.HeaderStyle>
                                 <Style TargetType="p:DataGridColumnHeader">
                                     <Setter Property="ContentTemplate">
@@ -159,11 +177,83 @@
                     </sdk:DataGrid.Columns>
                 </sdk:DataGrid>
             </Grid>
-        </StackPanel>
+			<Grid x:Name="_ui_gCached" Height="Auto" Margin="0,0,0,0" Visibility="Visible">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+				<sdk:DataGrid Grid.Row="0" Margin="1,0,1,0" AutoGenerateColumns="False" Height="608" Name="_ui_dgCached" FontSize="11" IsReadOnly="True" TabIndex="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="0" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single">
+					<sdk:DataGrid.Columns>
+						<sdk:DataGridTemplateColumn IsReadOnly="True" Width="100" CanUserSort="False" CanUserReorder="False">
+							<sdk:DataGridTemplateColumn.HeaderStyle>
+								<Style TargetType="p:DataGridColumnHeader">
+									<Setter Property="ContentTemplate">
+										<Setter.Value>
+											<DataTemplate>
+												<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sCached, Source={StaticResource g}}"/>
+											</DataTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</sdk:DataGridTemplateColumn.HeaderStyle>
+							<sdk:DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBox Background="{Binding cBrush}" Text="{Binding sCachedInfo}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+								</DataTemplate>
+							</sdk:DataGridTemplateColumn.CellTemplate>
+						</sdk:DataGridTemplateColumn>
+						<sdk:DataGridTemplateColumn IsReadOnly="True" Width="*" CanUserSort="False">
+							<sdk:DataGridTemplateColumn.HeaderStyle>
+								<Style TargetType="p:DataGridColumnHeader">
+									<Setter Property="ContentTemplate">
+										<Setter.Value>
+											<DataTemplate>
+												<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sName, Source={StaticResource g}}"/>
+											</DataTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</sdk:DataGridTemplateColumn.HeaderStyle>
+							<sdk:DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBox Background="{Binding cBrush}" Text="{Binding sName}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+								</DataTemplate>
+							</sdk:DataGridTemplateColumn.CellTemplate>
+						</sdk:DataGridTemplateColumn>
+						<sdk:DataGridTextColumn CanUserReorder="True" CanUserSort="False" Binding="{Binding sStartPlanned}" Width="110">
+							<sdk:DataGridTextColumn.HeaderStyle>
+								<Style TargetType="p:DataGridColumnHeader">
+									<Setter Property="ContentTemplate">
+										<Setter.Value>
+											<DataTemplate>
+												<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStartTime, Source={StaticResource g}}"/>
+											</DataTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</sdk:DataGridTextColumn.HeaderStyle>
+						</sdk:DataGridTextColumn>
+						<sdk:DataGridTextColumn CanUserReorder="True" CanUserSort="False" Binding="{Binding sDuration}" Width="100">
+							<sdk:DataGridTextColumn.HeaderStyle>
+								<Style TargetType="p:DataGridColumnHeader">
+									<Setter Property="ContentTemplate">
+										<Setter.Value>
+											<DataTemplate>
+												<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sTimings, Source={StaticResource g}}"/>
+											</DataTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</sdk:DataGridTextColumn.HeaderStyle>
+						</sdk:DataGridTextColumn>
+					</sdk:DataGrid.Columns>
+				</sdk:DataGrid>
+			</Grid>
+		</StackPanel>
         <sdk:Label Height="23" Name="_ui_lblSelected" Margin="10,0,0,2" Content="{Binding Path=cSCR.sNoticeAdvertsBlockChooser11, Source={StaticResource g}}" FontSize="14" FontFamily="Trebuchet MS" VerticalAlignment="Center" Grid.Row="1" />
         <sdk:Label Height="23" Name="_ui_lblNameOfSelected" Margin="130,0,0,2" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=U, Path=cCommon.sNoSelection, Source={StaticResource g}}" FontSize="16" FontFamily="Verdana" VerticalAlignment="Center" Grid.Row="1" FontWeight="Bold" Foreground="#FF288ACE" BorderThickness="0" BorderBrush="{x:Null}" />
 		<sdk:Label Height="23" Name="_ui_lblStatus" Margin="250,0,0,0" Content="" FontSize="10" FontFamily="Verdana" VerticalAlignment="Center" Grid.Row="1" FontWeight="Normal" Foreground="#FF080808" BorderThickness="0" BorderBrush="{x:Null}" />
         <Button x:Name="_ui_btnCancel" Content="{Binding Path=cCommon.sCancel, Source={StaticResource g}}" Click="_ui_btnCancel_Click" Width="75" Height="23" HorizontalAlignment="Right" Margin="0,0,4,2" Grid.Row="1" />
         <Button x:Name="_ui_btnOk" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=U, Path=cCommon.sOk, Source={StaticResource g}}" Click="_ui_btnOk_Click" Width="75" Height="23" HorizontalAlignment="Right" Margin="0,0,83,2" Grid.Row="1" />
+		<Button x:Name="_ui_btnRefresh" Content="{Binding Path=cCommon.sRefresh, Source={StaticResource g}}" Click="_ui_btnRefresh_Click" Width="75" Height="23" HorizontalAlignment="Right" Margin="0,0,162,2" Grid.Row="1" />
     </Grid>
 </controls:ChildWindow>

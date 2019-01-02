@@ -49,13 +49,24 @@ namespace replica.cues
 				if (null != cPlaylistItem)
 				{
 					sRetVal += cPlaylistItem.nID.ToString() + ":" + cPlaylistItem.sName + "]";
-					sRetVal += "[class:" + cPlaylistItem.cClass.nID + ":" + cPlaylistItem.cClass.sName + "]";
+					sRetVal += "[class:" + (null == cPlaylistItem.aClasses ? "NULL" : "[" + cPlaylistItem.aClasses.ToStr() + "]") + "]";
 				}
 				else
 					sRetVal += "NULL]";
 				sRetVal += "[bind:" + (null == cTemplateBind ? "NULL" : cTemplateBind.nID.ToString() + ":" + cTemplateBind.sKey) + "]";
 				sRetVal += "[start:" + dtStart.ToStr() + "]";
 				sRetVal += "[stop:" + dtStop.ToStr() + "]";
+				return sRetVal;
+			}
+			public string ToStringShort()
+			{
+				string sRetVal = "[pli:";
+				if (null != cPlaylistItem)
+				{
+					sRetVal += cPlaylistItem.nID.ToString() + ":" + cPlaylistItem.sName + "]";
+				}
+				else
+					sRetVal += "NULL]";
 				return sRetVal;
 			}
 		}
@@ -66,20 +77,39 @@ namespace replica.cues
         static private List<TemplatesSchedule> _aTemplatesSchedule;
         static private List<Template> _aTemplates;
 		static private object _cSyncRoot = new object();
+		static private int _nIndxGCForced;
 
 		private List<Range> _aRanges;
 		private Range _cRangeStarted;
 		private Range _cRangePreparing;
+		private Range _cRangeLast; // для предотвращения запуска одного и того же темплейта на одно и то же время
+		private bool RangeLookesTheSameAsLast(Range cRangeToTest)
+		{
+			if (null != _cRangeLast)
+			{
+				if (_cRangeLast.cPlaylistItem.nID == cRangeToTest.cPlaylistItem.nID && Math.Abs(cRangeToTest.dtStart.Subtract(_cRangeLast.dtStart).TotalSeconds) < 2)   // the same  
+					return true;
+			}
+			return false;
+		}
+		private bool RangeLated(Range cRangeToTest)
+		{
+			if (DateTime.Now > cRangeToTest.dtStart.AddSeconds(5))    // comes too late
+				return true;
+			return false;
+		}
 
 		public int nPlaylistItemID { get; set; }
 		private bool _bActual;
 		private Status? _eStatusTarget;
+		private int _nTimesWaiting;
 
 		public Template(string sFile)
 			: base(sFile, COMMAND.unknown)
 		{
 			_eStatusTarget = null;
-			if (null == _aTemplates)
+			_nTimesWaiting = 0;
+            if (null == _aTemplates)
 				ProccesingStart();
 			MacroExecute = OnMacroExecute;
 			RuntimeGet = OnRuntimeGet;
@@ -87,6 +117,10 @@ namespace replica.cues
 		}
 
 		public void RangeAdd(Range cRange)
+		{
+			RangeAdd(cRange, false);
+		}
+		public void RangeAdd(Range cRange, bool bRenewOnly)
 		{
 			lock (_cSyncRoot)
 			{
@@ -99,28 +133,14 @@ namespace replica.cues
 						cRangeExisted.dtStop = cRange.dtStop;
 						return;
 					}
-					//cRangeExisted = _aRanges.FirstOrDefault(row => row.cPlaylistItem.nID == cRange.cPlaylistItem.nID);
-					//if (null != cRangeExisted)
-					//{
-					//    if (cRangeExisted.dtStart == cRange.dtStart && cRangeExisted.dtStop == cRange.dtStop)
-					//        return;
-					//    bool bReturn = false;
-					//    if (DateTime.MaxValue == cRangeExisted.dtStart && DateTime.MaxValue > cRange.dtStart)
-					//    {
-					//        cRangeExisted.dtStart = cRange.dtStart;
-					//        bReturn = true;
-					//    }
-					//    if (DateTime.MaxValue == cRangeExisted.dtStop && DateTime.MaxValue > cRange.dtStop)
-					//    {
-					//        cRangeExisted.dtStop = cRange.dtStop;
-					//        bReturn = true;
-					//    }
-					//    if (bReturn)
-					//        return;
-					//}
 				}
-				_aRanges.Add(cRange);
-				(new Logger()).WriteNotice("добавлен диапазон [" + sFile + "]" + cRange.ToString());
+				if (bRenewOnly)
+					(new Logger()).WriteNotice("диапазон не обновлён [" + sFile + "]" + cRange.ToString());
+				else
+				{
+					_aRanges.Add(cRange);
+					(new Logger()).WriteNotice("добавлен диапазон [" + sFile + "]" + cRange.ToString());
+				}
 			}
 		}
 		public void Enqueue()
@@ -146,15 +166,17 @@ namespace replica.cues
                     {
                         cTpl._cRangeStarted.cTemplatesSchedule.dtLast = DateTime.Now;
                         iInteract.TemplatesScheduleSave(cTpl._cRangeStarted.cTemplatesSchedule);
-                    }
-                    cTpl._cRangeStarted = null;
-                    (new Logger()).WriteNotice("шаблон графического оформления остановлен:" + cTpl.sFile);
+					}
+					(new Logger()).WriteNotice("шаблон графического оформления остановлен:" + cTpl.sFile + " " + cTpl._cRangeStarted.ToStringShort());
+					cTpl._cRangeLast = cTpl._cRangeStarted;
+					cTpl._cRangeStarted = null;
                 }
                 else if (_bProcessing)
                     (new Logger()).WriteWarning("impossible state: отсутствует текущий диапазон - возможно елемент не смог быть подготовлен:" + cTpl.sFile);
                 cTpl.Dispose();
                 _aAtoms = new List<ingenie.userspace.Atom>();
 				_eStatusTarget = null;
+				_nTimesWaiting = 0;
                 cTpl.eStatus = Status.Created;
 				if (null != cFollowingTemplate)
 				{
@@ -200,7 +222,8 @@ namespace replica.cues
 		{
 			Macro.Flags eFlags = Macro.ParseFlags(ref sText);
 			string sRetVal = null;
-			switch (sText)
+            string sLog = "";
+            switch (sText)
 			{
 				case "{%RUNTIME::PLI::ID%}":
 					if (null != _cRangePreparing && null != _cRangePreparing.cPlaylistItem)
@@ -216,10 +239,13 @@ namespace replica.cues
                     }
                     else if (null != _cRangeStarted)
                     {
+                        sLog = "[_cRangePreparing is NULL] ";
                         if (null != _cRangeStarted.cTemplatesSchedule)
 							sRetVal = _cRangeStarted.cTemplatesSchedule.nID.ToString();
                     }
-					break;
+                    else
+                        sLog += "[_cRangeStarted is NULL] ";
+                    break;
 				case "{%RUNTIME::TCB::TEMPLATE::ID%}":
 					(new Logger()).WriteNotice("OnRuntimeGet: case {%RUNTIME::TCB::TEMPLATE::ID%}");
 					if (null != _cRangePreparing)
@@ -242,6 +268,7 @@ namespace replica.cues
 				default:
 					throw new Exception("обнаружен запрос неизвестного runtime-свойства [" + sText + "]"); //TODO LANG
 			}
+
 			if (null != sRetVal)
 			{
 				if (eFlags.HasFlag(Macro.Flags.Escaped))
@@ -249,19 +276,20 @@ namespace replica.cues
 				if (eFlags.HasFlag(Macro.Flags.Caps))
 					sRetVal = sRetVal.ToUpper();
 			}
-			else
-				(new Logger()).WriteNotice("OnRuntimeGet: return = NULL!!!");
-			return sRetVal;
+            else
+                (new Logger()).WriteNotice("OnRuntimeGet: return = NULL!!!  [rt=" + sText + "] " + sLog);
+            return sRetVal;
 		}
 		public void InclusionAction(Inclusion cInclusion)
         {
             try
             {
 				Func<Template> dTemplateFind = () =>
-					{
-						return _aTemplates.FirstOrDefault(o => System.IO.Path.GetFullPath(o.sFile) == System.IO.Path.GetFullPath(cInclusion.sFile));
-					};
-				Action dAction = null;
+                    {
+                        lock (_cSyncRoot)
+                            return _aTemplates.FirstOrDefault(o => System.IO.Path.GetFullPath(o.sFile) == System.IO.Path.GetFullPath(cInclusion.sFile));
+                    };
+                Action dAction = null;
 				Template cTemplate;
 				switch (cInclusion.eAction)
                 {
@@ -270,6 +298,7 @@ namespace replica.cues
 						{
 							_bActual = false;
 							_eStatusTarget = null;
+							_nTimesWaiting = 0;
 							Range[] aRangesToDelete = ((Template)cInclusion.cParent)._aRanges.Where(o => o.cPlaylistItem.nID == (((Template)cInclusion.cParent)._cRangeStarted).cPlaylistItem.nID).ToArray();
 							foreach (Range cRange in aRangesToDelete)
 								if (_aRanges.Contains(cRange))
@@ -283,7 +312,8 @@ namespace replica.cues
 						{
 							_bActual = false;
 							_eStatusTarget = null;
-							cTemplate.cFollowingTemplate = cInclusion.cParent;
+							_nTimesWaiting = 0;
+                            cTemplate.cFollowingTemplate = cInclusion.cParent;
 							Range[] aRangesToDelete = ((Template)cInclusion.cParent)._aRanges.Where(o => o.cPlaylistItem.nID == (((Template)cInclusion.cParent)._cRangeStarted).cPlaylistItem.nID).ToArray();
 							foreach (Range cRange in aRangesToDelete)
 								if (_aRanges.Contains(cRange))
@@ -293,10 +323,11 @@ namespace replica.cues
 						break;
 					case Inclusion.ACTION.Start:
 						dAction = () =>
-						{
-							if (null == (cTemplate = dTemplateFind()))
-								_aTemplates.Add(cTemplate = new Template(cInclusion.sFile));
-							Range cRange = new Range() { dtStart = DateTime.Now, dtStop = DateTime.MaxValue, bAnyTime = true };
+                        {
+                            if (null == (cTemplate = dTemplateFind()))
+                                lock (_cSyncRoot)
+                                    _aTemplates.Add(cTemplate = new Template(cInclusion.sFile));
+                            Range cRange = new Range() { dtStart = DateTime.Now, dtStop = DateTime.MaxValue, bAnyTime = true };
 							Range cParentRange = ((Template)cInclusion.cParent)._cRangeStarted;
 							if (null != cParentRange)
 							{
@@ -380,40 +411,65 @@ namespace replica.cues
 				{
 					_aTemplates = new List<Template>();
                     _aTemplatesSchedule = new List<TemplatesSchedule>();
-                    _bProcessing = true;
-					ThreadPool.QueueUserWorkItem(Worker);	
+					_bProcessing = true;
+					ThreadPool.QueueUserWorkItem(Worker);
 				}
 			}
 		}
+
+        static private int _nStopCount;
 		static public void ProccesingStop()
 		{
-			lock (_cSyncRoot)
+            _bProcessing = false;
+            lock (_cSyncRoot)
 			{
 				if (null != _aTemplates)
 				{
-					_bProcessing = false;
-					foreach (Template cTemplate in _aTemplates.ToArray())
+                    _nStopCount = _aTemplates.Count;
+                    foreach (Template cTemplate in _aTemplates.ToArray())
 					{
 						try
 						{
-							cTemplate.Stop();
-							cTemplate._aRanges.Clear();
-							cTemplate._cRangeStarted = null;
+							(new Logger()).WriteNotice("ProccesingStop: [name=" + cTemplate.sFile + "][status=" + cTemplate.eStatus + "]");
+                            ThreadPool.QueueUserWorkItem((o) =>
+                            {
+                                cTemplate.Stop();
+                                cTemplate._aRanges.Clear();
+                                cTemplate._cRangeLast = null;
+                                cTemplate._cRangeStarted = null;
+                                System.Threading.Interlocked.Decrement(ref _nStopCount);
+                            });
 						}
 						catch (Exception ex)
 						{
 							(new Logger()).WriteWarning(ex);
 						}
 					}
+                    while (_nStopCount > 0)
+                        Thread.Sleep(10);
 					_aTemplates.Clear();
-					//GC.Collect();
+					(new Logger()).WriteNotice("ProccesingStop: the end");
 				}
 			}
 		}
 		static private bool IsScheduleOnTime(TemplatesSchedule cTS, PlaylistItem cPLI)
 		{
+			(new Logger()).WriteDebug("IsScheduleOnTime: <br>\t\t[TS: [interval=" + cTS.tsInterval.ToString(@"dd\.hh\:mm\:ss") + "][start="+ cTS.dtStart + "][last="+ cTS.dtLast.ToString("yyyy-MM-dd HH:mm:ss") + "] <br>\t\tPLI: [name=" + cPLI.sName + "][start=" + cPLI.dtStart.ToString("yyyy-MM-dd HH:mm:ss") + "][stop=" + cPLI.dtStop.ToString("yyyy-MM-dd HH:mm:ss") + "]]");
 			if (1 > cTS.tsInterval.TotalMilliseconds)
 				return false;
+
+			if (cTS.tsInterval == TimeSpan.MaxValue)
+			{
+				if (cTS.dtStart >= cPLI.dtStart && cTS.dtStart < cPLI.dtStop && cTS.dtLast == DateTime.MaxValue)  // т.к. он вообще только один раз может пройти     1 > Math.Abs(cTS.dtLast.Subtract(cPLI.dtStart).TotalHours)
+				{
+					cTS.dtLast = cTS.dtStart;
+					(new Logger()).WriteDebug2("IsScheduleOnTime: YES2 PLI=" + cPLI.sName + " [Last:" + cTS.dtLast.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+					return true;
+				}
+				else
+					return false;
+			}
+
 			DateTime dtNearest = cTS.dtStart;
 			if (cTS.dtStart < cPLI.dtStart)
 				while (dtNearest < cPLI.dtStart)
@@ -422,15 +478,16 @@ namespace replica.cues
 			if (cPLI.dtStop > dtNearest && (cTS.dtLast.IsNullOrEmpty() || dtNearest.Subtract(cTS.dtLast).TotalMilliseconds > cTS.tsInterval.TotalMilliseconds / 2))
 			{
 				cTS.dtLast = dtNearest;
+				(new Logger()).WriteDebug2("IsScheduleOnTime: YES2 PLI=" + cPLI.sName + " [Nearest:" + dtNearest.ToString("yyyy-MM-dd HH:mm:ss") + "]");
 				return true;
 			}
 			else if (cPLI.dtStop > dtNearest)
-				(new Logger()).WriteDebug2("IsScheduleOnTime_false: PLI=" + cPLI.sName + "Nearest:" + dtNearest + " Last:" + cTS.dtLast);
+				(new Logger()).WriteDebug2("IsScheduleOnTime: PLI=" + cPLI.sName + " [Nearest:" + dtNearest.ToString("yyyy-MM-dd HH:mm:ss") + "] [Last:" + cTS.dtLast.ToString("yyyy-MM-dd HH:mm:ss") + "]");
 			return false;
 		}
 		static public void PlaylistItemStarted(PlaylistItem cPlaylistItem, TemplateBind[] aTemplateBinds)
 		{
-			(new Logger()).WriteNotice("pli:started:in:" + cPlaylistItem.nID + ":" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+			(new Logger()).WriteNotice("pli:started:in__" + cPlaylistItem.nID + "__" + cPlaylistItem.dtStart.ToString("HH:mm:ss.fff"));
 			PlaylistItemPrepared(cPlaylistItem, aTemplateBinds);
 			lock (_cSyncRoot)
 			{
@@ -482,12 +539,12 @@ namespace replica.cues
 							break;
 					}
 				}
-				(new Logger()).WriteNotice("pli:started:out:" + cPlaylistItem.nID + ":" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+				(new Logger()).WriteNotice("pli:started:out_-" + cPlaylistItem.nID + "-_-" + cPlaylistItem.dtStart.ToString("HH:mm:ss.fff"));
 			}
 		}
 		static public void PlaylistItemPrepared(PlaylistItem cPlaylistItem, TemplateBind[] aTemplateBinds)
 		{
-			(new Logger()).WriteNotice("pli:prepared:in:" + cPlaylistItem.nID + ":" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+			(new Logger()).WriteNotice("pli:prepared:in_-" + cPlaylistItem.nID + "-_-" + DateTime.Now.ToString("HH:mm:ss.fff"));
 			if (null == _aTemplates)
 				ProccesingStart();
 			lock (_cSyncRoot)
@@ -496,6 +553,7 @@ namespace replica.cues
                 TemplatesSchedule[] aTemplatesSchedule;
                 TemplatesSchedule cTemplatesSchedule;
                 Range cRange = null;
+				bool bRenewOnly;
 				PlaylistItem cPLIPrevious;
 				DateTime dtTarget = DateTime.MaxValue;
 				(new Logger()).WriteNotice("::::::::::::::::::::получены привязки:");
@@ -525,12 +583,19 @@ namespace replica.cues
 				{
 					cTemplate = _aTemplates.FirstOrDefault(row => row.sFile == cTemplateBind.cTemplate.sFile);
                     cTemplatesSchedule = null;
-					if (0 < (aTemplatesSchedule = _aTemplatesSchedule.Where(o => o.cTemplateBind.nID == cTemplateBind.nID).OrderByDescending(o => o.nID).ToArray()).Length)
-                    {
+					if (		0 < (aTemplatesSchedule = _aTemplatesSchedule.Where(o => o.cTemplateBind.nID == cTemplateBind.nID).OrderByDescending(o => o.nID).ToArray()).Length 
+								|| (cTemplateBind.cRegisteredTable != null && cTemplateBind.cRegisteredTable.sName == "tTemplatesSchedule")			)
+					{
 						if (null == (cTemplatesSchedule = aTemplatesSchedule.FirstOrDefault(o => IsScheduleOnTime(o, cPlaylistItem))))
 						{
 							if (null == cTemplate || null == (cRange = cTemplate._aRanges.FirstOrDefault(o => cPlaylistItem.nID == o.cPlaylistItem.nID && cTemplateBind.nID == o.cTemplateBind.nID)))
-								(new Logger()).WriteNotice("у шаблона есть расписание, но время не подошло или прошло:" + cTemplateBind.cTemplate.sFile);
+							{
+								string sLog = "TemplatesSchedule in foreach [plid=" + cPlaylistItem.nID + "][tbid=" + cTemplateBind.nID + "]<br>\t\t";
+								if (null != cTemplate)
+									foreach (Range cR in cTemplate._aRanges)
+										sLog += cR.ToString() + "<br>\t\t";
+								(new Logger()).WriteNotice("у шаблона есть расписание, но время не подошло или прошло:" + cTemplateBind.cTemplate.sFile + sLog);
+							}
 							else
 								(new Logger()).WriteNotice("у шаблона есть расписание и он уже заверстан [" + cTemplateBind.cTemplate.sFile + "][" + cRange.ToString() + "]");
 							continue;
@@ -543,6 +608,7 @@ namespace replica.cues
 						cTemplate.Enqueue();
 						(new Logger()).WriteNotice("загружен шаблон графического оформления:" + cTemplateBind.cTemplate.sFile);
 					}
+					bRenewOnly = false;
 					cRange = new Range();
 					cRange.cPlaylistItem = cPlaylistItem;
 					cRange.cTemplateBind = cTemplateBind;
@@ -582,13 +648,18 @@ namespace replica.cues
 									dtTarget = (0 > cTemplateBind.nValue ? cPLIPrevious.dtStop : cPLIPrevious.dtStart);
 									if (cRange.cPlaylistItem.nID != cPLIPrevious.nID)
 										(new Logger()).WriteNotice("будет добавлен диапазон по предварительному стопу: [" + cTemplate.sFile + "]" + cRange.ToString());
-									else if ((0 > cTemplateBind.nValue && cRange.cPlaylistItem.dtStop != dtTarget) || (-1 < cTemplateBind.nValue && cRange.cPlaylistItem.dtStart != dtTarget))
-										(new Logger()).WriteNotice("обновлен диапазон по предварительному стопу: [" + cTemplate.sFile + "]" + cRange.ToString());
+									else if ((0 > cTemplateBind.nValue && cRange.cPlaylistItem.dtStop != dtTarget) || (0 <= cTemplateBind.nValue && cRange.cPlaylistItem.dtStart != dtTarget))
+										(new Logger()).WriteNotice("будет обновлен диапазон по предварительному стопу: [" + cTemplate.sFile + "]" + cRange.ToString());
 									else
 										continue;
 									cRange.cPlaylistItem = cPLIPrevious;
-
 									cRange.dtStop = dtTarget.AddSeconds(cTemplateBind.nValue);
+									if (cRange.dtStop < DateTime.Now)
+									{
+										bRenewOnly = true;
+										(new Logger()).WriteNotice("обновим диапазон по предварительному стопу только если он есть, т.к. стоп уже в прошлом: [" + cTemplate.sFile + "]" + cRange.ToString());
+										continue;
+									}
 								}
 								cRange.dtStart = DateTime.MaxValue;
 								cRange.bAnyTime = true; //UNDONE maybe =)
@@ -603,16 +674,16 @@ namespace replica.cues
 							(new Logger()).WriteWarning("неизвестный ключ привязки классов и шаблонов графического оформления:" + cTemplateBind.sKey);
 							break;
 					}
-					cTemplate.RangeAdd(cRange);
+					cTemplate.RangeAdd(cRange, bRenewOnly);
 				}
-				(new Logger()).WriteNotice("pli:prepared:out:" + cPlaylistItem.nID + ":" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+				(new Logger()).WriteNotice("pli:prepared:out_-" + cPlaylistItem.nID + "-_-" + DateTime.Now.ToString("HH:mm:ss.fff"));
 			}
 		}
 		static public void PlaylistItemStopped(PlaylistItem cPlaylistItem)
 		{
 			lock (_cSyncRoot)
 			{
-				(new Logger()).WriteDebug2("pli:stop:in:" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+				(new Logger()).WriteDebug2("pli:stop:in_-" + cPlaylistItem.nID + "-_-" + DateTime.Now.ToString("HH:mm:ss.fff"));
 				List<Template> aTemplatesStopping = new List<Template>();
 				foreach (Template cTemplate in _aTemplates.ToArray())
 				{
@@ -627,30 +698,41 @@ namespace replica.cues
 				}
 				foreach (Template cTemplateRunning in aTemplatesStopping)
 				{
-					while (Status.Started == cTemplateRunning.eStatus) //UNDONE есть вероятность deadlock'а
+					DateTime dtNoLock = DateTime.Now.AddSeconds(20);
+					while (Status.Started == cTemplateRunning.eStatus && dtNoLock >= DateTime.Now) 
 						Thread.Sleep(100);
+
+					if (dtNoLock < DateTime.Now)
+						(new Logger()).WriteError("запущенный шаблон не смог остановиться за 20 секунд!!!:" + cTemplateRunning.sFile);  // последствия не изучены
 				}
-				(new Logger()).WriteDebug2("pli:stop:out:" + DateTime.Now.ToString("HH:mm:ss.ffff"));
+				(new Logger()).WriteDebug2("pli:stop:out_-" + cPlaylistItem.nID + "-_-" + DateTime.Now.ToString("HH:mm:ss.fff"));
 			}
 		}
 		static public void TEST_STOP_FORCED()
 		{
 			List<Template> aTemplatesStopping = new List<Template>();
-			foreach (Template cTemplate in _aTemplates.ToArray())
-			{
-				if (LIFETIME.PLI == cTemplate.eLifeTime && Status.Started == cTemplate.eStatus)
-				{
-					(new Logger()).WriteNotice("принудительно останавливаем запущенный шаблон:" + cTemplate.sFile);
-					cTemplate.StopAsync();
-					aTemplatesStopping.Add(cTemplate);
-				}
-			}
+            lock (_cSyncRoot)
+            {
+                foreach (Template cTemplate in _aTemplates.ToArray())
+                {
+                    if (LIFETIME.PLI == cTemplate.eLifeTime && Status.Started == cTemplate.eStatus)
+                    {
+                        (new Logger()).WriteNotice("принудительно останавливаем запущенный шаблон:" + cTemplate.sFile);
+                        cTemplate.StopAsync();
+                        aTemplatesStopping.Add(cTemplate);
+                    }
+                }
+            }
 			foreach (Template cTemplateRunning in aTemplatesStopping)
 			{
-				while (Status.Started == cTemplateRunning.eStatus) //UNDONE есть вероятность deadlock'а
+				DateTime dtNoLock = DateTime.Now.AddSeconds(20);
+				while (Status.Started == cTemplateRunning.eStatus && dtNoLock >= DateTime.Now) 
 					Thread.Sleep(100);
+
+				if (dtNoLock < DateTime.Now)
+					(new Logger()).WriteError("запущенный шаблон не смог остановиться за 20 секунд!!!:" + cTemplateRunning.sFile);  // последствия не изучены
 			}
-	
+
 		}
 		static private void Worker(object cState)
 		{
@@ -660,88 +742,107 @@ namespace replica.cues
 				DateTime dt = DateTime.Now.AddMinutes(5);
 				bool bBreak;
 				List<Template> aTemplates = new List<Template>();
-				List<Range> aRangesForRemove = new List<Range>();
-				ushort nWait;
-				Status eStatus = Status.Created;
+				List<Range> aRangesToRemove = new List<Range>();
+				Logger.Timings cTimings = new helpers.Logger.Timings("cues:Worker", helpers.Logger.Level.debug3);
 				while (true)
-				{
-					foreach (Template cTemplate in aTemplates)
-					{
-						nWait = 0;
-						while (null != cTemplate._eStatusTarget && cTemplate._eStatusTarget > (eStatus = cTemplate.eStatus)) //UNDONE возможный deadlock
-						{
-							Thread.Sleep(5);
-							nWait += 2;
-							if (2000 < nWait)
-							{
-								nWait = 1;
-								(new Logger()).WriteDebug3("still waiting for " + cTemplate._eStatusTarget + " [f:" + cTemplate.sFile + "][s:" + eStatus + "]");
-							}
-						}
-						if (1 == (nWait & 1))
-							(new Logger()).WriteDebug3("end waiting for " + cTemplate._eStatusTarget + " [f:" + cTemplate.sFile + "][s:" + eStatus + "]");
-						cTemplate._eStatusTarget = null;
-					}
-					if (!_bProcessing)
-						break;
-					aTemplates.Clear();
-
+                {
+                    if (!_bProcessing) break;
+                    aTemplates.Clear();
+					cTimings.TotalRenew();
+					cTimings.Restart("before sync");
 					lock (_cSyncRoot)
 					{
 						if (DateTime.Now > dt)
 						{
 							foreach (Template cTemplate in _aTemplates)
-								(new Logger()).WriteNotice(cTemplate.sFile + ":" + cTemplate.eStatus.ToString() + ":" + cTemplate._aRanges.Count);
+								(new Logger()).WriteNotice("before foreach: " +cTemplate.sFile + ": " + cTemplate.eStatus.ToString() + ": ranges = " + cTemplate._aRanges.Count);
 							dt = DateTime.Now.AddMinutes(5);
 						}
+						cTimings.Restart("S1");
 						foreach (Template cTemplate in _aTemplates)
 						{
+                            if (!_bProcessing) break;
+                            cTimings.Restart("\n\tFE1 ["+ System.IO.Path.GetFileName(cTemplate.sFile) + "]");
 							bBreak = false;
-							aRangesForRemove.Clear();
+							aRangesToRemove.Clear();
 							foreach (Range cRange in cTemplate._aRanges)
 							{
+                                if (!_bProcessing) break;
+                                cTimings.Restart("\n\t\tFE2 [status=" + cTemplate.eStatus + "]" + cRange.ToStringShort());
+                                if (null!=cRange.cPlaylistItem && cRange.cPlaylistItem.dtStopPlanned.AddHours(1) < DateTime.Now)
+                                {
+                                    aRangesToRemove.Add(cRange);  // пофиксил. а раньше ranges раздувались до невообразимых масштабов и кьюз приходилось перезапускать раз в квартал! )))
+                                    (new Logger()).WriteDebug("фикс - устаревший диапазон будет удалён [f=" + cTemplate.sFile + "][rang_count=" + cTemplate._aRanges.Count + "]   " + cRange.ToString());
+                                    continue;
+                                }
 								switch (cTemplate.eStatus)
 								{
 									case Status.Created:
-										if (DateTime.MaxValue > cRange.dtStart && DateTime.MinValue < cRange.dtStart && !cRange.bAnyTime && DateTime.Now.Subtract(TimeSpan.FromSeconds(5)) > cRange.dtStart)
+										if (null != cTemplate._eStatusTarget && cTemplate._eStatusTarget != Status.Created)
 										{
-											(new Logger()).WriteError(new Exception("пропущен диапазон на подготовке [" + cTemplate.sFile + "]" + cRange.ToString()));
-											aRangesForRemove.Add(cRange);
+											if ((cTemplate._nTimesWaiting++) % 1 == 0)  // %30 -  раз в 10 секунд
+												(new Logger()).WriteDebug3("still waiting for [target=" + cTemplate._eStatusTarget + "][" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
+											break;
+										}
+										cTemplate._eStatusTarget = null;
+                                        if (DateTime.MaxValue > cRange.dtStart && DateTime.MinValue < cRange.dtStart && !cRange.bAnyTime && (cTemplate.RangeLated(cRange) || cTemplate.RangeLookesTheSameAsLast(cRange)))  // прапорщеский зазор
+										{
+											if (cTemplate.RangeLookesTheSameAsLast(cRange))
+												(new Logger()).WriteWarning(new Exception("пропущен диапазон на подготовке, т.к. он совпал с предыдущим [" + cTemplate.sFile + "][prev_r=" + cTemplate._cRangeLast.ToString() + "][range=" + cRange.ToString() + "]"));
+											else
+												(new Logger()).WriteError(new Exception("пропущен диапазон на подготовке, т.к. он опоздал более 5 сек [" + cTemplate.sFile + "][range=" + cRange.ToString() + "]"));
+											aRangesToRemove.Add(cRange);
 										}
 										else if (DateTime.MaxValue > cRange.dtStart)
 										{
-											(new Logger()).WriteNotice("подготовка шаблона графического оформления [" + cTemplate.sFile + "]" + cRange.ToString());
+											(new Logger()).WriteNotice("подготовка шаблона графического оформления [" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
 											if (cTemplate._cRangePreparing != cRange)
 											{
 												cTemplate._cRangePreparing = cRange;
 												cTemplate._eStatusTarget = Status.Prepared;
+												cTemplate._nTimesWaiting = 0;
 												aTemplates.Add(cTemplate);
 												bBreak = true;
 											}
 											else
-												(new Logger()).WriteWarning("данный диапазон уже подготавливается [" + cTemplate.sFile + "]" + cRange.ToString());
+												(new Logger()).WriteWarning("данный диапазон уже подготавливается [" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
 										}
 										break;
 									case Status.Prepared:
+										if (null != cTemplate._eStatusTarget && cTemplate._eStatusTarget != Status.Prepared)
+										{
+											if ((cTemplate._nTimesWaiting++) % 1 == 0)  // %30 -  раз в 10 секунд
+												(new Logger()).WriteDebug3("still waiting for [target=" + cTemplate._eStatusTarget + "][" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
+											break;
+										}
+										cTemplate._eStatusTarget = null;
 										if (DateTime.Now >= cRange.dtStart && DateTime.MinValue < cRange.dtStart)
 										{
-											(new Logger()).WriteNotice("запуск шаблона графического оформления [" + cTemplate.sFile + "]" + cRange.ToString());
+											(new Logger()).WriteNotice("запуск шаблона графического оформления [" + cTemplate.sFile + "][delta_sec=" + Math.Abs(DateTime.Now.Subtract(cRange.dtStart).TotalSeconds) + "]" + cRange.ToString());
 											if (cRange.bAnyTime || 10 > Math.Abs(DateTime.Now.Subtract(cRange.dtStart).TotalSeconds))
 											{
                                                 if (cTemplate._cRangePreparing == cRange || cTemplate.bMispreparedShow)
                                                 {
-                                                    if (cTemplate._cRangePreparing != cRange) 
-                                                        (new Logger()).WriteWarning("стартуемый диапазон не зарегистрирован, как подготовленный [" + cTemplate.sFile + "] стартуемый диапазон:" + cRange.ToString() + " подготовленный диапазон:" + (null == cTemplate._cRangePreparing ? " NULL" : cTemplate._cRangePreparing.ToString()));
+													if (cTemplate._cRangePreparing != cRange)
+													{
+														(new Logger()).WriteWarning("стартуемый диапазон не зарегистрирован, как подготовленный [" + cTemplate.sFile + "] стартуемый диапазон:" + cRange.ToString() + " подготовленный диапазон:" + (null == cTemplate._cRangePreparing ? " NULL" : cTemplate._cRangePreparing.ToString()));
+														if (cTemplate._cRangePreparing != null && cTemplate._cRangePreparing.cPlaylistItem != null && cTemplate._cRangePreparing.cPlaylistItem.dtStopPlanned.AddMinutes(5) < DateTime.Now && cTemplate._aRanges.Contains(cTemplate._cRangePreparing))
+														{
+															aRangesToRemove.Add(cTemplate._cRangePreparing);
+															(new Logger()).WriteNotice("будем удалять зависший подготовленный: " + cRange.ToString());
+														}
+													}
                                                     cTemplate._cRangePreparing = null;
                                                     if (cTemplate._cRangeStarted != cRange)
                                                     {
                                                         cTemplate._cRangeStarted = cRange;
 														cTemplate._eStatusTarget = Status.Started;
+														cTemplate._nTimesWaiting = 0;
 														aTemplates.Add(cTemplate);
 														bBreak = true;
                                                     }
                                                     else
-                                                        (new Logger()).WriteWarning("данный диапазон уже является текущим [" + cTemplate.sFile + "]" + cRange.ToString());
+                                                        (new Logger()).WriteWarning("данный диапазон уже является текущим [" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
                                                 }
                                                 else
                                                 {
@@ -751,37 +852,47 @@ namespace replica.cues
 											}
 											else
 											{
-												(new Logger()).WriteError(new Exception("пропущен диапазон на старте [" + cTemplate.sFile + "]" + cRange.ToString() ));
-												aRangesForRemove.Add(cRange);
+												(new Logger()).WriteError(new Exception("пропущен диапазон на старте [" + cTemplate.sFile + "][anytime="+ cRange.bAnyTime + "][delta_sec="+ Math.Abs(DateTime.Now.Subtract(cRange.dtStart).TotalSeconds) + "][range=" + cRange.ToString() + "]"));
+												aRangesToRemove.Add(cRange);
 												cTemplate._eStatusTarget = Status.Stopped;
+												cTemplate._nTimesWaiting = 0;
 												aTemplates.Add(cTemplate);
 											}
-											aRangesForRemove.AddRange(cTemplate._aRanges.Where(row => (DateTime.MinValue < row.dtStart && row.dtStart < cRange.dtStart) || (DateTime.MinValue < row.dtStop && row.dtStop < cRange.dtStart)).ToArray());
+											aRangesToRemove.AddRange(cTemplate._aRanges.Where(row => (DateTime.MinValue < row.dtStart && row.dtStart < cRange.dtStart) || (DateTime.MinValue < row.dtStop && row.dtStop < cRange.dtStart)).ToArray());
 										}
 										break;
 									case Status.Started:
+										if (null != cTemplate._eStatusTarget && cTemplate._eStatusTarget != Status.Started)
+										{
+											if ((cTemplate._nTimesWaiting++) % 1 == 0)  // %30 -  раз в 10 секунд
+												(new Logger()).WriteDebug3("still waiting for [target=" + cTemplate._eStatusTarget + "][" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
+											break;
+										}
+										cTemplate._eStatusTarget = null;
 										if (DateTime.MaxValue > cRange.dtStop && DateTime.MinValue < cRange.dtStop)
 										{
 											if (DateTime.Now >= cRange.dtStop)
 											{
-												(new Logger()).WriteNotice("остановка шаблона графического оформления [" + cTemplate.sFile + "]" + cRange.ToString());
+												(new Logger()).WriteNotice("остановка шаблона графического оформления [" + cTemplate.sFile + "][range=" + cRange.ToString() + "]");
 												cTemplate._cRangeStarted = cRange;
 												cTemplate._eStatusTarget = Status.Stopped;
+												cTemplate._nTimesWaiting = 0;
 												aTemplates.Add(cTemplate);
 												bBreak = true;
-												aRangesForRemove.AddRange(cTemplate._aRanges.Where(row => (DateTime.MinValue < row.dtStart && row.dtStart < cRange.dtStop) || (DateTime.MinValue < row.dtStop && row.dtStop < cRange.dtStop)).ToArray());
+												aRangesToRemove.AddRange(cTemplate._aRanges.Where(row => (DateTime.MinValue < row.dtStart && row.dtStart < cRange.dtStop) || (DateTime.MinValue < row.dtStop && row.dtStop < cRange.dtStop)).ToArray());
 											}
 										}
 										break;
 									case Status.Failed:
 										if (null != cTemplate._cRangePreparing)
 										{
-											aRangesForRemove.Add(cTemplate._cRangePreparing);
+											aRangesToRemove.Add(cTemplate._cRangePreparing);
 											cTemplate._cRangePreparing = null;
 										}
 										else if (null != cTemplate._cRangeStarted)
 										{
-											aRangesForRemove.Add(cTemplate._cRangeStarted);
+											aRangesToRemove.Add(cTemplate._cRangeStarted);
+											cTemplate._cRangeLast = cTemplate._cRangeStarted;
 											cTemplate._cRangeStarted = null;
 										}
 										else
@@ -789,26 +900,39 @@ namespace replica.cues
 										cTemplate.Dispose();
 										cTemplate._aAtoms = new List<ingenie.userspace.Atom>();
 										cTemplate._eStatusTarget = null;
+										cTemplate._nTimesWaiting = 0;
 										cTemplate.eStatus = Status.Created;
 										break;
 								}
 								if (bBreak)
 									break;
 							}
-							foreach (Range cRange in aRangesForRemove)
-							{
-                                (new Logger()).WriteNotice("удаление диапазона [" + cTemplate.sFile + "]" + cRange.ToString());
-								cTemplate._aRanges.Remove(cRange);
+							foreach (Range cRange in aRangesToRemove)
+                            {
+                                (new Logger()).WriteNotice("удаление диапазона [f=" + cTemplate.sFile + "][rang_count=" + cTemplate._aRanges.Count + "]   " + cRange.ToString());
+                                if (cTemplate._aRanges.Contains(cRange))
+									cTemplate._aRanges.Remove(cRange);
 							}
 						}
+						cTimings.Restart("\n\tF1out");
 					}
+					cTimings.Restart("\n\tSync Out");
+					cTimings.Restart("after sync");
 					foreach (Template cTemplate in aTemplates.Where(o => Status.Stopped == o._eStatusTarget))
 						cTemplate.StopAsync();
 					foreach (Template cTemplate in aTemplates.Where(o => Status.Started == o._eStatusTarget))
 						cTemplate.StartAsync();
 					foreach (Template cTemplate in aTemplates.Where(o => Status.Prepared == o._eStatusTarget))
 						cTemplate.PrepareAsync();
-					GC.Collect();
+
+					//_nIndxGCForced++;
+					//cTimings.TotalRenew();
+					if (System.Runtime.GCSettings.LatencyMode != System.Runtime.GCLatencyMode.Interactive)
+						System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.Interactive;
+					//GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
+					//cTimings.Stop("GC > 10", "GC-" + "Optimized" + " " + System.Runtime.GCSettings.LatencyMode + " queue:", 10);
+					cTimings.Stop("foreach takes too long", "before sleep", 700);   
+
 					Thread.Sleep(300);
 				}
 			}

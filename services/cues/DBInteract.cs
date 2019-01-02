@@ -1,8 +1,9 @@
-//#define SCR
+п»ї//#define SCR
 
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 using System.Collections;
 using System.Collections.Specialized;
@@ -25,31 +26,38 @@ namespace replica.cues
 		}
 		public void ProcessCommands()
 		{
-			return;
+			//return; 
 			try
 			{
-				//UNDONE нужно сделать что-то типа QueuedCommandsGet в Helper.replica.DBInteract
-				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT * FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('cues_template_show','cues_template_hide') AND 'waiting'=`sCommandStatus` ORDER BY dt LIMIT 1");
-				if (null != aqDBValues && 0 < aqDBValues.Count)
+				foreach (QueuedCommand cQC in QueuedCommand.Load("`sCommandName` IN ('cues_template_show','cues_template_hide','cues_plugin_playlist_start') AND 'waiting'=`sCommandStatus`", "dt", "1"))
 				{
-					QueuedCommand cCommand = new QueuedCommand(aqDBValues.Dequeue());
-					_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=4 WHERE id=" + cCommand.nID);//UNDONE нужны соответствующие функции в БД, в helpers.replica.DBInteract и в helpers.replica.QueuedCommand
-					string sTemplateFile = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'path'=`sKey` AND `idCommandsQueue`=" + cCommand.nID);//UNDONE нужны соответствующие функции в БД, в helpers.replica.DBInteract и в helpers.replica.QueuedCommand
-					Template cTemplate = new Template(sTemplateFile);
-					cTemplate.cTag = cCommand;
-					//cTemplate.nTemplateID = cTemplate.sFile.GetHashCode();
-					//cTemplate.nPLIID = cues.cCurrentPLIID;
-					switch (cCommand.cCommand.sName)
+					Template cTemplate = null;
+					cQC.StatusChange("proccessing");
+					if (cQC.cCommand.sName == "cues_template_show" || cQC.cCommand.sName == "cues_template_hide")
+					{
+                        QueuedCommand.Parameter cQCP = cQC.aParameters.FirstOrDefault(o => o.sKey == "path");
+						if (null != cQCP)
+							cTemplate = new Template(cQCP.sValue);
+						else
+							throw new Exception("There is no 'path' parameter in command [name="+ cQC.cCommand.sName + "]");
+					}
+					switch (cQC.cCommand.sName)
 					{
 						case "cues_template_show":
-							cTemplate.eCommand = Template.COMMAND.show;
+							cTemplate.eCommand = Template.COMMAND.show; // СѓР¶Рµ РґР°РІРЅРѕ Р±С‹Р»Рѕ РЅРµ РґРѕРґРµР»Р°РЅРѕ! 
 							cTemplate.Prepare();
 							break;
 						case "cues_template_hide":
-							cTemplate.eCommand = Template.COMMAND.hide;
+							cTemplate.eCommand = Template.COMMAND.hide;  // СѓР¶Рµ РґР°РІРЅРѕ Р±С‹Р»Рѕ РЅРµ РґРѕРґРµР»Р°РЅРѕ! 
+							break;
+						case "cues_plugin_playlist_start":
+							cTemplate = new Template(_cDB.GetValue("SELECT `sFile` FROM cues.`tTemplates` WHERE `sName` = 'Р­РєСЃС‚СЂРµРЅРЅС‹Р№ РїР»РµР№Р»РёСЃС‚'"));
+							(new Logger("commands")).WriteNotice("template: [file=" + cTemplate.sFile + "][pliid=" + cTemplate.nPlaylistItemID + "][command=" + cTemplate.eCommand + "]");
+                            cTemplate.Prepare();
+							cTemplate.Start();
 							break;
 					}
-					//cCues.ProcessTemplate(cTemplate);
+					cQC.StatusChange("succeed");
 				}
 			}
 			catch (Exception ex)
@@ -58,17 +66,17 @@ namespace replica.cues
 			}
 		}
 
-		#region реализация Cues.IInteract
+		#region СЂРµР°Р»РёР·Р°С†РёСЏ Cues.IInteract
 		Cues.IInteract Cues.IInteract.Init()
 		{
 			return new DBInteract();
 		}
 
 		PlaylistItem Cues.IInteract.PlaylistItemOnAirGet() { return this.PlaylistItemOnAirGet(); }
-		Queue<PlaylistItem> Cues.IInteract.PlaylistItemsPreparedGet() { return this.PlaylistItemsQueuedGet(); }
-        TemplateBind[] Cues.IInteract.TemplateBindsGet(PlaylistItem cPLI) { return this.TemplateBindsGet(cPLI); }
-        #endregion реализация Cues.IInteract
-		#region реализация Template.IInteract
+		Queue<PlaylistItem> Cues.IInteract.PlaylistItemsPreparedGet() { return this.PlaylistItemsPreparedAndQueuedGet(); }
+        TemplateBind[] Cues.IInteract.TemplateBindsGet(PlaylistItem cPLI) { return this.TemplateBindsActualGet(cPLI); }
+        #endregion СЂРµР°Р»РёР·Р°С†РёСЏ Cues.IInteract
+		#region СЂРµР°Р»РёР·Р°С†РёСЏ Template.IInteract
 		Template.IInteract Template.IInteract.Init()
 		{
 			return new DBInteract();
@@ -80,6 +88,6 @@ namespace replica.cues
 		void Template.IInteract.TemplatesScheduleSave(TemplatesSchedule cTemplatesSchedule) { this.TemplatesScheduleSave(cTemplatesSchedule); }
 		void Template.IInteract.TemplateStarted(Template.Range cRange) { cRange.cTemplateBind.cTemplate.Started(cRange.cPlaylistItem); }
 		PlaylistItem Template.IInteract.PlaylistItemPreviousGet(PlaylistItem cPLI) { return this.PlaylistItemPreviousGet(cPLI); }
-		#endregion реализация Template.IInteract
+		#endregion СЂРµР°Р»РёР·Р°С†РёСЏ Template.IInteract
 	}
 }

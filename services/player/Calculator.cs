@@ -126,7 +126,7 @@ namespace replica.playlist
 				DateTime dtTimingsUpdate = DateTime.Now;
 				string sLockeds = "";
 
-				foreach (PlaylistItem cPLI in aPLIs.Where(pli => pli.bLocked).OrderBy(pli => pli.dtStartQueued).ToArray())
+				foreach (PlaylistItem cPLI in aPLIs.Where(pli => pli.bLocked).OrderBy(pli => pli.dtStartReal).ThenBy(pli => pli.dtStartQueued).ToArray())
 				{
 					sLockeds += ", " + cPLI.nID;
 					aqItemsLocked.Enqueue(cPLI);
@@ -259,6 +259,7 @@ namespace replica.playlist
 				cItemCurrentSequential = cItemPrevious = null;
 //				bRetVal = false;
 				bRetVal = true;   // чо-то смысла в ретвале нет уже походу...
+				int nSRCount = 0;
 				while (0 < aqItemsLocked.Count)
 				{
 					cItemPrevious = aqItemsLocked.Dequeue();
@@ -266,10 +267,9 @@ namespace replica.playlist
 					{
 						if (DateTime.MaxValue == cItemPrevious.dtStartPlanned)
 							throw new Exception("impossible state: dtStartPlanned is empty [" + cItemPrevious.nID + "]");
-						if (DateTime.MaxValue != dtStart)
+						if (DateTime.MaxValue != dtStart) // т.е. не первый раз в while
 						{
-							(new Logger()).WriteError(new Exception("got a few real starts [" + dtStart.ToStr() + "][" + cItemPrevious.nID + "][" + cItemPrevious.dtStartReal.ToStr() + "]"));
-
+							(new Logger()).WriteError(new Exception("got a few real starts (very strange) [s_calcd=" + dtStart.ToStr() + "][id=" + cItemPrevious.nID + "][sr=" + cItemPrevious.dtStartReal.ToStr() + "]"));
 						}
 						if (DateTime.MaxValue > cItemPrevious.dtStartReal)
 						{
@@ -292,7 +292,7 @@ namespace replica.playlist
 					if (null != ItemTimingsUpdateSet)
 						ItemTimingsUpdateSet(cItemPrevious.nID, dtTimingsUpdate);
 					CachedRemover(cItemPrevious.nID);
-					dtStart = dtStart.AddMilliseconds((1 > cItemPrevious.nDuration ? 25 * 5 : cItemPrevious.nDuration) * 40); //TODO FPS
+					dtStart = dtStart.AddMilliseconds((1 > cItemPrevious.nDuration ? (ulong)Player.Preferences.nFPS * 5 : cItemPrevious.nDuration) * (ulong)Player.Preferences.nFrameMs);
 				}
 				if (0 < aqItemsSequential.Count)
 					cItemCurrentSequential = aqItemsSequential.Dequeue();
@@ -329,7 +329,7 @@ namespace replica.playlist
 					}
 					else
 						throw new Exception("can't find any timed or sequential items"); //TODO LANG
-					dtStart = cItemPrevious.dtStartPlanned.AddMilliseconds((1 > cItemPrevious.nDuration ? 25 * 5 : cItemPrevious.nDuration) * 40); //TODO FPS
+                    dtStart = cItemPrevious.dtStartPlanned.AddMilliseconds((1 > cItemPrevious.nDuration ? (ulong)Player.Preferences.nFPS * 5 : cItemPrevious.nDuration) * (ulong)Player.Preferences.nFrameMs); //TODO FPS
 					(new Logger()).WriteNotice("planned start:" + dtStart.ToStr() + "[id:" + cItemPrevious.nID + "]");
 					if (null != ItemTimingsUpdateSet)
 						ItemTimingsUpdateSet(cItemPrevious.nID, dtTimingsUpdate);
@@ -337,6 +337,7 @@ namespace replica.playlist
 				}
 
 				bForceAdd = false;
+                int nFrMs = Player.Preferences.nFrameMs;
 
 				if (null == cItemCurrentTimed && null == cItemCurrentSequential) // кроме локедов ничего и не было - выход
 				{
@@ -353,13 +354,13 @@ namespace replica.playlist
 						bForceAdd = true;
 					}
 					else
-						nDiff = (long)(cItemCurrentTimed.dtStartHardSoft.Subtract(dtStart).TotalMilliseconds) / 40; // прогал до следующего таймеда
+						nDiff = (long)(cItemCurrentTimed.dtStartHardSoft.Subtract(dtStart).TotalMilliseconds) / nFrMs; // прогал до следующего таймеда
 
 					if (null == cItemCurrentSequential)
 						nDuration = 0;
 					else
 						nDuration = (long)cItemCurrentSequential.nDuration;
-					(new Logger()).WriteNotice("nDiff: " + nDiff + "; nSeqDuration: " + nDuration + "; dtStart: " + dtStart.ToStr() + "; bForceAdd: " + bForceAdd + "; nDurMin: " + Playlist.Preferences.nDurationMinimum + "; nDurClipMin: " + Playlist.Preferences.nDurationClipMinimum);
+					(new Logger()).WriteNotice("nDiff: " + nDiff + "; nSeqDuration: " + nDuration + "; dtStart: " + dtStart.ToStr() + "; bForceAdd: " + bForceAdd + "; nDurMin: " + Playlist.Preferences.nDurationMinimum + " ms; nDurClipMin: " + Playlist.Preferences.nDurationClipMinimum + " ms");
 
 
 					if (0 >= nDiff || (nDuration == 0 && DateTime.MaxValue == cItemCurrentTimed.dtStartHard) || ItemsAreInBlock(cItemPrevious, cItemCurrentTimed))
@@ -373,7 +374,7 @@ namespace replica.playlist
 						else
 							(new Logger()).WriteNotice("0 >= nDiff: soft: " + cItemCurrentTimed.dtStartPlanned.ToStr());
 						cItemCurrentTimed.dtStartPlanned = dtStart;
-						dtStart = dtStart.AddMilliseconds(cItemCurrentTimed.nDuration * 40);
+						dtStart = dtStart.AddMilliseconds(cItemCurrentTimed.nDuration * (ulong)nFrMs);
 						cItemPrevious = cItemCurrentTimed;
 						if (0 < aqItemsTimed.Count)
 						{
@@ -385,11 +386,11 @@ namespace replica.playlist
 							(new Logger()).WriteNotice("cItemCurrentTimed = null");
 						}
 					}
-					else if (!bForceAdd && DateTime.MaxValue > cItemCurrentTimed.dtStartHard && Playlist.Preferences.nDurationMinimum > (ulong)(40 * nDiff))
+					else if (!bForceAdd && DateTime.MaxValue > cItemCurrentTimed.dtStartHard && Playlist.Preferences.nDurationMinimum > (ulong)(nFrMs * nDiff))
 					{// если есть таймеды и есть зазор, но меньше минимума даже для плагов и следующий таймед - это хард
 						// то спокойно ставим хард на текущее место, т.к. чёрное поле и микропланы еще хуже
 						cItemCurrentTimed.dtStartPlanned = dtStart;
-						dtStart = dtStart.AddMilliseconds(cItemCurrentTimed.nDuration * 40);
+						dtStart = dtStart.AddMilliseconds(cItemCurrentTimed.nDuration * (ulong)nFrMs);
 						cItemPrevious = cItemCurrentTimed;
 						(new Logger()).WriteNotice("minimum > nDiff: hard: " + cItemCurrentTimed.dtStartPlanned.ToStr());
 						if (0 < aqItemsTimed.Count)
@@ -402,14 +403,14 @@ namespace replica.playlist
 							(new Logger()).WriteNotice("cItemCurrentTimed = null");
 						}
 					}
-					else if (bForceAdd || DateTime.MaxValue == cItemCurrentTimed.dtStartHard || 0 < nDuration && nDiff >= nDuration && Playlist.Preferences.nDurationMinimum < (ulong)(40 * (nDiff - nDuration)))
+					else if (bForceAdd || DateTime.MaxValue == cItemCurrentTimed.dtStartHard || 0 < nDuration && nDiff >= nDuration && Playlist.Preferences.nDurationMinimum < (ulong)(nFrMs * (nDiff - nDuration)))
 					{ // или у нас вообще нет таймедов или если следующий таймед - это софт (и время его еще не пришло) или прогал после вставки клипа будет достаточным для плага
 						// тогда спокойно вставляем клип
 						(new Logger()).WriteNotice("sequential: " + cItemCurrentSequential.dtStartPlanned.ToStr());
 						cItemCurrentSequential.dtStartPlanned = dtStart;
 						if (null != ItemFrameStopRestore)
 							ItemFrameStopRestore(cItemCurrentSequential.nID);
-						dtStart = dtStart.AddMilliseconds(cItemCurrentSequential.nDuration * 40);
+						dtStart = dtStart.AddMilliseconds(cItemCurrentSequential.nDuration * (ulong)nFrMs);
 						cItemPrevious = cItemCurrentSequential;
 						if (0 < aqItemsSequential.Count)
 							cItemCurrentSequential = aqItemsSequential.Dequeue();
@@ -420,14 +421,14 @@ namespace replica.playlist
 						}
 						//EXIT WHEN NOT FOUND;
 					}
-					else if (DateTime.MaxValue > cItemCurrentTimed.dtStartHard && (long)Playlist.Preferences.nDurationClipMinimum < 40 * nDiff && nDuration > nDiff)
+					else if (DateTime.MaxValue > cItemCurrentTimed.dtStartHard && (long)Playlist.Preferences.nDurationClipMinimum < nFrMs * nDiff && nDuration > nDiff)
 					{// следующий таймед - это хард (и время его еще не пришло) и прогал меньше клипа, но достаточен для обрезки (2'30")
 						// тогда вставляем клип в обрез
 						(new Logger()).WriteNotice("cutted sequential before hard: " + cItemCurrentSequential.dtStartPlanned.ToStr());
 						cItemCurrentSequential.dtStartPlanned = dtStart;
 						if (null != ItemFrameStopChange)
 							ItemFrameStopChange(cItemCurrentSequential.nID, cItemCurrentSequential.nFrameStop, cItemCurrentSequential.nFrameStart + nDiff);
-						dtStart = dtStart.AddMilliseconds(nDiff * 40);
+						dtStart = dtStart.AddMilliseconds(nDiff * nFrMs);
 						cItemPrevious = cItemCurrentSequential;
 						if (0 < aqItemsSequential.Count)
 							cItemCurrentSequential = aqItemsSequential.Dequeue();
@@ -438,7 +439,7 @@ namespace replica.playlist
 						}
 						//EXIT WHEN NOT FOUND;
 					}
-					else if (DateTime.MaxValue > cItemCurrentTimed.dtStartHard && (nDuration == 0 || (long)Playlist.Preferences.nDurationClipMinimum >= 40 * nDiff || Playlist.Preferences.nDurationMinimum >= (ulong)(40 * (nDiff - nDuration))) && !cItemPrevious.bPlug)
+					else if (DateTime.MaxValue > cItemCurrentTimed.dtStartHard && (nDuration == 0 || (long)Playlist.Preferences.nDurationClipMinimum >= nFrMs * nDiff || Playlist.Preferences.nDurationMinimum >= (ulong)(nFrMs * (nDiff - nDuration))) && !cItemPrevious.bPlug)
 					{// следующий таймед - это хард (и время его еще не пришло) и либо нет вообще клипов, либо прогал недостаточен для вставки клипа в обрез, либо клип влезает, но после него уже ничего не вставишь и предыдущий в ПЛ не был плагом
 						// тогда вставляем плаг
 						(new Logger()).WriteNotice("plug insert before hard: aqPlugs.Count: " + aqPlugs.Count + "][dtStart: "+"");
@@ -449,8 +450,8 @@ namespace replica.playlist
 						}
 						else if (null != PlugAdd)
 							PlugAdd(dtStart, nDiff, dtTimingsUpdate);
-						dtStart = dtStart.AddMilliseconds(nDiff * 40);
-						tsUpdateScope = tsUpdateScope < TimeSpan.MaxValue ? tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(nDiff * 40)) : TimeSpan.MaxValue;
+						dtStart = dtStart.AddMilliseconds(nDiff * nFrMs);
+						tsUpdateScope = tsUpdateScope < TimeSpan.MaxValue ? tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(nDiff * nFrMs)) : TimeSpan.MaxValue;
 						continue;
 					}
 					else
@@ -482,7 +483,7 @@ namespace replica.playlist
 						(new Logger()).WriteNotice("break because ending arrays");
 						break;
 					}
-					tsUpdateScope = tsUpdateScope < TimeSpan.MaxValue ? tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(cItemPrevious.nDuration * 40)) : TimeSpan.MaxValue;
+					tsUpdateScope = tsUpdateScope < TimeSpan.MaxValue ? tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(cItemPrevious.nDuration * (ulong)nFrMs)) : TimeSpan.MaxValue;
 				}
 				// cItemPrevious - последний элемент пересчитанной части ПЛ, а  dtStart - его конец
 
@@ -539,15 +540,15 @@ namespace replica.playlist
 				//    {
 				//        if (null == cTimedPrevious)
 				//        {
-				//            dtStart = cItemCurrentSequential.dtStartPlanned.AddMilliseconds(40 * cItemCurrentSequential.nDuration);
+				//            dtStart = cItemCurrentSequential.dtStartPlanned.AddMilliseconds(nFrMs * cItemCurrentSequential.nDuration);
 				//            if (cItemCurrentTimed.dtStartHard < DateTime.MaxValue && cItemCurrentTimed.dtStartHard < dtStart)
 				//                dtStart = cItemCurrentTimed.dtStartHard;
-				//            tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(40 * cItemCurrentSequential.nDuration));
+				//            tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(nFrMs * cItemCurrentSequential.nDuration));
 				//        }
 				//        else
 				//        {
-				//            dtStart = cTimedPrevious.dtStartPlanned.AddMilliseconds(40 * cTimedPrevious.nDuration);
-				//            tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(40 * cTimedPrevious.nDuration));
+				//            dtStart = cTimedPrevious.dtStartPlanned.AddMilliseconds(nFrMs * cTimedPrevious.nDuration);
+				//            tsUpdateScope.Subtract(TimeSpan.FromMilliseconds(nFrMs * cTimedPrevious.nDuration));
 				//            if (ItemsHardSoft(cItemCurrentTimed).Subtract(ItemsHardSoft(cTimedPrevious)).TotalSeconds > 1 && tsUpdateScope.TotalSeconds < 1)
 				//            {
 				//                (new Logger()).WriteNotice("end timed update: break because tsUpdateScope");

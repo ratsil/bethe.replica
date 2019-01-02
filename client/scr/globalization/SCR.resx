@@ -162,6 +162,12 @@
   <data name="sError22" xml:space="preserve">
     <value>Errors occurred while clips list get</value>
   </data>
+  <data name="sError23" xml:space="preserve">
+    <value>Cannot get the fragment of current linear playlist</value>
+  </data>
+  <data name="sError24" xml:space="preserve">
+    <value>You're attempting to add possibly uncached item{0}It would be safer to choose from cached list.</value>
+  </data>
   <data name="sError3" xml:space="preserve">
     <value>Error occurred while DB service request...{0}Copy and save error description{0}{0}YOU CAN CLOSE THIS WINDOW...{0}If this error will not appear frequently, you have no need to refresh the page!</value>
   </data>
@@ -309,6 +315,15 @@
   <data name="sNotice41" xml:space="preserve">
     <value>Continue this air?{0}If press OK the air automation will turn on!</value>
   </data>
+  <data name="sNotice42" xml:space="preserve">
+    <value>play top</value>
+  </data>
+  <data name="sNotice43" xml:space="preserve">
+    <value>play with</value>
+  </data>
+  <data name="sNotice44" xml:space="preserve">
+    <value>to cache</value>
+  </data>
   <data name="sNotice5" xml:space="preserve">
     <value>loading storage mappings...</value>
   </data>
@@ -335,6 +350,9 @@
   </data>
   <data name="sNoticeAdvertsBlockChooser11" xml:space="preserve">
     <value>selected block:</value>
+  </data>
+  <data name="sNoticeAdvertsBlockChooser12" xml:space="preserve">
+    <value>selected clip:</value>
   </data>
   <data name="sNoticeAdvertsBlockChooser2" xml:space="preserve">
     <value>loading playlist items - {0} --- {1} |</value>

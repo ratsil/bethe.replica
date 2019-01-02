@@ -15,11 +15,16 @@ namespace scr
 {
     public partial class MainPage : UserControl
     {
+		static MainPage _cMainPageCurrent;
         public MainPage()
         {
+			_cMainPageCurrent = this;
             InitializeComponent();
 		}
-
+		public static void NameSet(string sName)
+		{
+			_cMainPageCurrent.ApplicationNameTextBlock.Text = sName;
+		}
         // After the Frame navigates, ensure the HyperlinkButton representing the current page is selected
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
         {

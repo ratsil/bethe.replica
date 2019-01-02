@@ -34,8 +34,8 @@ namespace webservice.ia
 							eAssetType = eAT;
 							break;
 						}
-					}
-					else if (cPLI.cClass.sName.ToLower().Contains(eAT.ToString().ToLower()))
+                    }
+                    else if (cPLI.aClasses.ContainsPartOfName(eAT.ToString()))
 					{
 						eAssetType = eAT;
 						break;
@@ -84,7 +84,7 @@ namespace webservice.ia
 						break;
 					}
 				}
-				else if (cAsset.cClass.sName.ToLower().Contains(eAT.ToString().ToLower()))
+				else if (cAsset.aClasses.ContainsPartOfName(eAT.ToString()))
 				{
 					eAssetType = eAT;
 					break;
@@ -123,11 +123,12 @@ namespace webservice.ia
 			if (null != cClip.stCues.sAlbum)
 				sRetVal += " album=\"" + cClip.stCues.sAlbum.ForXML() + "\"";
 			sRetVal += " />";
-			cClip.PersonsLoad();
-			sRetVal += "<persons>";
-			foreach (Person cPerson in cClip.aPersons)
-				sRetVal += PersonGet(cPerson);
-			sRetVal += "</persons>";
+			// c артистами очень долго берётся
+			//cClip.PersonsLoad();
+			//sRetVal += "<persons>";
+			//foreach (Person cPerson in cClip.aPersons)
+			//	sRetVal += PersonGet(cPerson);
+			//sRetVal += "</persons>";
 			sRetVal += "</clip>";
 			//if (null == cClip.aCustomValues)
 			//    cClip.aCustomValues = cDBI.CustomsLoad(cClip.nID);
@@ -141,7 +142,26 @@ namespace webservice.ia
 		}
 		static public bool Redirect(System.Web.UI.Page cPage)
 		{
+#if !AUTOCHANNEL
 			return false;
+#endif
+			string sURL = cPage.Request.RawUrl;
+			if (sURL.Contains('?'))
+				sURL += "&";
+			else
+				sURL += "?";
+			sURL += "ip_source=" + cPage.Request.UserHostAddress;
+			HttpWebRequest cWebRequest = (HttpWebRequest)HttpWebRequest.Create("http://127.0.0.1" + sURL);
+			HttpWebResponse cWebResponse = (HttpWebResponse)cWebRequest.GetResponse();
+			for (int i = 0; i < cWebResponse.Headers.Count; ++i)
+				cPage.Response.AddHeader(cWebResponse.Headers.Keys[i], cWebResponse.Headers[i]);
+			cPage.Response.ContentType = cWebResponse.ContentType;
+			System.IO.Stream cStream = cWebResponse.GetResponseStream();
+			byte[] aBuffer = new byte[1024];
+			int nQty = 0;
+			while (0 < (nQty = cStream.Read(aBuffer, 0, aBuffer.Length)))
+				cPage.Response.BinaryWrite(aBuffer.Take(nQty).ToArray());
+			return true;
 		}
 	}
 }

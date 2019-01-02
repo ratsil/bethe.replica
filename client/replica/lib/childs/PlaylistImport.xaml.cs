@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 using controls.childs.sl;
+using controls.sl;
 using replica.sl;
 using helpers.replica.services.dbinteract;
 using helpers.extensions;
@@ -29,6 +30,7 @@ namespace controls.childs.replica.sl
 			public string sRemoteFile;
 		}
 		private Progress _dlgProgress;
+        private MsgBox _dlgMsg;
 		private DBInteract _cDBI;
 		private DateTime _dtDateTimeLastSelected;
 
@@ -42,8 +44,9 @@ namespace controls.childs.replica.sl
 
 			_cDBI = new DBInteract();
 			_dlgProgress = new Progress();
+            _dlgMsg = new MsgBox();
 
-			_cDBI.UploadFileBeginCompleted += new EventHandler<UploadFileBeginCompletedEventArgs>(_cDBI_UploadFileBeginCompleted);
+            _cDBI.UploadFileBeginCompleted += new EventHandler<UploadFileBeginCompletedEventArgs>(_cDBI_UploadFileBeginCompleted);
 			_cDBI.UploadFileContinueCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_UploadFileContinueCompleted);
 			_cDBI.UploadFileEndCompleted += new EventHandler<UploadFileEndCompletedEventArgs>(_cDBI_UploadFileEndCompleted);
 
@@ -53,19 +56,37 @@ namespace controls.childs.replica.sl
 			_cDBI.PlaylistsMergeCompleted += new EventHandler<PlaylistsMergeCompletedEventArgs>(_cDBI_PlaylistsMergeCompleted);
 
 			_cDBI.ErrorsGetCompleted += new EventHandler<ErrorsGetCompletedEventArgs>(_cDBI_ErrorsGetCompleted);
-
+			_cDBI.ImportLogGetCompleted += _cDBI_ImportLogGetCompleted;
+			
 			_ui_dpAdvertisementBind.SelectedDate = DateTime.Now.AddDays(1);
 			_dlgProgress.Close();
-			//_cDBI.DBCredentialsSetAsync("replica_client");
+			_ui_btnLog.IsEnabled = false;
+			_ui_btnExport.IsEnabled = false;
+            _ui_btnOK.Background = Coloring.Notifications.cButtonNormal;
+            btnErrorOn(false);
 		}
+
 
 		#region event handlers
 		#region UI
 		private void _ui_btnOK_Click(object sender, RoutedEventArgs e)
-		{
-			this.DialogResult = true;
+        {
+            if (_ui_btnErrors.Tag == null)
+                this.DialogResult = true;
+            else
+            {
+                _dlgMsg.Closed += _dlgMsg_Closed;
+                _dlgMsg.Show(g.Replica.sWarningPlaylistImport1.Fmt(Environment.NewLine), g.Common.sAttention, MsgBox.MsgBoxButton.OKCancel);
+            }
 		}
-		private void _ui_btnCancel_Click(object sender, RoutedEventArgs e)
+        private void _dlgMsg_Closed(object sender, EventArgs e)
+        {
+            _dlgMsg.Closed -= _dlgMsg_Closed;
+            if (_dlgMsg.enMsgResult == MsgBox.MsgBoxButton.OK)
+                this.DialogResult = true;
+        }
+
+        private void _ui_btnCancel_Click(object sender, RoutedEventArgs e)
 		{
 			aPlaylistItems = null;
 			this.DialogResult = false;
@@ -137,7 +158,7 @@ namespace controls.childs.replica.sl
 		{
 			if (null == _ui_tbClipsFile.Tag || null == _ui_tbAdvertisementsFile.Tag || null == _ui_tbDesignsFile.Tag)
 			{
-				_ui_btnErrors.Visibility = Visibility.Visible;
+				btnErrorOn(true);
 				_ui_btnErrors.Tag = g.Replica.sErrorPlaylistImport1;
 				return;
 			}
@@ -145,7 +166,7 @@ namespace controls.childs.replica.sl
 			_dlgProgress.Tag = true;
 			ProgressUpdate();
 
-			_ui_btnErrors.Visibility = Visibility.Collapsed;
+			btnErrorOn(false);
 			_ui_btnErrors.Tag = null;
 
 			byte[] aBytes = null;
@@ -195,11 +216,20 @@ namespace controls.childs.replica.sl
 			cMsg.bTextIsReadOnly = true;
             cMsg.Show(g.Common.sErrors, g.Common.sError, MsgBox.MsgBoxButton.OK, sErrors);
 		}
+		private void _ui_btnLog_Click(object sender, RoutedEventArgs e)
+		{
+			string sLog = "Import Log";
+			if (null != _ui_btnLog.Tag)
+				sLog = _ui_btnLog.Tag.ToString();
+			MsgBox cMsg = new MsgBox();
+			cMsg.bTextIsReadOnly = true;
+			cMsg.Show("", g.Common.sInformation, MsgBox.MsgBoxButton.OK, sLog);
+		}
 		private void _ui_btnExport_Click(object sender, RoutedEventArgs e)
 		{
 			SaveFileDialog cSFD = new SaveFileDialog();
 			//cSFD.Filter = "XML files | *.xml";
-			cSFD.DefaultExt = ".xml";
+			cSFD.DefaultExt = ".xls";
 			if ((bool)cSFD.ShowDialog())
 			{
 				#region excel
@@ -433,7 +463,8 @@ namespace controls.childs.replica.sl
 				{
 					aPlaylistItems = e.Result;
 					_ui_btnOK.IsEnabled = true;
-					_ui_btnExport.Visibility = Visibility.Visible;
+                    _ui_btnOK.Background = Coloring.Notifications.cButtonNormal;
+                    _ui_btnExport.IsEnabled = true;
 				}
 			}
 			catch { }
@@ -459,18 +490,29 @@ namespace controls.childs.replica.sl
 		}
 		void _cDBI_ErrorsGetCompleted(object sender, ErrorsGetCompletedEventArgs e)
 		{
+			_cDBI.ImportLogGetAsync();
 			if (null != e.Result && 0 < e.Result.Length)
 			{
 				_cDBI.ErrorsClearAsync();
-				_ui_btnErrors.Visibility = Visibility.Visible;
+				btnErrorOn(true);
 				string sErrors = "";
 				for (int nIndx = 0; e.Result.Length > nIndx; nIndx++)
 					sErrors += e.Result[nIndx].sMessage.Remove("<br>");
 				_ui_btnErrors.Tag = sErrors;
-				_ui_btnOK.IsEnabled = false;
-			}
+				//_ui_btnOK.IsEnabled = true;
+                _ui_btnOK.Background = Coloring.Notifications.cButtonError;
+            }
 			_dlgProgress.Close();
 		}
+		private void _cDBI_ImportLogGetCompleted(object sender, ImportLogGetCompletedEventArgs e)
+		{
+			_ui_btnLog.Tag = e.Result;
+			if (e.Result != null && e.Result.Length > 0)
+				_ui_btnLog.IsEnabled = true;
+			else
+				_ui_btnLog.IsEnabled = false;
+		}
+
 		//void _cDBI_DBCredentialsUnsetCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
 		//{
 		//    try
@@ -482,7 +524,21 @@ namespace controls.childs.replica.sl
 		//}
 		#endregion
 		#endregion
-
+		private void btnErrorOn(bool bOn)
+		{
+			if (bOn)
+			{
+				_ui_btnErrors.IsEnabled = true;
+				_ui_btnErrors.Background = controls.sl.Coloring.Notifications.cButtonError;
+				_ui_btnErrors.Foreground = controls.sl.Coloring.Notifications.cErrorForeground;
+			}
+			else
+			{
+				_ui_btnErrors.IsEnabled = false;
+				_ui_btnErrors.Background = controls.sl.Coloring.Notifications.cButtonInactive;
+				_ui_btnErrors.Foreground = controls.sl.Coloring.Notifications.cNormalForeground;
+			}
+		}
 		private void UploadFileContinue(UploadInfo cUploadInfo)
 		{
 			byte[] aBytes = new byte[1024 * 1024];

@@ -108,7 +108,7 @@ namespace controls.replica.sl
 		}
         private void _ui_dgPersons_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            _CellValueBeforeEditing = ((TextBlock)e.EditingEventArgs.OriginalSource).Text;
+			_CellValueBeforeEditing = ((TextBlock)e.EditingEventArgs.OriginalSource).Text;
         }
         private void _ui_dgPersons_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
@@ -165,8 +165,9 @@ namespace controls.replica.sl
 		}
         void msgOk_Closed(object sender, EventArgs e)
         {
-            //MsgBox msg = (MsgBox)sender;
-            if (MsgBox.MsgBoxButton.OK == _cMsgBox.enMsgResult && "msgOk_Closed" == _cMsgBox.Tag.ToString())
+			_cMsgBox.Closed -= msgOk_Closed;
+			//MsgBox msg = (MsgBox)sender;
+			if (MsgBox.MsgBoxButton.OK == _cMsgBox.enMsgResult && "msgOk_Closed" == _cMsgBox.Tag.ToString())
             {
                 _cDBI.PersonsRemoveAsync(_ui_dgPersons.SelectedItems.Cast<Person>().ToArray());
                 _cMsgBox.Tag = null;

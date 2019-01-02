@@ -107,9 +107,8 @@ namespace replica
 
 		private void Worker(object cStateInfo)
 		{
-			try
-			{
-				(new Logger()).WriteNotice("модуль титрования запущен");//TODO LANG
+            try
+            {
 				RC.Template.ProccesingStart();
 				Dictionary<string, byte> ahFails = new Dictionary<string, byte>();
 				List<long> aPassed = new List<long>();
@@ -121,20 +120,35 @@ namespace replica
 				_cCurrentPLI = null;
 				TemplateBind[] aTemplateBinds = null;
 				DateTime dtCurrentStop;
-
+				Dictionary<long, TemplateBind[]> ahPLIBinds = new Dictionary<long, TemplateBind[]>();
+                string sLogClasses;
 
 
 				if (null != WatcherCommands)
 					ThreadPool.QueueUserWorkItem(WatcherCommands);
 
-				while (_bRunning)
+                _iInteract = _iInteract.Init();
+                (new Logger()).WriteNotice("waiting for onair PLI playing now (not in the past)");
+                while (true)
+                {
+                    PlaylistItem cPLI = _iInteract.PlaylistItemOnAirGet();
+                    if (cPLI != null && cPLI.dtStopPlanned.AddSeconds(5) > DateTime.Now)
+                    {
+                        (new Logger()).WriteNotice("correct onair PLI found [id=" + cPLI.nID + "][pli.stop = " + cPLI.dtStopPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+                        break;
+                    }
+                }
+                (new Logger()).WriteNotice("модуль титрования запущен");//TODO LANG
+
+                while (_bRunning)
 				{
 					Thread.Sleep(500);
-					_iInteract = _iInteract.Init();
+//					_iInteract = _iInteract.Init();
 					try
 					{
 						try
 						{
+							#region get current pli
 							if (null == (cPlaylistItem = _iInteract.PlaylistItemOnAirGet()) || DateTime.MaxValue == cPlaylistItem.dtStartReal)
 							{
 								if (2 == ahFails["pli:onair"])
@@ -158,17 +172,31 @@ namespace replica
 								}
 								continue;
 							}
-							ahFails["pli:onair:start"] = 0;
-							(new Logger()).WriteNotice("::::::::::::::::::::найден новый текущий элемент плейлиста [fn:" + cPlaylistItem.cFile.sFile + "][sr:" + cPlaylistItem.dtStartReal + "][sp:" + cPlaylistItem.dtStopPlanned + "][fs:" + cPlaylistItem.nFrameStop + "][id:" + cPlaylistItem.nID + "][pid:" + (null == _cCurrentPLI ? "null" : _cCurrentPLI.nID.ToString()) + "]"); //TODO LANG
+                            if (cPlaylistItem.aClasses == null)
+                            {
+                                (new Logger()).WriteError("no classes for pli [fn:" + cPlaylistItem.cFile.sFile + "]");
+                                cPlaylistItem.aClasses = new Class[0];
+                            }
+                            sLogClasses = cPlaylistItem.aClasses.ToStr();
+                            ahFails["pli:onair:start"] = 0;
+                            (new Logger()).WriteNotice("::::::::::::::::::::найден новый текущий элемент плейлиста [fn:" + cPlaylistItem.cFile.sFile + "][sr:" + cPlaylistItem.dtStartReal + "][sp:" + cPlaylistItem.dtStopPlanned + "][fs:" + cPlaylistItem.nFrameStop + "][cla:" + cPlaylistItem.aClasses.ToStr() + "][id:" + cPlaylistItem.nID + "][cur_id:" + (null == _cCurrentPLI ? "null" : _cCurrentPLI.nID.ToString()) + "]"); //TODO LANG
 
-							if (!ahFails.ContainsKey("pli:class:" + cPlaylistItem.cClass.sName))
-								ahFails["pli:class:" + cPlaylistItem.cClass.sName] = 0;
-							if (null != (aTemplateBinds = _iInteract.TemplateBindsGet(cPlaylistItem)) && 0 < aTemplateBinds.Length)
+                            if (!ahFails.ContainsKey("pli:class:" + sLogClasses))
+								ahFails["pli:class:" + sLogClasses] = 0;
+
+							if (!ahPLIBinds.ContainsKey(cPlaylistItem.nID))      // кладём сюда бинды ещё при обнаружении препаредов для экономии времени на текущем элементе, а то 10 секунд может занимать TemplateBindsGet!
 							{
-								if (0 < ahFails["pli:class:" + cPlaylistItem.cClass.sName])
+								(new Logger()).WriteNotice("для нового элемента нет заранее подготовленного массива с биндами - будем брать");
+								if (null != (aTemplateBinds = _iInteract.TemplateBindsGet(cPlaylistItem)) && 0 < aTemplateBinds.Length)
+									ahPLIBinds.Add(cPlaylistItem.nID, aTemplateBinds);   
+							}
+							if (ahPLIBinds.ContainsKey(cPlaylistItem.nID))
+							{
+								aTemplateBinds = ahPLIBinds[cPlaylistItem.nID];
+								if (0 < ahFails["pli:class:" + sLogClasses])
 								{
-									(new Logger()).WriteWarning("найдены шаблоны графического оформления для класса " + cPlaylistItem.cClass.sName);
-									ahFails["pli:class:" + cPlaylistItem.cClass.sName] = 0;
+									(new Logger()).WriteWarning("найдены шаблоны графического оформления для класса " + sLogClasses);
+									ahFails["pli:class:" + sLogClasses] = 0;
 								}
 								foreach (TemplateBind cTB in aTemplateBinds.ToArray())
 								{
@@ -193,16 +221,18 @@ namespace replica
 								if (null != _cCurrentPLI)
 									RC.Template.PlaylistItemStopped(_cCurrentPLI);
 								RC.Template.PlaylistItemStarted(cPlaylistItem, aTemplateBinds);
+								ahPLIBinds.Remove(cPlaylistItem.nID);
 							}
 							else
 							{
-								if (1 > ahFails["pli:class:" + cPlaylistItem.cClass.sName])
-									(new Logger()).WriteWarning("не найдено шаблонов графического оформления для класса " + cPlaylistItem.cClass.sName);
-								if (2 > ahFails["pli:class:" + cPlaylistItem.cClass.sName])
-									ahFails["pli:class:" + cPlaylistItem.cClass.sName]++;
+								if (1 > ahFails["pli:class:" + sLogClasses])
+									(new Logger()).WriteWarning("не найдено шаблонов графического оформления для класса " + sLogClasses);
+								if (2 > ahFails["pli:class:" + sLogClasses])
+									ahFails["pli:class:" + sLogClasses]++;
 							}
 							_cCurrentPLI = cPlaylistItem;
-
+							#endregion
+							#region get prepared plis
 							if (null != (aPLIs = _iInteract.PlaylistItemsPreparedGet()) && 0 < aPLIs.Count)
 							{
 								if (2 == ahFails["pli:prepared"])
@@ -219,8 +249,9 @@ namespace replica
 									aPassed.Remove(cPlaylistItem.nID);
 
 								(new Logger()).WriteDebug2("before_while");
-								while (0 < aPLIs.Count)    // ВНИМАНИЕ!  один цикл может достигать 1 секунды!!  А элементов может быть десятки! 
+								while (0 < aPLIs.Count)    // ВНИМАНИЕ!  один цикл может достигать 1 секунды!!  А элементов может быть десятки! ... даже  10 секунд, т.к. много бывает навешано на иной класс!!     вродь фиксанул с помощью ahPLIBinds
 								{  // причем много времени идёт на TemplateBindsGet
+                                    if (!_bRunning) break;
 									if ((nDelta = (int)dtCurrentStop.Subtract(DateTime.Now).TotalSeconds) < 2)
 									{
 										(new Logger()).WriteDebug2("срочно закончили обработку элементов плейлиста [id:" + cPlaylistItem.nID + "][plis_count:" + aPLIs.Count + "][delta:" + nDelta + "sec]");
@@ -228,21 +259,34 @@ namespace replica
 										break;
 									}
 									cPlaylistItem = aPLIs.Dequeue();
-									if ((aPLIs.Count + 1) * 1 > nDelta && aPassed.Contains(cPlaylistItem.nID))   // т.к. длительность обработки этого цикла примерно 3 сек
+                                    if ((aPLIs.Count + 1) * 1 > nDelta && aPassed.Contains(cPlaylistItem.nID))   // т.к. длительность обработки этого участка примерно 3 сек
 									{
 										(new Logger()).WriteDebug2("элемент плейлиста сразу пропущен, как уже обработанный ранее [id:" + cPlaylistItem.nID + "][plis_count:" + aPLIs.Count + "][delta:" + nDelta + "sec]");
 										bBreaked = true;
 										continue;
 									}
-									(new Logger()).WriteDebug2("найден подготовленный элемент плейлиста [" + cPlaylistItem.nID + "]");
-									if (!ahFails.ContainsKey("pli:class:" + cPlaylistItem.cClass.sName))
-										ahFails["pli:class:" + cPlaylistItem.cClass.sName] = 0;
+                                    if (cPlaylistItem.aClasses == null)
+                                    {
+                                        (new Logger()).WriteWarning("no classes for pli [fn:" + cPlaylistItem.cFile.sFile + "]");
+                                        aPassed.Add(cPlaylistItem.nID);
+                                        continue;
+                                    }
+                                    sLogClasses = cPlaylistItem.aClasses.ToStr();
+
+                                    (new Logger()).WriteDebug2("найден подготовленный элемент плейлиста [" + cPlaylistItem.nID + "]");
+									if (!ahFails.ContainsKey("pli:class:" + sLogClasses))
+										ahFails["pli:class:" + sLogClasses] = 0;
 									if (null != (aTemplateBinds = _iInteract.TemplateBindsGet(cPlaylistItem)) && 0 < aTemplateBinds.Length)
 									{
-										if (0 < ahFails["pli:class:" + cPlaylistItem.cClass.sName])
+										if (!ahPLIBinds.ContainsKey(cPlaylistItem.nID))
+											ahPLIBinds.Add(cPlaylistItem.nID, aTemplateBinds);
+										else
+											ahPLIBinds[cPlaylistItem.nID] = aTemplateBinds;
+
+										if (0 < ahFails["pli:class:" + sLogClasses])
 										{
-											(new Logger()).WriteWarning("найдены шаблоны графического оформления для класса " + cPlaylistItem.cClass.sName);
-											ahFails["pli:class:" + cPlaylistItem.cClass.sName] = 0;
+											(new Logger()).WriteWarning("найдены шаблоны графического оформления для класса " + sLogClasses);
+											ahFails["pli:class:" + sLogClasses] = 0;
 										}
 										foreach (TemplateBind cTB in aTemplateBinds.ToArray())
 										{
@@ -251,7 +295,7 @@ namespace replica
 											if (!System.IO.File.Exists(cTB.cTemplate.sFile))
 											{
 												if (1 > ahFails["pli:template:" + cTB.cTemplate.nID])
-													(new Logger()).WriteWarning("не найден файл шаблона:" + cTB.cTemplate.sFile);
+													(new Logger()).WriteWarning("не найден файл шаблона2:" + cTB.cTemplate.sFile);
 												if (2 > ahFails["pli:template:" + cTB.cTemplate.nID])
 													ahFails["pli:template:" + cTB.cTemplate.nID]++;
 												aTemplateBinds = aTemplateBinds.Where(row => row != cTB).ToArray();
@@ -259,7 +303,7 @@ namespace replica
 											else if (ahFails.ContainsKey("pli:template:" + cTB.cTemplate.nID))
 											{
 												if (0 < ahFails["pli:template:" + cTB.cTemplate.nID])
-													(new Logger()).WriteWarning("найден файл шаблона:" + cTB.cTemplate.sFile);
+													(new Logger()).WriteWarning("найден файл шаблона2:" + cTB.cTemplate.sFile);
 												ahFails["pli:template:" + cTB.cTemplate.nID] = 0;
 											}
 										}
@@ -268,10 +312,10 @@ namespace replica
 									}
 									else
 									{
-										if (1 > ahFails["pli:class:" + cPlaylistItem.cClass.sName])
-											(new Logger()).WriteWarning("не найдено шаблонов графического оформления для класса " + cPlaylistItem.cClass.sName);
-										if (2 > ahFails["pli:class:" + cPlaylistItem.cClass.sName])
-											ahFails["pli:class:" + cPlaylistItem.cClass.sName]++;
+										if (1 > ahFails["pli:class:" + sLogClasses])
+											(new Logger()).WriteWarning("не найдено шаблонов графического оформления для класса " + sLogClasses);
+										if (2 > ahFails["pli:class:" + sLogClasses])
+											ahFails["pli:class:" + sLogClasses]++;
 									}
 								}
 								(new Logger()).WriteDebug2("after_while");
@@ -287,6 +331,7 @@ namespace replica
 								if (3 > ahFails["pli:prepared"])
 									ahFails["pli:prepared"]++;
 							}
+							#endregion
 						}
 						catch (Exception ex)
 						{

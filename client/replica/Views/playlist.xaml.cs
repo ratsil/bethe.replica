@@ -31,15 +31,18 @@ namespace replica.sl
         private System.Windows.Threading.DispatcherTimer _cTimerForCommandResult = null;
 		private System.Windows.Threading.DispatcherTimer _cTimerForPLAddResult = null;
 		//private int nTimeoutForAddResult;
-        private DateTime _dtCommandBegin;
+        private DateTime _dtCommandTimeout;
 		private DateTime _dtPLImportTimeout;
         private PlaylistItemSL _cPlayListItemCurrent;
         private string _sPlannedDelete_Header;
         private MsgBox _dlgMsg = new MsgBox();
-        private Button _btnActivePlannedFilter;
+		private DateTime _dtActivePlannedDate;
+		private bool _bInitIsOver;
         private PlaylistTimer _cPLTimer;
 		private List<PlaylistItemSL> _aPLIsJustInserted;
-        public playlist()
+		private int _nAttemptsCount;
+
+		public playlist()
         {
             InitializeComponent();
             Language = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.Name);
@@ -51,13 +54,16 @@ namespace replica.sl
             _cDBI.PlaylistItemsPlanGetCompleted += new EventHandler<PlaylistItemsPlanGetCompletedEventArgs>(_cDBI_PlaylistItemsPlanGetCompleted);
             _cDBI.PlaylistItemsDeleteCompleted += new EventHandler<PlaylistItemsDeleteCompletedEventArgs>(_cDBI_PlaylistItemsDeleteCompleted);
             _cDBI.PlaylistItemStartsSetCompleted += new EventHandler<PlaylistItemStartsSetCompletedEventArgs>(_cDBI_PlaylistItemStartsSetCompleted);
-			_cDBI.PlaylistItemsAddCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_PlaylistItemsAddCompleted);
-            _cDBI.PlaylistRecalculateQueryCompleted += new EventHandler<PlaylistRecalculateQueryCompletedEventArgs>(_cDBI_PlaylistRecalculateQueryCompleted);
+			_cDBI.PlaylistItemsAddWorkerCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_PlaylistItemsAddCompleted);
+
+			_cDBI.PlaylistRecalculateQueryCompleted += new EventHandler<PlaylistRecalculateQueryCompletedEventArgs>(_cDBI_PlaylistRecalculateQueryCompleted);
             _cDBI.CommandStatusGetCompleted += new EventHandler<CommandStatusGetCompletedEventArgs>(_cDBI_CommandStatusGetCompleted);
             _cDBI.PlaylistItemsDeleteSinceCompleted += new EventHandler<PlaylistItemsDeleteSinceCompletedEventArgs>(_cDBI_PlaylistItemsDeleteSinceCompleted);
             _cDBI.PlaylistInsertCompleted += new EventHandler<PlaylistInsertCompletedEventArgs>(_cDBI_PlaylistInsertCompleted);
 			_cDBI.PlaylistItemAdd_ResultGetCompleted += new EventHandler<PlaylistItemAdd_ResultGetCompletedEventArgs>(_cDBI_PlaylistItemAdd_ResultGetCompleted);
 			_cDBI.GroupMovingCompleted += new EventHandler<GroupMovingCompletedEventArgs>(_cDBI_GroupMovingCompleted);
+			_cDBI.PlaylistItemsTimingsSetCompleted += _cDBI_PlaylistItemsTimingsSetCompleted;
+			_cDBI.InsertInBlockCompleted += _cDBI_InsertInBlockCompleted;
             _ui_dgOnAir.LoadingRow += new EventHandler<DataGridRowEventArgs>(_ui_dgOnAir_LoadingRow);
             _ui_dgPlanned.LoadingRow += new EventHandler<DataGridRowEventArgs>(_ui_dgPlanned_LoadingRow);
             _ui_dgArchived.LoadingRow += new EventHandler<DataGridRowEventArgs>(_ui_dgArchived_LoadingRow);
@@ -68,7 +74,7 @@ namespace replica.sl
 			_cDBI.PlaylistLastElementGetCompleted += new EventHandler<PlaylistLastElementGetCompletedEventArgs>(_cDBI_PlaylistLastElementGetCompleted);
 			_cDBI.BeforeAddCheckRangeCompleted += new EventHandler<BeforeAddCheckRangeCompletedEventArgs>(_cDBI_BeforeAddCheckRangeCompleted);
 
-            _ui_nudDaysQty.Value = 3;
+			_dlgMsg.Closed += _dlgMsg_Closed_negative;
 			_ui_rpPlanned.IsOpen = true;
             _ui_rpAir.IsOpen = false;
             _ui_rpArchived.IsOpen = false;
@@ -82,12 +88,20 @@ namespace replica.sl
             _ui_lblNextItemsdtStert.Content = null;
             _ui_lblNextItemsType.Content = null;
 
-            App.Current.Host.Content.Resized += new EventHandler(BrowserWindow_Resized);
+			_dtActivePlannedDate = DateTime.MinValue;
+			_ui_dtpArchiveDate.DisplayDateStart = DateTime.Now.AddDays(-50);
+			_ui_dtpArchiveDate.SelectedDate = DateTime.Now.AddDays(-2);
+			_ui_dtpArchiveDate.DisplayDateEnd = DateTime.Now;
+			_ui_dtpPlannedDate.DisplayDateStart = DateTime.Now;
+			_ui_dtpPlannedDate.SelectedDate = DateTime.Now.AddDays(3);
+			_ui_dtpPlannedDate.DisplayDateEnd = DateTime.Now.AddDays(50);
+
+			this.Loaded += Playlist_Loaded;
+			App.Current.Host.Content.Resized += new EventHandler(BrowserWindow_Resized);
             _ui_svMainViewer.MaxHeight = UI_Sizes.GetPossibleHeightOfPlaylistScrollViewer();
 			_ui_dgPlanned.MaxHeight = UI_Sizes.GetPossibleHeightOfElementInPlaylistView_Single();
 			_ui_dgOnAir.MaxHeight = UI_Sizes.GetPossibleHeightOfElementInPlaylistView_Single();
 			_ui_dgArchived.MaxHeight = UI_Sizes.GetPossibleHeightOfElementInPlaylistView_Single();
-            //_cDBI.DBCredentialsSetAsync("replica_client");
             Init();
 
             if (!access.scopes.playlist.bCanCreate)
@@ -102,12 +116,17 @@ namespace replica.sl
                 if (!access.scopes.playlist.bCanUpdate)
                     _ui_spPlannedQty.Visibility = Visibility.Collapsed;
             }
+			_bInitIsOver = true;
         }
 
 
+		private void _cDBI_PlaylistItemsTimingsSetCompleted(object sender, PlaylistItemsTimingsSetCompletedEventArgs e)
+		{
+			if (!e.Result)
+				_dlgMsg.ShowError(g.Replica.sErrorPlaylist1);
+		}
 
-
-        void BrowserWindow_Resized(object sender, EventArgs e)
+		void BrowserWindow_Resized(object sender, EventArgs e)
         {
             _ui_svMainViewer.MaxHeight = UI_Sizes.GetPossibleHeightOfPlaylistScrollViewer();
 			if (!(_ui_rpPlanned.IsOpen && _ui_rpAir.IsOpen) && !(_ui_rpPlanned.IsOpen && _ui_rpArchived.IsOpen) && !(_ui_rpArchived.IsOpen && _ui_rpAir.IsOpen))
@@ -155,7 +174,6 @@ namespace replica.sl
                 _cTimerForLablesRefresh = new System.Windows.Threading.DispatcherTimer();
                 _cTimerForLablesRefresh.Tick += new EventHandler(LablesRefresh);
 				_cTimerForLablesRefresh.Interval = new System.TimeSpan(0, 0, 1);
-
             }
             public void Start(Label lblCurrentName, Label lblCurrentStart, Label lblCurrentType, Label lblCurrentLeft, Label lblNextName, Label lblNextStart, Label lblNextType)
             {
@@ -218,14 +236,19 @@ namespace replica.sl
             }
         }
 		#region event handlers
-        #region UI
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+		#region UI
+		private void Playlist_Loaded(object sender, RoutedEventArgs e)
+		{
+			_ui_dtpArchiveDate.SelectedDateChanged += _ui_dtpArchiveDate_SelectedDateChanged;
+			_ui_dtpPlannedDate.SelectedDateChanged += _ui_dtpPlannedDate_SelectedDateChanged;
+		}
+		protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-        }
+		}
 		private void Archived_Click(object sender, RoutedEventArgs e)
 		{
 			_dlgProgress.Show();
-			DateTime dtStart = DateTime.MinValue, dtEnd;
+			DateTime dtStart = DateTime.MinValue;
 			switch (((Button)sender).Name)
 			{
 				case "_ui_btnArchivedToday":
@@ -238,19 +261,28 @@ namespace replica.sl
 					dtStart = DateTime.Today.AddDays(-_ui_nudDaysBeforeQty.Value);
 					break;
 			}
-			dtEnd = dtStart.AddDays(1).AddMinutes(_nOverlapMinutes);
+			ArchiveShow(dtStart);
+        }
+		private void _ui_dtpArchiveDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+		{
+			_dlgProgress.Show();
+			ArchiveShow(_ui_dtpArchiveDate.SelectedDate.Value);
+		}
+		private void ArchiveShow(DateTime dtStart)
+		{
+			DateTime dtEnd = dtStart.AddDays(1).AddMinutes(_nOverlapMinutes);
 			if (dtEnd > DateTime.Now)
 				dtEnd = DateTime.Now;
-            _cDBI.PlaylistItemsArchGetAsync(dtStart.AddMinutes(-_nOverlapMinutes), dtEnd);
+			_cDBI.PlaylistItemsArchGetAsync(dtStart.AddMinutes(-_nOverlapMinutes), dtEnd);
 		}
 		private void _ui_btnOnAirRefresh_Click(object sender, RoutedEventArgs e)
         {
             _dlgProgress.Show();
-            IdNamePair[] cNP = new IdNamePair[3];
-            cNP[0] = new IdNamePair(); cNP[0].nID = 2; cNP[0].sName = "queued";
-            cNP[1] = new IdNamePair(); cNP[1].nID = 3; cNP[1].sName = "prepared";
-            cNP[2] = new IdNamePair(); cNP[2].nID = 4; cNP[2].sName = "onair";
-            _cDBI.PlaylistItemsGetAsync(cNP);
+            IdNamePair[] aNPs = new IdNamePair[3];
+            aNPs[0] = new IdNamePair(); aNPs[0].nID = 2; aNPs[0].sName = "queued";  // DB request will on sStatusName field only! (not on idStatuses)
+            aNPs[1] = new IdNamePair(); aNPs[1].nID = 3; aNPs[1].sName = "prepared";
+            aNPs[2] = new IdNamePair(); aNPs[2].nID = 4; aNPs[2].sName = "onair";
+            _cDBI.PlaylistItemsGetAsync(aNPs);
         }
 		private void _ui_nudDaysBeforeQty_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -261,8 +293,7 @@ namespace replica.sl
 		private void Planned_Click(object sender, RoutedEventArgs e)
         {
             _dlgProgress.Show();
-            DateTime dtDay = DateTime.MinValue, dtNextDay;
-            _btnActivePlannedFilter = (Button)sender;
+            DateTime dtDay = DateTime.MinValue;
             switch (((Button)sender).Name)
             {
                 case "_ui_btnToday":
@@ -274,43 +305,28 @@ namespace replica.sl
                 case "_ui_btnTheDayAfterTomorrow":
                     dtDay = DateTime.Today.AddDays(2);
                     break;
-                case "_ui_btnChooseDate":
-                    dtDay = DateTime.Today.AddDays(_ui_nudDaysQty.Value);
-                    break;
             }
-			dtNextDay = dtDay.AddDays(1); 
-			_cDBI.PlaylistItemsPlanGetAsync(dtDay.AddMinutes(-_nOverlapMinutes), dtNextDay.AddMinutes(_nOverlapMinutes)); 
+			PlannedShow(dtDay);
         }
+		private void _ui_dtpPlannedDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+		{
+			_dlgProgress.Show();
+			PlannedShow(_ui_dtpPlannedDate.SelectedDate.Value);
+		}
+		private void PlannedShow(DateTime dtStart)
+		{
+			_dtActivePlannedDate = dtStart;
+			DateTime dtNextDay = dtStart.AddDays(1);
+			_cDBI.PlaylistItemsPlanGetAsync(dtStart.AddMinutes(-_nOverlapMinutes), dtNextDay.AddMinutes(_nOverlapMinutes));
+		}
 		private bool IsThisDateInRange(DateTime dtCheckingDate)
 		{
-			DateTime dtDay = DateTime.MinValue, dtNextDay;
-			switch (_btnActivePlannedFilter.Name)
-			{
-				case "_ui_btnToday":
-					dtDay = DateTime.Today;
-					break;
-				case "_ui_btnTomorrow":
-					dtDay = DateTime.Today.AddDays(1);
-					break;
-				case "_ui_btnTheDayAfterTomorrow":
-					dtDay = DateTime.Today.AddDays(2);
-					break;
-				case "_ui_btnChooseDate":
-					dtDay = DateTime.Today.AddDays(_ui_nudDaysQty.Value);
-					break;
-			}
-			dtNextDay = dtDay.AddDays(1).AddMinutes(_nOverlapMinutes); // для захлестика....
-			if (dtCheckingDate > dtDay.AddMinutes(-_nOverlapMinutes) && dtCheckingDate < dtNextDay)
+			DateTime dtNextDay = _dtActivePlannedDate.AddDays(1).AddMinutes(_nOverlapMinutes); // для захлестика....
+			if (dtCheckingDate > _dtActivePlannedDate.AddMinutes(-_nOverlapMinutes) && dtCheckingDate < dtNextDay)
 				return true;
 			else
 				return false;
 		}
-        private void _ui_nudDaysQty_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (null == _ui_nudDaysQty)
-                return;
-            _ui_lblDays.Content = GetCorrectWordForm(g.Helper.sDays, _ui_nudDaysQty.Value.ToInt32()) + ":";
-        }
         private void _ui_btnImport_Click(object sender, RoutedEventArgs e)
         {
 			if (_ui_lblPLImportText.Visibility == Visibility.Collapsed)
@@ -325,7 +341,8 @@ namespace replica.sl
         }
 		void dlgPLImport_Closed(object sender, EventArgs e)
 		{
-			PlaylistImport dlgPLImport = (PlaylistImport)sender;
+            PlaylistImport dlgPLImport = (PlaylistImport)sender;
+			dlgPLImport.Closed -= dlgPLImport_Closed;
 			if (dlgPLImport.DialogResult.HasValue && dlgPLImport.DialogResult.Value)
 			{
 				_dlgProgress.Show();
@@ -333,7 +350,10 @@ namespace replica.sl
 				_cDBI.BeforeAddCheckRangeAsync(aPLI[0].dtStartPlanned, aPLI[aPLI.Length - 1].dtStartPlanned, aPLI);
 			}
 			else
+			{
+				_dlgProgress.Show();
 				_dlgProgress.Close();
+			}
 		}
         private void _ui_dgPlanned_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -398,27 +418,27 @@ namespace replica.sl
 					_ui_pbPLRecalcPartProgress.Visibility = Visibility.Visible;
 					int nHrsQty = _ui_nudHoursQty.Value.ToInt32();
 					long nID = null == _cPlayListItemCurrent ? -1 : _cPlayListItemCurrent.nID;
-					MsgBox dlgReculculate;
+					MsgBox dlgRecalculate;
 					if (0 == nHrsQty)
-						dlgReculculate = new MsgBox(g.Replica.sNoticePlaylist1 + "?", g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
+						dlgRecalculate = new MsgBox(g.Replica.sNoticePlaylist1 + "?", g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
 					else if (0 < nHrsQty && 0 < nID)
-                        dlgReculculate = new MsgBox(g.Replica.sNoticePlaylist2.Fmt(nHrsQty.ToStr(), GetCorrectWordForm(g.Helper.sHours, _ui_nudHoursQty.Value.ToInt32()), _cPlayListItemCurrent.sName), g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
+                        dlgRecalculate = new MsgBox(g.Replica.sNoticePlaylist2.Fmt(nHrsQty.ToStr(), GetCorrectWordForm(g.Helper.sHours, _ui_nudHoursQty.Value.ToInt32()), _cPlayListItemCurrent.sName), g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
 					else
 					{
 						_dlgMsg.ShowError(g.Replica.sErrorPlaylist2);
 						return;
 					}
-					dlgReculculate.Closed += new EventHandler(dlgRecalculate_Closed);
-					dlgReculculate.Tag = new long[2] { nID, nHrsQty }; //EMERGENCY:l а зачем ты вот это присвоение делаешь? ты же его нигде не используешь)
-					dlgReculculate.Show();
+					dlgRecalculate.Closed += new EventHandler(dlgRecalculate_Closed);
+					dlgRecalculate.Tag = new long[2] { nID, nHrsQty }; //EMERGENCY:l а зачем ты вот это присвоение делаешь? ты же его нигде не используешь)   ))) использую - см "dlg.Tag" 
+					dlgRecalculate.Show();
 				}
 			}
 			catch { }
         }
 		void dlgRecalculate_Closed(object sender, EventArgs e)
 		{
-			_dlgProgress.Show();
-			_dlgProgress.Close();
+			//_dlgProgress.Show();
+			//_dlgProgress.Close();
 			MsgBox dlg = (MsgBox)sender;
 			if (dlg.DialogResult == true && dlg.enMsgResult == MsgBox.MsgBoxButton.OK)
 			{
@@ -433,22 +453,24 @@ namespace replica.sl
         {
             if (null != row && null != dg && null != cPLI)
             {
-                TextBox tb = null;
-				tb = ((TextBox)dg.Columns[7].GetCellContent(row));
+                TextBox tb = ((TextBox)dg.Columns[8].GetCellContent(row));
                 if (!cPLI.bIsInserted)
                 {
-                    string sStorageName = cPLI.cFile.cStorage.sName.ToLower(); //EMERGENCY:l тут надо отталкиваться от типа видеоматериала (cPLI.cAsset.cType.eType) потому что хранилища могут называть как угодно и на один тип может быть привязано много хранилищ и в одном хранилище могут быть разные типы
-                    if (g.Helper.sClips.ToLower() == sStorageName)
+					if (cPLI.cAsset == null)  // plug
+						tb.Background = Coloring.Playlist.cTypeColumn_PlugBackgr;
+					else if (cPLI.cAsset.stVideo.cType == null)
+						tb.Background = Coloring.Playlist.cTypeColumn_ErrorBackgr;
+					else if (cPLI.cAsset.stVideo.cType.sName == "clip")
                         tb.Background = Coloring.Playlist.cTypeColumn_ClipsBackgr;
-                    else if (g.Helper.sAdvertisement.ToLower() == sStorageName)
+                    else if (cPLI.cAsset.stVideo.cType.sName == "advertisement")
                         tb.Background = Coloring.Playlist.cTypeColumn_AdvertsBackgr;
-                    else if (g.Helper.sDesign.ToLower() == sStorageName)
+                    else if (cPLI.cAsset.stVideo.cType.sName == "design")
                         tb.Background = Coloring.Playlist.cTypeColumn_DesignBackgr;
-                    else if (g.Helper.sPrograms.ToLower() == sStorageName)
+                    else if (cPLI.cAsset.stVideo.cType.sName == "program")
                         tb.Background = Coloring.Playlist.cTypeColumn_ProgramsBackgr;
                     else
-                        tb.Background = Coloring.Notifications.cTextBoxError;
-                }
+                        tb.Background = Coloring.Playlist.cTypeColumn_ErrorBackgr;
+				}
                 else
                     tb.Background = Coloring.Playlist.cTypeColumn_InsertedBackgr;
             }
@@ -462,9 +484,17 @@ namespace replica.sl
                 e.Row.Background = Coloring.Playlist.cRow_OnAirPreparedBackgr;
             else if ("onair" == item.cStatus.sName)
 				e.Row.Background = Coloring.Playlist.cRow_OnAirOnAirBackgr;
-            else if (item.bCached)
-				e.Row.Background = Coloring.Playlist.cRow_CachedBackgr;
-            MarkTypeCell(e.Row, _ui_dgOnAir, item);
+            else
+				e.Row.Background = Coloring.Playlist.cRow_CachedBackgr;  // вообще не должно быть
+
+			TextBox tb = ((TextBox)_ui_dgOnAir.Columns[0].GetCellContent(e.Row));
+
+			if (item.bCached)
+				tb.Background = Coloring.Playlist.cRow_CachedBackgr;
+			else
+				tb.Background = Coloring.Playlist.cRow_UnCachedBackgr;
+
+			MarkTypeCell(e.Row, _ui_dgOnAir, item);
         }
         private void _ui_dgPlanned_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -474,20 +504,28 @@ namespace replica.sl
 			else
 				e.Row.Foreground = Coloring.Playlist.cRow_PlannedNormalForegr;
 
-            if (item.bCached)
-				e.Row.Background = Coloring.Playlist.cRow_CachedBackgr;
-			else if (item.cFile.cStorage.sPath.Contains("clips"))
+			if (item.cFile.cStorage.sPath.Contains("clip"))
 				e.Row.Background = Coloring.Playlist.cRow_PlannedClipBackgr;
-			else if (item.cFile.cStorage.sPath.Contains("advertisements"))
+			else if (item.cFile.cStorage.sPath.Contains("advertisement"))
 				e.Row.Background = Coloring.Playlist.cRow_PlannedAdvBackgr;
 			else if (item.cFile.cStorage.sPath.Contains("design"))
 				e.Row.Background = Coloring.Playlist.cRow_PlannedDesignBackgr;
-			else if (item.cFile.cStorage.sPath.Contains("programs"))
+			else if (item.cFile.cStorage.sPath.Contains("program"))
 				e.Row.Background = Coloring.Playlist.cRow_PlannedProgramBackgr;
-            else
+			else if (item.cFile.cStorage.sPath.Contains("trailer"))
+				e.Row.Background = Coloring.Playlist.cRow_PlannedTrailersBackgr;
+			else if (item.cFile.cStorage.sPath.Contains("plug"))
+				e.Row.Background = Coloring.Playlist.cRow_PlannedPlugsBackgr;
+			else
 				e.Row.Background = Coloring.Playlist.cRow_PlannedOtherBackgr;
 
-            MarkTypeCell(e.Row, _ui_dgPlanned, item);
+			TextBox tb = ((TextBox)_ui_dgPlanned.Columns[0].GetCellContent(e.Row));
+			if (item.bCached)
+				tb.Background = Coloring.Playlist.cRow_CachedBackgr;
+			else
+				tb.Background = Coloring.Playlist.cRow_UnCachedBackgr;
+
+			MarkTypeCell(e.Row, _ui_dgPlanned, item);
         }
         void _ui_dgArchived_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -501,8 +539,6 @@ namespace replica.sl
 			if (1 < _ui_dgPlanned.SelectedItems.Count)
 			{
 				_dlgMsg.ShowError(g.Replica.sNoticePlaylist3);
-				_dlgProgress.Show();
-				_dlgProgress.Close();
 			}
 			else
 			{
@@ -535,7 +571,8 @@ namespace replica.sl
         void dlgAssetsChooser_Closed(object sender, EventArgs e)
 		{
 			AssetsChooser dlgAssetsChooser = (AssetsChooser)sender;
-			List<AssetSL> aAssets = dlgAssetsChooser.aSelectedAssets;
+			dlgAssetsChooser.Closed -= dlgAssetsChooser_Closed;
+            List<AssetSL> aAssets = dlgAssetsChooser.aSelectedAssets;
 			if (dlgAssetsChooser.DialogResult == null || dlgAssetsChooser.DialogResult == false || aAssets.Count < 1)
 				return;
 
@@ -551,7 +588,7 @@ namespace replica.sl
 				if (dlgAssetsChooser.dtPlanned < DateTime.MaxValue)  // вставляем просто пленнед
 				{ 
 					//_dlgProgress.Close();
-					DoAddingAssetsAsBlock(dlgAssetsChooser.dtHard, dlgAssetsChooser.dtSoft, dlgAssetsChooser.dtPlanned, dlgAssetsChooser.aSelectedAssets, dlgAssetsChooser.dtSelected);  
+					DoAddingAssetsAsBlock(dlgAssetsChooser.dtHard, dlgAssetsChooser.dtSoft, dlgAssetsChooser.dtPlanned, dlgAssetsChooser.aSelectedAssets);  
 				}
 				else  //  вставляем timed
 				{
@@ -569,11 +606,34 @@ namespace replica.sl
 			}
 			else
 			{
-				if (!_cPlayListItemCurrent.bCached && !_cPlayListItemCurrent.bIsInserted)
-					_cDBI.PlaylistInsertAsync(AssetSL.GetArrayOfBases(aAssets.ToArray()), PlaylistItemSL.GetBase(_cPlayListItemCurrent), aAssets);
+				if (!_cPlayListItemCurrent.bIsInserted)   // !_cPlayListItemCurrent.bCached &&
+				{
+					List<PlaylistItemSL> aPL;
+					aPL = (List<PlaylistItemSL>)_ui_dgPlanned.ItemsSource;
+					int nPrevIndx = aPL.IndexOf((PlaylistItemSL)helper.FindPrevItem(aPL, typeof(PlaylistItemSL), "nID", _cPlayListItemCurrent.nID));
+					if (aPL.Count > nPrevIndx + 2 && aPL[nPrevIndx + 2].dtStartHardSoft.Subtract(_cPlayListItemCurrent.dtStartHardSoft).TotalSeconds == 1)
+					{ // вставляем внутрь блока
+						List<PlaylistItemSL> aTailOfBlock = new List<PlaylistItemSL>();
+						int nI = nPrevIndx + 2;
+						aTailOfBlock.Add(aPL[nI]);
+						while (aPL.Count > nI + 1 && aPL[nI + 1].dtStartHardSoft.Subtract(aPL[nI].dtStartHardSoft).TotalSeconds == 1)
+						{
+							aTailOfBlock.Add(aPL[nI + 1]);
+							nI++;
+						}
+						foreach (PlaylistItemSL cPLI in aTailOfBlock)
+							cPLI.dtStartHardSoft = cPLI.dtStartHardSoft.AddSeconds(aAssets.Count);
+
+						PlaylistItem[] aInsertedPLIs = PreparePLIsFromAssets(DateTime.MaxValue, _cPlayListItemCurrent.dtStartHardSoft.AddSeconds(1), _cPlayListItemCurrent.dtStopPlanned, aAssets);
+						int nHours = (int)aTailOfBlock[aTailOfBlock.Count - 1].dtStopPlanned.Subtract(aTailOfBlock[0].dtStartPlanned).TotalHours + 1;
+						_cDBI.InsertInBlockAsync(aInsertedPLIs, PlaylistItemSL.GetArrayOfBases(aTailOfBlock.ToArray()), new long[2] { _cPlayListItemCurrent.nID, 5 });
+					}
+					else // вставляем после блока или вообще вне блока
+						_cDBI.PlaylistInsertAsync(AssetSL.GetArrayOfBases(aAssets.ToArray()), PlaylistItemSL.GetBase(_cPlayListItemCurrent), aAssets);
+				}
 				else
 				{
-					_dlgMsg.ShowError(g.Replica.sNoticePlaylist3);
+					_dlgMsg.ShowError(g.Replica.sNoticePlaylist36);
 					_dlgProgress.Close();
 				}
 			}
@@ -626,12 +686,12 @@ namespace replica.sl
 						if (((PlaylistItemSL)oPLI).dtTimingsUpdate == DateTime.MaxValue)
 							_ui_cmPlannedGroupMoving.IsEnabled = false;
 
-					_ui_cmPlannedCopySelected.IsEnabled = false; // надо подумать... штука опасная и ненужная вроде
+					_ui_cmPlannedCopySelected.IsEnabled = true; // надо подумать... штука опасная и ненужная вроде
 					_ui_cmPlannedTimedCopySelected.IsEnabled = true;
 					_ui_cmPlannedAdvancedPL.IsEnabled = true;
                 }
             }
-            if (null != _btnActivePlannedFilter)
+            if (DateTime.MinValue < _dtActivePlannedDate)
             {
                 _ui_cmPlannedRefresh.IsEnabled = true;
             }
@@ -699,8 +759,8 @@ namespace replica.sl
 
 		void cMsgDel_Closed(object sender, EventArgs e)
 		{
-			_dlgProgress.Show();
-			_dlgProgress.Close();
+			//_dlgProgress.Show();
+			//_dlgProgress.Close();
 			MsgBox cMsg = (MsgBox)sender;
 			cMsg.Closed -= cMsgDelSince_Closed;
 			if (MsgBox.MsgBoxButton.OK == cMsg.enMsgResult)
@@ -708,10 +768,10 @@ namespace replica.sl
 				PlannedDelete();
 			}
 		}
-		List<IdNamePair> aSelectedToDel;
+		List<PlaylistItemSL> _aPLIsToDelete;
 		void PlannedDelete()
 		{
-			aSelectedToDel = new List<IdNamePair>();
+			_aPLIsToDelete = new List<PlaylistItemSL>();
 			MsgBox cMsgDelNewPLIs;
  			bool bIfThereAreNewPLIs=false;
 			if (0 < _ui_dgPlanned.SelectedItems.Count)
@@ -719,7 +779,7 @@ namespace replica.sl
 				foreach (PlaylistItemSL cPLI in _ui_dgPlanned.SelectedItems)
 				{
 					if (cPLI.nID > 0)
-						aSelectedToDel.Add(new IdNamePair() { nID = cPLI.nID, sName = cPLI.sName });
+						_aPLIsToDelete.Add(cPLI);
 					else
 						bIfThereAreNewPLIs = true;
 				}
@@ -727,7 +787,7 @@ namespace replica.sl
 			else
 			{
 				if (_cPlayListItemCurrent.nID > 0)
-					aSelectedToDel.Add(new IdNamePair() { nID = _cPlayListItemCurrent.nID, sName = _cPlayListItemCurrent.sName });
+					_aPLIsToDelete.Add(_cPlayListItemCurrent);
 				else
 					bIfThereAreNewPLIs = true;
 			}
@@ -741,19 +801,27 @@ namespace replica.sl
 			else
 			{
 				_dlgProgress.Show();
-				_cDBI.PlaylistItemsDeleteAsync(aSelectedToDel.ToArray(), aSelectedToDel);
-			}
+				DeletSelectedItems(_aPLIsToDelete);
+            }
 		}
-
+		void DeletSelectedItems(List<PlaylistItemSL> aPLIs)
+		{
+			List<IdNamePair> aSelectedToDel = new List<IdNamePair>();
+			foreach (PlaylistItemSL cPLI in aPLIs)
+			{
+				aSelectedToDel.Add(new IdNamePair() { nID = cPLI.nID, sName = cPLI.sName });
+			}
+			_cDBI.PlaylistItemsDeleteAsync(aSelectedToDel.ToArray(), aPLIs);
+		}
 		void cMsgDelNewPLIs_Closed(object sender, EventArgs e)
 		{
 			MsgBox cMsg = (MsgBox)sender;
 			cMsg.Closed -= cMsgDelSince_Closed;
 			_dlgProgress.Show();
-			if (MsgBox.MsgBoxButton.OK == cMsg.enMsgResult && aSelectedToDel.Count > 0)
+			if (MsgBox.MsgBoxButton.OK == cMsg.enMsgResult && _aPLIsToDelete.Count > 0)
 			{
-				_cDBI.PlaylistItemsDeleteAsync(aSelectedToDel.ToArray(), aSelectedToDel);
-			}
+				DeletSelectedItems(_aPLIsToDelete);
+            }
 			else
 				_dlgProgress.Close(); // против глюка с белесым экраном
 		}
@@ -819,8 +887,8 @@ namespace replica.sl
 		}
         private void _ui_cmPlanned_Refresh(object sender, RoutedEventArgs e)
         {
-            if (null != _btnActivePlannedFilter)
-                Planned_Click(_btnActivePlannedFilter, null);
+			if (_dtActivePlannedDate > DateTime.MinValue)
+				PlannedShow(_dtActivePlannedDate);
         }
         private void _ui_cmOnAir_Opened(object sender, RoutedEventArgs e)
         {
@@ -881,11 +949,31 @@ namespace replica.sl
 		}
 		private void _ui_cmPlanned_AdvancedPL(object sender, RoutedEventArgs e)
 		{
-			
+			controls.childs.replica.sl.AdvancedPlaylist dlgAdvancedPL = new controls.childs.replica.sl.AdvancedPlaylist();
+			dlgAdvancedPL.Closed += DlgAdvancedPL_Closed;
+            dlgAdvancedPL.dtSelectedInPL = _cPlayListItemCurrent.dtStartPlanned;
+            dlgAdvancedPL.Show();
 		}
-        
+		
+		private void DlgAdvancedPL_Closed(object sender, EventArgs e)
+		{
+			controls.childs.replica.sl.AdvancedPlaylist dlgAdvancedPL = (controls.childs.replica.sl.AdvancedPlaylist)sender;
+			dlgAdvancedPL.Closed -= DlgAdvancedPL_Closed;
+			_dlgProgress.Show();
+			_dlgProgress.Close();
+		}
+
+		private void _dlgMsg_Closed_negative(object sender, EventArgs e)
+		{
+			if (true)    //_dlgMsg.DialogResult == false
+			{
+				//_dlgProgress.Show();
+				//_dlgProgress.Close();
+			}
+		}
 		void _dlgMsg_Closed(object sender, EventArgs e)
 		{
+			_dlgMsg.Closed -= _dlgMsg_Closed;
 			int nCopiesQty;
 			if (_dlgMsg.DialogResult == true && int.TryParse(_dlgMsg.sText, out nCopiesQty) && 0 < _ui_dgPlanned.SelectedItems.Count)
 			{
@@ -893,11 +981,6 @@ namespace replica.sl
 				_cDBI.PlaylistLastElementGetAsync(nCopiesQty);
 				//_cPlayListItemCurrent = _aPlayListItemsPlanned[_aPlayListItemsPlanned.Count - 1];
 				//_cDBI.PlaylistInsertCopiesAsync(aAssets.ToArray(), PlaylistItemSL.GetBase(_cPlayListItemCurrent), nCopiesQty, aAllAssets);
-			}
-			else
-			{
-				_dlgProgress.Show();
-				_dlgProgress.Close();
 			}
 		}
 		private void _ui_cmPlannedTimedCopySelected_Click(object sender, RoutedEventArgs e)
@@ -974,10 +1057,10 @@ namespace replica.sl
 				cPLI = PlaylistItemSL.GetBase(cPLISL);
 				cPLI.nID = -1;
 				cPLI.dtTimingsUpdate = DateTime.MaxValue;
-				if (null != cPLI.cAsset)
-					cPLI.cAsset.cClass = cPLI.cClass;
+                if (null != cPLI.cAsset)
+                    cPLI.cAsset.aClasses = cPLI.aClasses;
 
-				aPLIs.Add(cPLI);
+                aPLIs.Add(cPLI);
 
 				if (cPLI_pre == null)
 				{
@@ -1008,9 +1091,9 @@ namespace replica.sl
 
 			aPLIs = aPLIs.Where(o => !o.bPlug).ToList();
 			_aPLIsJustInserted = PlaylistItemSL.GetArrayOfPlaylistItemSLs(aPLIs.ToArray()).ToList();
-			_cDBI.PlaylistItemsAddAsync(aPLIs.ToArray(), aPLIs.ToArray());
+			_cDBI.PlaylistItemsAddWorkerAsync(aPLIs.ToArray(), aPLIs.ToArray());
 		}
-		void DoAddingAssetsAsBlock(DateTime dtStartHard, DateTime dtStartSoft, DateTime dtPlanned, List<AssetSL> aAssetsSL, DateTime dtStart)
+		PlaylistItem[] PreparePLIsFromAssets(DateTime dtStartHard, DateTime dtStartSoft, DateTime dtPlanned, List<AssetSL> aAssetsSL)
 		{
 			PlaylistItem[] aPLIs = new PlaylistItem[aAssetsSL.Count];
 			PlaylistItem cPLI;
@@ -1023,8 +1106,8 @@ namespace replica.sl
 				cPLI = new PlaylistItem()
 				{
 					cAsset = AssetSL.GetAsset(cAss),
-					cClass = cAss.cClass,
-					dtStartHard = DateTime.MaxValue,
+                    aClasses = cAss.aClasses,
+                    dtStartHard = DateTime.MaxValue,
 					dtStartSoft = DateTime.MaxValue,
 					dtStartPlanned = DateTime.MaxValue,
 					dtStartQueued = DateTime.MaxValue,
@@ -1045,11 +1128,11 @@ namespace replica.sl
 				{
 					cPLI.dtStartHard = dtStartHard;
 					cPLI.dtStartSoft = dtStartSoft;
-					cPLI.dtStartPlanned = dtPlanned;
+					//cPLI.dtStartPlanned = dtPlanned;
 					if (bAsPlanned)
 						cPLI.dtStartPlanned = PLIHardSoftPlanned(cPLI);
 					else
-						cPLI.dtStartPlanned = PLIHardSoft(cPLI);
+						cPLI.dtStartPlanned = dtPlanned == DateTime.MaxValue ? PLIHardSoft(cPLI) : dtPlanned;
 				}
 				else
 				{
@@ -1060,6 +1143,11 @@ namespace replica.sl
 				}
 				aPLIs[nI++] = cPLI;
 			}
+			return aPLIs;
+		}
+		void DoAddingAssetsAsBlock(DateTime dtStartHard, DateTime dtStartSoft, DateTime dtPlanned, List<AssetSL> aAssetsSL)
+		{
+			PlaylistItem[] aPLIs = PreparePLIsFromAssets(dtStartHard, dtStartSoft, dtPlanned, aAssetsSL);
 			_dlgProgress.Close();
 			_aPLIsJustInserted = PlaylistItemSL.GetArrayOfPlaylistItemSLs(aPLIs).ToList();
 			AddSequencedToPL(aPLIs);
@@ -1193,7 +1281,7 @@ namespace replica.sl
 					case "proccessing":
 						if (null == _cTimerForCommandResult)
 						{
-							_dtCommandBegin = DateTime.Now.AddMinutes(3);
+							_dtCommandTimeout = DateTime.Now.AddSeconds(Preferences.cServer.nPLRecalculateTimeout);
 							_cTimerForCommandResult = new System.Windows.Threading.DispatcherTimer();
 							_cTimerForCommandResult.Tick +=
 									delegate(object s, EventArgs args)
@@ -1203,22 +1291,18 @@ namespace replica.sl
 									};
 							_cTimerForCommandResult.Interval = new System.TimeSpan(0, 0, 0, 0, 1000);
 						}
-						if (DateTime.Now < _dtCommandBegin)
+						if (DateTime.Now < _dtCommandTimeout)
 						{
 							_cTimerForCommandResult.Start();
 							return;
 						}
 						else
 						{
-							_dlgMsg.ShowError(g.Replica.sErrorPlaylist4 + "! " + g.Common.sErrorTimeout.Fmt("3-x"));//ch=child 
-							_dlgProgress.Show();
-							_dlgProgress.Close();
+							_dlgMsg.ShowError(g.Replica.sErrorPlaylist4 + "! " + g.Common.sErrorTimeout.Fmt(Preferences.cServer.nPLRecalculateTimeout));//ch=child 
 							break;
 						}
 					case "failed":                     // месага об ошибке + вернуть старый файл
 						_dlgMsg.ShowError(g.Replica.sErrorPlaylist4 + "!");   //ch=child 
-						_dlgProgress.Show();
-						_dlgProgress.Close();
 						break;
 					case "succeed":
 						//_ui_btnOnAirRefresh_Click(null, null);
@@ -1235,10 +1319,6 @@ namespace replica.sl
         {
             _ui_lblPLRecalcPartText.Visibility = Visibility.Visible;
             _ui_pbPLRecalcPartProgress.Visibility = Visibility.Collapsed;
-        }
-        void _cDBI_PlaylistItemsAddCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-			_cDBI.PlaylistItemAdd_ResultGetAsync();
         }
 
 		void ResetButtonPLImport()
@@ -1267,7 +1347,7 @@ namespace replica.sl
 					case "proccessing":
 						if (null == _cTimerForPLAddResult)
 						{
-							_dtPLImportTimeout = DateTime.Now.AddMinutes(60);
+							_dtPLImportTimeout = DateTime.Now.AddSeconds(Preferences.cServer.nPLImportTimeout);
 							_cTimerForPLAddResult = new System.Windows.Threading.DispatcherTimer();
 							_cTimerForPLAddResult.Tick +=
 									delegate(object s, EventArgs args)
@@ -1284,7 +1364,7 @@ namespace replica.sl
 						}
 						else
 						{
-                            _dlgMsg.Show(g.Common.sErrorAdd + "! " + g.Common.sErrorTimeout.Fmt("60"));   //ch=child 
+                            _dlgMsg.Show(g.Common.sErrorAdd + "! " + g.Common.sErrorTimeout.Fmt(Preferences.cServer.nPLImportTimeout));   //ch=child 
 							break;
 						}
 					case "failed":                     // месага об ошибке + вернуть старый файл
@@ -1353,11 +1433,11 @@ namespace replica.sl
 				List<string> aNotInserted = new List<string>();
 				for (int ni = 0; aAssets.Count > ni; ni++)
 				{
-					if (-1 < aPLIs[ni].nID)
-						aItemsInserted.Add(new PlaylistItemSL() { dtTimingsUpdate = DateTime.MaxValue, cAsset =AssetSL.GetAsset(aAssets[ni]), cClass = aPLIs[ni].cClass, nFrameStop = aPLIs[ni].nFrameStop, nFrameStart = aPLIs[ni].nFrameStart, sName = aPLIs[ni].sName, nID = aPLIs[ni].nID, cFile = aPLIs[ni].cFile, cStatus = aPLIs[ni].cStatus });
-					else
-						aNotInserted.Add(aAssets[ni].sName);
-				}
+                    if (-1 < aPLIs[ni].nID)
+                        aItemsInserted.Add(new PlaylistItemSL() { dtTimingsUpdate = DateTime.MaxValue, cAsset = AssetSL.GetAsset(aAssets[ni]), aClasses = aPLIs[ni].aClasses, nFrameStop = aPLIs[ni].nFrameStop, nFrameStart = aPLIs[ni].nFrameStart, sName = aPLIs[ni].sName, nID = aPLIs[ni].nID, cFile = aPLIs[ni].cFile, cStatus = aPLIs[ni].cStatus });
+                    else
+                        aNotInserted.Add(aAssets[ni].sName);
+                }
 				if (0 < aNotInserted.Count)
 				{
 					ListBox lb = new ListBox();
@@ -1437,7 +1517,7 @@ namespace replica.sl
 				if (null != e.UserState && e.UserState is AssetsChooser)
 				{
 					AssetsChooser dlgAC = (AssetsChooser)e.UserState;
-					DoAddingAssetsAsBlock(dlgAC.dtHard, dlgAC.dtSoft, dlgAC.dtPlanned, dlgAC.aSelectedAssets, dlgAC.dtSelected);  
+					DoAddingAssetsAsBlock(dlgAC.dtHard, dlgAC.dtSoft, dlgAC.dtPlanned, dlgAC.aSelectedAssets);  
 					return;
 				}
 				if (null != e.UserState && e.UserState is TimedCopyInfo)
@@ -1460,11 +1540,26 @@ namespace replica.sl
 		{
 			_ui_lblPLImportText.Visibility = Visibility.Collapsed;
 			_ui_pbPLImportProgress.Visibility = Visibility.Visible;
-			_cDBI.PlaylistItemsAddAsync(aPLIs);
-
+			//_dlgMsg.Show("total plis = " + aPLIs.Length);
+			//_cDBI.PlaylistItemsAddTestAsync(_aPLIs);
+			_nAttemptsCount = 0;
+			_cDBI.PlaylistItemsAddWorkerAsync(aPLIs, aPLIs);
 		}
+		void _cDBI_PlaylistItemsAddCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+		{
+			if (e.Error != null && _nAttemptsCount <= 10)
+			{
+				_nAttemptsCount++;
+				_cDBI.PlaylistItemsAddWorkerAsync((PlaylistItem[])e.UserState, (PlaylistItem[])e.UserState);        // борьба с багом, когда иногда приходиться по несколько раз обращаться к серваку, иначе не видим его. Почему-то только при этом вызове - "PlaylistItemsAddWorkerAsync"!
+			}
+			else if (e.Error == null)
+				_cDBI.PlaylistItemAdd_ResultGetAsync();
+			else
+				_cDBI.PlaylistItemsAddWorkerAsync(null);   // прекращение дальнейших попыток
+		}
+
 		#region контекстное меню
-        void _cDBI_PlaylistItemStartsSetCompleted(object sender, PlaylistItemStartsSetCompletedEventArgs e)
+		void _cDBI_PlaylistItemStartsSetCompleted(object sender, PlaylistItemStartsSetCompletedEventArgs e)
         {
 			sPROBA_ERR += g.Replica.sNoticePlaylist15 + e.Result + Environment.NewLine;
             if (DateTime.MaxValue == e.Result)
@@ -1491,30 +1586,75 @@ namespace replica.sl
                 return;
             }
 			long nScrollID;
-            List<IdNamePair> aDeleted = (List<IdNamePair>)e.UserState;
+			long nDuration = 0;
+            List<PlaylistItemSL> aDeletedPLIs = (List<PlaylistItemSL>)e.UserState;
             if (0 < e.Result.Length)  // не все удалились
             {
                 MsgBox dlgRes = new MsgBox();
                 ListBox ui_lbErr = new ListBox();
-                ui_lbErr.ItemsSource = e.Result;
-                ui_lbErr.SetBinding(ListBox.ItemsSourceProperty, new Binding("sName"));
+                //ui_lbErr.SetBinding(ListBox.ItemsSourceProperty, new Binding("sName"));
+                ui_lbErr.ItemsSource = e.Result.Select(o => o.sName).ToList();
                 dlgRes.ShowError(g.Common.sErrorDelete, ui_lbErr);
                 nScrollID = e.Result[0].nID; // первый неудаленный
             }
             else
             {
-				nScrollID = helper.FindPrevItemID(_ui_dgPlanned.ItemsSource, typeof(PlaylistItemSL), "nID", ((List<IdNamePair>)e.UserState)[0].nID);
-            }
-            foreach (IdNamePair cID in aDeleted)  // удаляем кроме неудаленных
-            {
-                if (e.Result.Contains(cID))
-                    continue;
-                try
-                {
-                    _aPlayListItemsPlanned.Remove(_aPlayListItemsPlanned.FirstOrDefault(o => o.nID == cID.nID));
-                }
-                catch { }
-            }
+				nScrollID = helper.FindPrevItemID(_ui_dgPlanned.ItemsSource, typeof(PlaylistItemSL), "nID", ((List<PlaylistItemSL>)e.UserState)[0].nID);
+			}
+			PlaylistItemSL cPLIFirst = _aPlayListItemsPlanned.FirstOrDefault(o => o.nID == aDeletedPLIs[0].nID);
+			List<PlaylistItemSL> aPLIsInBlock = new List<PlaylistItemSL>();
+            int nBeforeFirst = -1;
+			bool bDeletingFromBlock = false;
+			bool bDeletingAllFromMiddleOfOneBlock = false;
+			if (null != cPLIFirst)   // если все удалились и были из одного блока, то поправим тайминги (в более сложных случаях пусть пересчитывают и обновляют ПЛ и руками слепляют блоки)
+			{						//TODO  также сделать вставку!
+				nBeforeFirst = _aPlayListItemsPlanned.IndexOf(cPLIFirst) - 1;
+				if (0 <= nBeforeFirst && aDeletedPLIs[0].dtStartSoft.Subtract(PLIHardSoft(_aPlayListItemsPlanned[nBeforeFirst])).TotalSeconds == 1)
+				{
+					bDeletingFromBlock = true;
+					bDeletingAllFromMiddleOfOneBlock = true;
+					if (nBeforeFirst + aDeletedPLIs.Count <= _aPlayListItemsPlanned.Count)
+						for (int nI = nBeforeFirst+1; nI <= nBeforeFirst + aDeletedPLIs.Count; nI++)
+						{
+							if (_aPlayListItemsPlanned[nI + 1].dtStartSoft.Subtract(_aPlayListItemsPlanned[nI].dtStartSoft).TotalSeconds != 1)
+							{
+								bDeletingAllFromMiddleOfOneBlock = false;
+								break;
+							}
+						}
+					if (bDeletingAllFromMiddleOfOneBlock)
+					{
+						aPLIsInBlock.Add(_aPlayListItemsPlanned[nBeforeFirst + aDeletedPLIs.Count + 1]);
+                        for (int nI = nBeforeFirst + aDeletedPLIs.Count + 2; nI < _aPlayListItemsPlanned.Count; nI++)
+						{
+							if (_aPlayListItemsPlanned[nI].dtStartSoft.Subtract(_aPlayListItemsPlanned[nI-1].dtStartSoft).TotalSeconds != 1)
+							{
+								break;
+							}
+							aPLIsInBlock.Add(_aPlayListItemsPlanned[nI]);
+						}
+						foreach (PlaylistItemSL cPLI in aDeletedPLIs)
+								nDuration += cPLI.nDuration;
+						foreach (PlaylistItemSL cPLI in aPLIsInBlock)
+						{
+							cPLI.dtStartSoft = cPLI.dtStartSoft.AddSeconds(-1 * aDeletedPLIs.Count);
+							cPLI.dtStartPlanned = cPLI.dtStartPlanned.AddMilliseconds(-40 * nDuration);
+						}
+						_cDBI.PlaylistItemsTimingsSetAsync(PlaylistItemSL.GetArrayOfBases(aPLIsInBlock.ToArray()));
+					}
+				}
+			}
+			foreach (PlaylistItemSL cPLI in aDeletedPLIs)  // удаляем кроме неудаленных
+			{
+				if (null != e.Result.FirstOrDefault(o => o.nID == cPLI.nID))
+					continue;
+				try
+				{
+					_aPlayListItemsPlanned.Remove(_aPlayListItemsPlanned.FirstOrDefault(o => o.nID == cPLI.nID));
+				}
+				catch { }
+			}
+
 			if (0 > nScrollID && 0 < _aPlayListItemsPlanned.Count)
 				nScrollID = _aPlayListItemsPlanned[0].nID;
             ShowPlanned();
@@ -1532,7 +1672,7 @@ namespace replica.sl
             {
                 if (e.Result > 0)
                     _dlgMsg.ShowError(g.Replica.sErrorPlaylist9.Fmt(e.Result));
-                Planned_Click(_btnActivePlannedFilter, null);
+				PlannedShow(_dtActivePlannedDate);
             }
         }
 		void _cDBI_GroupMovingCompleted(object sender, GroupMovingCompletedEventArgs e)
@@ -1543,6 +1683,15 @@ namespace replica.sl
 				_dlgMsg.Show(g.Replica.sNoticePlaylist16.Fmt(Environment.NewLine), g.Common.sInformation, MsgBox.MsgBoxButton.OK);
 			_dlgProgress.Close();
 		}
+		private void _cDBI_InsertInBlockCompleted(object sender, InsertInBlockCompletedEventArgs e)
+		{
+			if (null != e.Result)
+				_dlgMsg.ShowError(e.Result);
+			long[] aParams = (long[])e.UserState;
+			_cDBI.PlaylistRecalculateQueryAsync(aParams[0], (ushort)aParams[1]);
+			_dlgProgress.Close();
+		}
+
 		void ScrollTo(long nID)
 		{
 			PlaylistItemSL cPLI = _aPlayListItemsPlanned.FirstOrDefault(ass => ass.nID == nID);

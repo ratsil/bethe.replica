@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.ServiceProcess;
 using System.Threading;
 
@@ -34,7 +34,7 @@ namespace replica.player
 
 			try
 			{
-				(new Logger("service")).WriteNotice("ïîëó÷åí ñèãíàë íà çàïóñê");//TODO LANG
+				(new Logger("service")).WriteWarning("Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½ ÑÐ¸Ð³Ð½Ð°Ð» Ð½Ð° Ð·Ð°Ð¿ÑƒÑÐº");//TODO LANG
 				_bRunning = true;
 				_nThreadsFinished = 0;
 				_cPlayer = new Player();
@@ -53,7 +53,7 @@ namespace replica.player
         {
 			try
 			{
-				(new Logger("service")).WriteNotice("ïîëó÷åí ñèãíàë íà îñòàíîâêó");//TODO LANG
+				(new Logger("service")).WriteWarning("Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½ ÑÐ¸Ð³Ð½Ð°Ð» Ð½Ð° Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÑƒ");//TODO LANG
 				_bRunning = false;
 				DateTime dt = DateTime.Now;
 				_cPlaylist.Stop();
@@ -61,7 +61,7 @@ namespace replica.player
 				while (1 > _nThreadsFinished && DateTime.Now.Subtract(dt).TotalSeconds < 2)
 					Thread.Sleep(300);
 				if (1 > _nThreadsFinished)
-					(new Logger("service")).WriteNotice("ïðåâûøåíî îæèäàíèå çàâåðøåíèÿ ïîòîêîâ");
+					(new Logger("service")).WriteNotice("Ð¿Ñ€ÐµÐ²Ñ‹ÑˆÐµÐ½Ð¾ Ð¾Ð¶Ð¸Ð´Ð°Ð½Ð¸Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ñ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¾Ð²");
 			}
 			catch (Exception ex)
 			{
@@ -71,13 +71,13 @@ namespace replica.player
 
 		private void WatcherCommands(object cStateInfo)
 		{
-			(new Logger("commands")).WriteNotice("ìîäóëü óïðàâëåíèÿ êîìàíäàìè çàïóùåí");//TODO LANG
+			(new Logger("commands")).WriteNotice("Ð¼Ð¾Ð´ÑƒÐ»ÑŒ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°Ð¼Ð¸ Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½");//TODO LANG
 			while (_bRunning)
 			{
 				try
 				{
 					(new DBInteract()).ProcessCommands(new Delegate[] { (DBInteract.PlayerSkipDelegate)_cPlayer.Skip });
-					Thread.Sleep(300);
+					Thread.Sleep(500);
 				}
 				catch (Exception ex)
 				{
@@ -85,14 +85,14 @@ namespace replica.player
 					Thread.Sleep(5000);
 				}
 			}
-			(new Logger("commands")).WriteNotice("ìîäóëü óïðàâëåíèÿ êîìàíäàìè îñòàíîâëåí");//TODO LANG
+			(new Logger("commands")).WriteNotice("Ð¼Ð¾Ð´ÑƒÐ»ÑŒ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°Ð¼Ð¸ Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½");//TODO LANG
 			_nThreadsFinished++;
 		}
 		//private void WatcherPlaylist(object cStateInfo)
 		//{
 		//    try
 		//    {
-		//        (new Logger("playlist")).WriteNotice("ìîäóëü ïëåéëèñòà çàïóùåí");//TODO LANG
+		//        (new Logger("playlist")).WriteNotice("Ð¼Ð¾Ð´ÑƒÐ»ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð° Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½");//TODO LANG
 		//        PlaylistItem cPLIPrevious = null;
 		//        DBInteract cDBI = null;
 		//        int nEmptySlots = 0;
@@ -115,13 +115,13 @@ namespace replica.player
 		//                    {
 		//                        cPLIPrevious = cDBI.PlaylistItemCurrentGet();
 		//                        if (null == cPLIPrevious)
-		//                            throw new Exception("íà òåêóùåå âðåìÿ çàïëàíèðîâàííîå âîñïðîèçâåäåíèå îòñóòñòâóåò");
+		//                            throw new Exception("Ð½Ð° Ñ‚ÐµÐºÑƒÑ‰ÐµÐµ Ð²Ñ€ÐµÐ¼Ñ Ð·Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ð¾Ðµ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚");
 		//                        _cPlayer.QueueAdd(cPLIPrevious);
 		//                    }
 		//                    catch (System.IO.FileNotFoundException e)
 		//                    {
 		//                        cPLIPrevious = null;
-		//                        (new Logger("playlist")).WriteError(new Exception("îòñóòñòâóåò óêàçàííûé ôàéë ["+e.Message+"]"));
+		//                        (new Logger("playlist")).WriteError(new Exception("Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ ÑƒÐºÐ°Ð·Ð°Ð½Ð½Ñ‹Ð¹ Ñ„Ð°Ð¹Ð» ["+e.Message+"]"));
 		//                    }
 		//                    catch (Exception ex)
 		//                    {
@@ -191,9 +191,9 @@ namespace replica.player
 		//                        {
 		//                            if(!System.IO.File.Exists(aPLIs[nIndx].cFile.sFile))
 		//                            {
-		//                                cDBI.PlaylistItemStop(aPLIs[nIndx]); //TODO: âûñòàâèòü ôëàã îøèáêè íà ôàéë
+		//                                cDBI.PlaylistItemStop(aPLIs[nIndx]); //TODO: Ð²Ñ‹ÑÑ‚Ð°Ð²Ð¸Ñ‚ÑŒ Ñ„Ð»Ð°Ð³ Ð¾ÑˆÐ¸Ð±ÐºÐ¸ Ð½Ð° Ñ„Ð°Ð¹Ð»
 		//                                cPLIPrevious = aPLIs[nIndx];
-		//                                (new Logger("playlist")).WriteNotice("ÍÅ ÍÀÉÄÅÍ ÔÀÉË:" + aPLIs[nIndx].cFile.sFile);
+		//                                (new Logger("playlist")).WriteNotice("ÐÐ• ÐÐÐ™Ð”Ð•Ð Ð¤ÐÐ™Ð›:" + aPLIs[nIndx].cFile.sFile);
 		//                                (new Logger("playlist")).WriteNotice("***************************************************************************");
 		//                                continue;
 		//                            }
@@ -214,7 +214,7 @@ namespace replica.player
 		//                                        )
 		//                                    )
 		//                                    {
-		//                                        (new Logger("playlist")).WriteNotice("ÎÁÍÀÐÓÆÅÍÎ ÎÒÑÓÒÑÒÂÈÅ ÊÎÍÒÅÍÒÀ ÌÅÆÄÓ [" + cPLIPrevious.cFile.sFile + "] È [" + aPLIs[nIndx].cFile.sFile + "]");
+		//                                        (new Logger("playlist")).WriteNotice("ÐžÐ‘ÐÐÐ Ð£Ð–Ð•ÐÐž ÐžÐ¢Ð¡Ð£Ð¢Ð¡Ð¢Ð’Ð˜Ð• ÐšÐžÐÐ¢Ð•ÐÐ¢Ð ÐœÐ•Ð–Ð”Ð£ [" + cPLIPrevious.cFile.sFile + "] Ð˜ [" + aPLIs[nIndx].cFile.sFile + "]");
 		//                                        (new Logger("playlist")).WriteNotice("***************************************************************************");
 		//                                        cPLIPrevious = null;
 		//                                        break;
@@ -224,7 +224,7 @@ namespace replica.player
 		//                                //if (cPLIPrevious.nDuration - nFramesNeeded >= Preferences.nFPS && Preferences.nMinimumFrames <= nFramesNeeded)
 		//                                //{
 		//                                //    cPLIPrevious.nFrameStop = (int)((((ulong)cPLIPrevious.nFrameStart + nFramesNeeded) / Preferences.nFPS) * Preferences.nFPS);
-		//                                //    (new Logger("playlist")).WriteNotice("äîïèíôî [" + cPLIPrevious.nDuration + "][" + nFramesNeeded + "][" + cPLIPrevious.nFrameStop + "][" + cPLIPrevious.nFrameStart + "]");
+		//                                //    (new Logger("playlist")).WriteNotice("Ð´Ð¾Ð¿Ð¸Ð½Ñ„Ð¾ [" + cPLIPrevious.nDuration + "][" + nFramesNeeded + "][" + cPLIPrevious.nFrameStop + "][" + cPLIPrevious.nFrameStart + "]");
 		//                                //    cPLIPrevious.nFrameStop = (int)(((ulong)cPLIPrevious.nFrameStart + nFramesNeeded) / Preferences.nFPS * Preferences.nFPS);
 		//                                //    QueueUpdate(cPLIPrevious);
 		//                                //}
@@ -256,7 +256,7 @@ namespace replica.player
 		//        (new Logger("playlist")).WriteError(ex);
 		//    }
 
-		//    (new Logger("playlist")).WriteNotice("ìîäóëü ïëåéëèñòà îñòàíîâëåí");//TODO LANG
+		//    (new Logger("playlist")).WriteNotice("Ð¼Ð¾Ð´ÑƒÐ»ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð° Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½");//TODO LANG
 		//    _nThreadsFinished++;
 		//}
 	}

@@ -26,16 +26,23 @@ namespace webservice.services
 			}
             ~StoreAtom()
             {
-                if (Logger.Level.debug4 < Logger.eLevelMinimum)
-                    return;
-                string sRez = " ~StoreAtom(): StackTrace";
-                StackTrace st = new StackTrace(true);
-                for (int i = 0; i < st.FrameCount; i++)
+                try
                 {
-                    StackFrame sf = st.GetFrame(i);
-                    sRez += "/n/r/t[type " + sf.GetType() + "] [filename " + sf.GetFileName() + "] [method " + sf.GetMethod() + "] [line " + sf.GetFileLineNumber() + "]";
+                    if (Logger.Level.debug4 < Logger.eLevelMinimum)
+                        return;
+                    string sRez = " ~StoreAtom(): StackTrace";
+                    StackTrace st = new StackTrace(true);
+                    for (int i = 0; i < st.FrameCount; i++)
+                    {
+                        StackFrame sf = st.GetFrame(i);
+                        sRez += "/n/r/t[type " + sf.GetType() + "] [filename " + sf.GetFileName() + "] [method " + sf.GetMethod() + "] [line " + sf.GetFileLineNumber() + "]";
+                    }
+                    (new Logger()).WriteDebug4(sRez);
                 }
-                (new Logger()).WriteDebug4(sRez);
+                catch (Exception ex)
+                {
+                    (new Logger()).WriteError(ex);
+                }
             }
 
 			public object ValueGet(string sValueName)
@@ -67,14 +74,22 @@ namespace webservice.services
 			{
 				if (null == _sSessionID)
 					return null;
+				(new Logger()).WriteDebug3("_cStoreAtom: [_ahContainer.count=" + _ahContainer == null ? "NULL" : _ahContainer.Count + "]");
 				if (!_ahContainer.ContainsKey(_sSessionID))
 					_ahContainer.Add(_sSessionID, new StoreAtom(_sSeed));
 				try
 				{
+					HttpContext context = HttpContext.Current;
+					(new Logger()).WriteDebug3("_cStoreAtom: try in");
+					(new Logger()).WriteDebug3("_cStoreAtom: [HttpContext.Current" + (HttpContext.Current == null ? "=NULL" : (HttpContext.Current.Session == null ? ".Session = NULL" : HttpContext.Current.Session.SessionID)) + "]");
 					HttpContext.Current.Session["replica"] = true;
 					SessionIDsReform();
 				}
-				catch { }
+				catch(Exception ex)
+				{
+					(new Logger()).WriteError("_cStoreAtom error:", ex);
+					(new Logger()).WriteError("current_session=["+ HttpContext.Current.Session.SessionID + "][url="+ HttpContext.Current.Request.Url + "][url_ref=" + HttpContext.Current.Request.UrlReferrer + "]" + HttpContext.Current.Session + "]", ex);
+				}
 				return _ahContainer[_sSessionID];
 			}
 			set
@@ -88,12 +103,15 @@ namespace webservice.services
 					HttpContext.Current.Session["replica"] = true;
 					SessionIDsReform();
 				}
-				catch { }
+				catch (Exception ex)
+				{
+					(new Logger()).WriteError("current_session=[" + HttpContext.Current.Session.SessionID + "][url=" + HttpContext.Current.Request.Url + "][url_ref=" + HttpContext.Current.Request.UrlReferrer + "]" + HttpContext.Current.Session + "]", ex);
+				}
 			}
 		}
 		public SessionInfo(string sSeed)
 		{
-			(new Logger()).WriteDebug3("in");
+			(new Logger()).WriteDebug3("SessionInfo_in");
 			if (null == HttpContext.Current.Request || null == HttpContext.Current.Request.Cookies || null == HttpContext.Current.Request.Cookies["ASP.NET_SessionId"])
 			{
 				try
@@ -136,7 +154,10 @@ namespace webservice.services
 				}
 			}
 			else
+			{
+				(new Logger()).WriteDebug2("SessionInfo: _ahContainer created");
 				_ahContainer = new Dictionary<string, StoreAtom>();
+			}
 			(new Logger()).WriteDebug4("return");
 		}
 

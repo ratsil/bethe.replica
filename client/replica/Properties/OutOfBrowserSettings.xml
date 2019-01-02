@@ -1,7 +1,7 @@
-<OutOfBrowserSettings ShortName="replica" EnableGPUAcceleration="False" ShowInstallMenuItem="True">
+<OutOfBrowserSettings ShortName="replica" EnableGPUAcceleration="True" ShowInstallMenuItem="True">
   <OutOfBrowserSettings.Blurb>replica</OutOfBrowserSettings.Blurb>
   <OutOfBrowserSettings.WindowSettings>
-    <WindowSettings Title="replica management" WindowStyle="BorderlessRoundCornersWindow" />
+    <WindowSettings Title="replica management" Height="1000" Width="1200" Top="100" Left="100" WindowStartupLocation="Manual" />
   </OutOfBrowserSettings.WindowSettings>
   <OutOfBrowserSettings.SecuritySettings>
     <SecuritySettings ElevatedPermissions="Required" />

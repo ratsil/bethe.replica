@@ -43,10 +43,13 @@
         <Button Grid.Row="3" Grid.Column="100" Name="_ui_btnDesignsFile" Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=...l, Path=cCommon.sSelect1, Source={StaticResource g}}" Click="_ui_btnFile_Click" Margin="10,5" />
 
         <Button Name="_ui_btnMerge" Grid.Row="4" Grid.Column="1" Content="{Binding Path=cReplica.sNoticePlaylistImport5, Source={StaticResource g}}" Click="_ui_btnMerge_Click" Grid.ColumnSpan="2" Margin="10,5" />
-        <Button Name="_ui_btnErrors" Grid.Row="4" Grid.Column="0"  Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sErrors, Source={StaticResource g}}" Click="_ui_btnErrors_Click" Margin="10,5" Visibility="Collapsed" Background="Red" Foreground="DarkRed" FontWeight="ExtraBold" />
-        <Button Name="_ui_btnExport" Grid.Row="4" Grid.Column="99"  Click="_ui_btnExport_Click" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Image Stretch="Uniform" Source="/replica;component/Images/excel.png" />
-        </Button>
+        <Button Name="_ui_btnErrors" Grid.Row="4" Grid.Column="0"  Content="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sErrors, Source={StaticResource g}}" Click="_ui_btnErrors_Click" Margin="10,5" Background="Red" Foreground="DarkRed" FontWeight="ExtraBold" />
+        <StackPanel Grid.Row="4"  Grid.Column="100" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Name="_ui_btnLog" Content="Log" Click="_ui_btnLog_Click" Height="23" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="3" IsEnabled="False" />
+            <Button Name="_ui_btnExport" Grid.Row="4" Grid.Column="99"  Click="_ui_btnExport_Click" Margin="6, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Image Stretch="Uniform" Source="/replica;component/Images/excel.png" />
+            </Button>
+        </StackPanel>
         <data:DataGrid Grid.Row="5" Grid.ColumnSpan="4" Name="_ui_dgPlaylist" AutoGenerateColumns="False">
             <data:DataGrid.Columns>
                 <data:DataGridTextColumn Binding="{Binding dtStartPlanned}">

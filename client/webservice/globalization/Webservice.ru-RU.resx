@@ -174,8 +174,47 @@
   <data name="sErrorPLImport20" xml:space="preserve">
     <value>не удалось найти подходящие ассеты в процессе анализа файла оформления</value>
   </data>
+  <data name="sErrorPLImport21" xml:space="preserve">
+    <value>у файла из PowerGold [{2}] неправильный статус [{0}] или есть ошибка [{1}]</value>
+  </data>
+  <data name="sErrorPLImport22" xml:space="preserve">
+    <value>метка игнорирования времени старта блока '!' не может стоять на первом блоке</value>
+  </data>
+  <data name="sErrorPLImport23" xml:space="preserve">
+    <value>не удалось подсоедениться к БД TSR</value>
+  </data>
+  <data name="sErrorPLImport24" xml:space="preserve">
+    <value>не прочитали ответ от БД TSR</value>
+  </data>
+  <data name="sErrorPLImport25" xml:space="preserve">
+    <value>не определен код VI в TSR</value>
+  </data>
+  <data name="sErrorPLImport26" xml:space="preserve">
+    <value>не определен тип в TSR</value>
+  </data>
+  <data name="sErrorPLImport27" xml:space="preserve">
+    <value>информация об этом файле не найдена в БД</value>
+  </data>
+  <data name="sErrorPLImport28" xml:space="preserve">
+    <value>непонятная ошибка при формировании или сохранении ассета</value>
+  </data>
+  <data name="sErrorPLImport29" xml:space="preserve">
+    <value>странный тип файла в TSR</value>
+  </data>
   <data name="sErrorPLImport3" xml:space="preserve">
     <value>отсутствуют привязки индентификаторов PG к ассетам:</value>
+  </data>
+  <data name="sErrorPLImport30" xml:space="preserve">
+    <value>не получилось внести задание на определение хронометража файла</value>
+  </data>
+  <data name="sErrorPLImport31" xml:space="preserve">
+    <value>не удалось определить хронометраж файла</value>
+  </data>
+  <data name="sErrorPLImport32" xml:space="preserve">
+    <value>элементы НЕ были добавлены в плейлист по причине проблем с файлом:</value>
+  </data>
+  <data name="sErrorPLImport33" xml:space="preserve">
+    <value>не совпали хронометражи некоторых роликов:</value>
   </data>
   <data name="sErrorPLImport4" xml:space="preserve">
     <value>не удалось найти подходящие ассеты в процессе анализа файла PowerGold</value>
@@ -217,13 +256,16 @@
     <value>В эфире</value>
   </data>
   <data name="sNoticePreferences5" xml:space="preserve">
-    <value>Проигранно</value>
+    <value>Проиграно</value>
   </data>
   <data name="sNoticePreferences6" xml:space="preserve">
-    <value>Пропущенно</value>
+    <value>Пропущено</value>
   </data>
   <data name="sNoticePreferences7" xml:space="preserve">
     <value>Другое</value>
+  </data>
+  <data name="sNoticePreferences8" xml:space="preserve">
+    <value>С ошибкой</value>
   </data>
   <data name="sNoticeVJ1" xml:space="preserve">
     <value>не указана</value>

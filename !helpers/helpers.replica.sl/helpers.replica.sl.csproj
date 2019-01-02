@@ -159,7 +159,7 @@
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.Asset1.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.ChatInOut1.datasource">
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.ChatInOut.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.Class.datasource">
@@ -183,6 +183,12 @@
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.File.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.FileIsInPlaylist.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.FilesAgeGetResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.IdNamePair1.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -196,6 +202,9 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.Plaque.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.Playlist.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.PlaylistItem.datasource">
@@ -232,6 +241,9 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.TransliterationPair.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.TSRItem.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.UploadFileBeginResponse1.datasource">

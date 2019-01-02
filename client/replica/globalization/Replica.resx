@@ -457,4 +457,85 @@
   <data name="sNoticePlaylist32" xml:space="preserve">
     <value>end date and time</value>
   </data>
+  <data name="sNoticePlaylist33" xml:space="preserve">
+    <value>Name the new playlist</value>
+  </data>
+  <data name="sErrorPlaylist10" xml:space="preserve">
+    <value>status must be 'planned'</value>
+  </data>
+  <data name="sErrorPlaylist11" xml:space="preserve">
+    <value>Status must not be 'onair' to delete element</value>
+  </data>
+  <data name="sErrorPlaylist12" xml:space="preserve">
+    <value>Adding task went with errors</value>
+  </data>
+  <data name="sNoticePlaylist34" xml:space="preserve">
+    <value>Task  added</value>
+  </data>
+  <data name="sNoticePlaylist35" xml:space="preserve">
+    <value>Are you SURE you want to start this playlist OVER THE MAIN AIR ??????</value>
+  </data>
+  <data name="sErrorPlaylist13" xml:space="preserve">
+    <value>Attention! The total recalculation is needed!</value>
+  </data>
+  <data name="sBtnCheckMinimum" xml:space="preserve">
+    <value>Check minimum</value>
+  </data>
+  <data name="sWarningIngest1" xml:space="preserve">
+    <value>The file with the same name has already been uploaded earlier! Are you sure you want to replace it?</value>
+  </data>
+  <data name="sWarningIngest2" xml:space="preserve">
+    <value>Such binding code is already in the Asset:{0}{1}{0}with file:{2}{0}{0}</value>
+  </data>
+  <data name="sErrorIngest4" xml:space="preserve">
+    <value>Specify {0}!!</value>
+  </data>
+  <data name="sErrorStat1" xml:space="preserve">
+    <value>The 'played' status was not found!</value>
+  </data>
+  <data name="sPathAdvertisement" xml:space="preserve">
+    <value>Path to advertisement</value>
+  </data>
+  <data name="sPathTrailers" xml:space="preserve">
+    <value>Path to trailers</value>
+  </data>
+  <data name="sStorageAdvertisement" xml:space="preserve">
+    <value>Advertisements storage</value>
+  </data>
+  <data name="sStorageTrailers" xml:space="preserve">
+    <value>Trailers storage</value>
+  </data>
+  <data name="sMoveFile" xml:space="preserve">
+    <value>Move file (not copy)</value>
+  </data>
+  <data name="sNoAsset" xml:space="preserve">
+    <value>Don't create an asset</value>
+  </data>
+  <data name="sReplaceSelectedFile" xml:space="preserve">
+    <value>Replace selected file</value>
+  </data>
+  <data name="sErrorIngest5" xml:space="preserve">
+    <value>The replaceable file is likely already cached, or in the process! {0} It is not recommended to replace it right now! {0} Continue only if you REALLY can control all the consequences!!</value>
+  </data>
+  <data name="sNoticePlaylist36" xml:space="preserve">
+    <value>It's impossible to insert item after just inserted (and not recalculated) item</value>
+  </data>
+  <data name="sErrorIngest6" xml:space="preserve">
+    <value>Neither the original nor current file names does not match Your filename!!{0}Are You SURE????{0}Possibly the wrong file will pass to the air!!</value>
+  </data>
+  <data name="sWarningIngest3" xml:space="preserve">
+    <value>The replaceable file is in the on-air playlist!{0}It is necessary to discuss the replacement with your media planner!</value>
+  </data>
+  <data name="sWarningPlaylistImport1" xml:space="preserve">
+    <value>There are errors in merged playlist!{0}It's strongly recommended to stop import!{0}Are You sure that You can control all the consequences???</value>
+  </data>
+  <data name="sNoticeIngest15" xml:space="preserve">
+    <value>Nothing to proceed - the list is empty</value>
+  </data>
+  <data name="sErrorAssetsProperties1" xml:space="preserve">
+    <value>Saving classes was unsuccessful on these assets:</value>
+  </data>
+  <data name="sErrorAssetsProperties2" xml:space="preserve">
+    <value>Saving rotations was unsuccessful on these assets:</value>
+  </data>
 </root>

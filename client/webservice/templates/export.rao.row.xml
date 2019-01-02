@@ -1,0 +1,26 @@
+      <Row>
+        <Cell ss:StyleID="cell_left">
+          <Data ss:Type="String">{%ARTIST_NAME%}</Data>
+        </Cell>
+        <Cell ss:StyleID="cell_left">
+          <Data ss:Type="String">{%SONG_NAME%}</Data>
+        </Cell>
+        <Cell ss:StyleID="cell_middle">
+          <Data ss:Type="String">{%SECONDS%}</Data>
+        </Cell>
+				<Cell ss:StyleID="cell_right">
+					<Data ss:Type="Number">{%RELISES_QTY%}</Data>
+				</Cell>
+				<Cell ss:StyleID="cell_middle">
+					<Data ss:Type="String">{%SECONDS_TOTAL%}</Data>
+				</Cell>
+				<Cell ss:StyleID="cell_left">
+					<Data ss:Type="String">{%GENRE%}</Data>
+				</Cell>
+				<Cell ss:StyleID="cell_left">
+					<Data ss:Type="String">{%AUTHOR_OF_MUSIC%}</Data>
+				</Cell>
+				<Cell ss:StyleID="cell_left">
+					<Data ss:Type="String">{%AUTHOR_OF_LYRICS%}</Data>
+				</Cell>
+			</Row>

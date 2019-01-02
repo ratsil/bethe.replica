@@ -35,6 +35,7 @@ namespace replica.sl
 		private MenuItem _ui_cmiTrails_Delete;
 		private TextBox _tbSemafor;
 		ContextMenu _ui_cmTrails;
+		bool _bReset;
 		public templates()
 		{
 			InitializeComponent();
@@ -58,7 +59,6 @@ namespace replica.sl
 			_cDBI.TemplateRegisteredTableGetCompleted += new EventHandler<TemplateRegisteredTableGetCompletedEventArgs>(_cDBI_TemplateRegisteredTableGetCompleted);
 
 			_dlgProgress.Show();
-
 			#region making of _ui_spTrails
 			_ui_spTrails.Children.Remove(_ui_btnSaveTrails);
 			_ui_spTrails.Children.Remove(_ui_spAddTrail);
@@ -175,7 +175,6 @@ namespace replica.sl
             _ui_cmiTrails_Delete = new MenuItem() { Header = g.Common.sDelete, Name = "_ui_cmTrailDelete", IsEnabled = false };
 			_ui_cmiTrails_Delete.Click += new RoutedEventHandler(cMI_Delete_Click);
 			_ui_cmTrails.Items.Add(_ui_cmiTrails_Delete);
-
 			_ui_dgTrails.SetValue(ContextMenuService.ContextMenuProperty, _ui_cmTrails);
 
 			_ui_spTrails.Children.Add(_ui_spAddTrail);
@@ -426,7 +425,8 @@ namespace replica.sl
 			foreach (TextBox cTB in _aChangedTBs)
 			{
 				cDE = (DictionaryElement)cTB.Tag;
-				cDE.sValue = "" == cTB.Text ? " " : cTB.Text;
+				if ("" != cTB.Text)
+					cDE.sValue = cTB.Text;
 				aChangedLines.Add(cDE);
 			}
 			_cDBI.TemplateMessagesTextSaveAsync(aChangedLines.ToArray());
@@ -505,9 +505,10 @@ namespace replica.sl
 		}
 		private void AddTrailReset()
 		{
+			_bReset = true;
 			_ui_cbTrailName.SelectedValue = _aTemplateBindsTrails[0];
 			_ui_dpTrailStart.SelectedDate = DateTime.Today.GetMonday();
-			_ui_dpTrailStart_SelectedDateChanged(null, null);
+			//_ui_dpTrailStart_SelectedDateChanged(null, null);
 			_ui_dpTrailStop.ClearValue(DatePicker.SelectedDateProperty);
 			_ui_tpTrailStart.Value = null;
 			_ui_tpTrailStop.Value = null;
@@ -526,31 +527,35 @@ namespace replica.sl
 			_ui_cbFri.IsChecked = false;
 			_ui_cbSat.IsChecked = false;
 			_ui_cbSun.IsChecked = false;
-			switch (_ui_dpTrailStart.SelectedDate.Value.DayOfWeek)
-			{
-				case DayOfWeek.Monday:
-					_ui_cbMon.IsChecked = true;
-					break;
-				case DayOfWeek.Tuesday:
-					_ui_cbTue.IsChecked = true;
-					break;
-				case DayOfWeek.Wednesday:
-					_ui_cbWed.IsChecked = true;
-					break;
-				case DayOfWeek.Thursday:
-					_ui_cbThu.IsChecked = true;
-					break;
-				case DayOfWeek.Friday:
-					_ui_cbFri.IsChecked = true;
-					break;
-				case DayOfWeek.Saturday:
-					_ui_cbSat.IsChecked = true;
-					break;
-				case DayOfWeek.Sunday:
-					_ui_cbSun.IsChecked = true;
-					break;
-			} 
+			 if (!_bReset)
+				switch (_ui_dpTrailStart.SelectedDate.Value.DayOfWeek)
+				{
+					case DayOfWeek.Monday:
+						_ui_cbMon.IsChecked = true;
+						break;
+					case DayOfWeek.Tuesday:
+						_ui_cbTue.IsChecked = true;
+						break;
+					case DayOfWeek.Wednesday:
+						_ui_cbWed.IsChecked = true;
+						break;
+					case DayOfWeek.Thursday:
+						_ui_cbThu.IsChecked = true;
+						break;
+					case DayOfWeek.Friday:
+						_ui_cbFri.IsChecked = true;
+						break;
+					case DayOfWeek.Saturday:
+						_ui_cbSat.IsChecked = true;
+						break;
+					case DayOfWeek.Sunday:
+						_ui_cbSun.IsChecked = true;
+						break;
+					default:
+						break;
+				}
 			MakeBtnAddTrailReady();
+			_bReset = false;
 		}
 		void _ui_tpTrailStart_ValueChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
 		{
@@ -571,7 +576,7 @@ namespace replica.sl
 				bStartTimeIsReady = true;
 			if (null != _ui_tbTrailPath.Text && "" != _ui_tbTrailPath.Text)
 				bPathIsReady = true;
-			if (null != _ui_tbTrailLine1.Text && 0 < _ui_tbTrailLine1.Text.Length && null != _ui_tbTrailLine2.Text && 0 < _ui_tbTrailLine2.Text.Length)
+			//if (null != _ui_tbTrailLine1.Text && 0 < _ui_tbTrailLine1.Text.Length && null != _ui_tbTrailLine2.Text && 0 < _ui_tbTrailLine2.Text.Length)
 				bLinesAreReady = true;
 			if (bNameIsReady && bStartDateIsReady && bStartTimeIsReady && bPathIsReady && bLinesAreReady && _ui_dgTrails.IsEnabled == true)
 				_ui_btnAddTrail.IsEnabled = true;

@@ -27,63 +27,6 @@ namespace webservice
                 : base("request", "replica", true)
             { }
         }
-        //class WebBrowser : SWF.ApplicationContext
-        //{
-        //    private int _nNavigatingQty = 0;
-        //    private ManualResetEvent _cMRE = new ManualResetEvent(false);
-        //    private Thread _cThread;
-        //    private SWF.WebBrowser _cWebBrowser;
-        //    private string _sURL;
-
-        //    public WebBrowser(string sURL)
-        //    {
-        //        _sURL = sURL;
-        //        _nNavigatingQty = 0;
-        //        _cMRE = new ManualResetEvent(false);
-        //        _cThread = new Thread(Worker);
-        //        _cThread.SetApartmentState(ApartmentState.STA);
-        //        this.
-        //        _cThread.Start();
-        //    }
-        //    public void Worker()
-        //    {
-        //        _cWebBrowser = new SWF.WebBrowser();
-        //        _cWebBrowser.DocumentCompleted += new SWF.WebBrowserDocumentCompletedEventHandler(_cWebBrowser_DocumentCompleted);
-        //        _cWebBrowser.Navigating += new SWF.WebBrowserNavigatingEventHandler(_cWebBrowser_Navigating);
-        //        _cWebBrowser.Navigate("http://odnoklassniki.ru");
-        //        //_cWebBrowser.Navigate("http://google.com");
-        //        SWF.Application.Run(this);
-        //    }
-
-        //    void _cWebBrowser_Navigating(object sender, SWF.WebBrowserNavigatingEventArgs e)
-        //    {
-        //        _nNavigatingQty++;
-        //    }
-
-        //    void _cWebBrowser_DocumentCompleted(object sender, SWF.WebBrowserDocumentCompletedEventArgs e)
-        //    {
-        //        if (1 > (--_nNavigatingQty))
-        //        {
-        //            SWF.HtmlElement uiEmail, uiPassword, uiSubmit;
-        //            if (
-        //                null != (uiEmail = (SWF.HtmlElement)_cWebBrowser.Document.GetElementById("field_email"))
-        //                && null != (uiPassword = (SWF.HtmlElement)_cWebBrowser.Document.GetElementById("field_password"))
-        //                && null != (uiSubmit = (SWF.HtmlElement)_cWebBrowser.Document.GetElementById("hook_FormButton_button_go"))
-        //            )
-        //            {
-        //                uiEmail.SetAttribute("value", "listar@mail.ru");
-        //                uiPassword.SetAttribute("value", "v2ksi3");
-        //                uiSubmit.InvokeMember("click");
-        //                return;
-        //            }
-        //            _cMRE.Set();
-        //        }
-        //    }
-        //    public void Wait()
-        //    {
-        //        _cMRE.WaitOne();
-        //    }
-        //}
 
         private bool _bAuthenticated
         {
@@ -263,8 +206,6 @@ namespace webservice
                                             }
                                             if (cOAuth.bAuthorized)
                                             {
-                                                //https://api.vk.com/method/'''METHOD_NAME'''?'''PARAMETERS'''&access_token='''ACCESS_TOKEN'''
-                                                //https://api.vk.com/method/users.get.xml?uid=66748&v=5.2&access_token=533bacf01e11f55b536a565b57531ac114461ae8736d6506a3
                                                 System.Net.WebClient cWebClient = new System.Net.WebClient();
                                                 string sResponse = cWebClient.DownloadString("https://api.vk.com/method/photos.getWallUploadServer.xml?v=5.2&access_token=" + cOAuth.sToken);
                                                 cResponse = new XmlDocument();
@@ -289,8 +230,6 @@ namespace webservice
                                         case "publish":
                                             if (cOAuth.bAuthorized)
                                             {
-                                                //https://api.vk.com/method/'''METHOD_NAME'''?'''PARAMETERS'''&access_token='''ACCESS_TOKEN'''
-                                                //https://api.vk.com/method/users.get.xml?uid=66748&v=5.2&access_token=533bacf01e11f55b536a565b57531ac114461ae8736d6506a3
                                                 string sBoundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
                                                 byte[] aBytes = Encoding.ASCII.GetBytes(
                                                     "--" + sBoundary + Environment.NewLine
@@ -331,28 +270,6 @@ namespace webservice
                                                 sResult = "social.status(social.scope.vk, false);";
                                             break;
                                     }
-                                    //sResult = "social.vk();";
-                                    //Response.Redirect("social.html");
-                                    //switch (Request.Params["type"])
-                                    //{
-                                    //    case "status":
-                                    //        sResult = "document.getElementById('_ui_imgVKLogin').style.display=" + (cWebAuthorizer.IsAuthorized?"'none';":"'block';");
-                                    //        break;
-                                    //    case "response":
-                                    //        cWebAuthorizer.CompleteAuthorization(new Uri(Request.Url.AbsoluteUri.Replace(sResponseQuery + "&", "")));
-                                    //        if (cWebAuthorizer.IsAuthorized)
-                                    //        {
-                                    //            if(null == cDBI)
-                                    //                cDBI = new DBInteract(_sUser, _sPassword);
-                                    //            cDBI.AdmPreferencesSocialSet("instagram:at", cWebAuthorizer.Credentials.AccessToken);
-                                    //            cDBI.AdmPreferencesSocialSet("instagram:ot", cWebAuthorizer.Credentials.OAuthToken);
-                                    //        }
-                                    //        sResult = "<script type='text/javascript'>window.close();</script>";
-                                    //        break;
-                                    //    case "login":
-                                    //        cWebAuthorizer.BeginAuthorization(new Uri(Request.Url, "request.aspx?" + sResponseQuery));
-                                    //        break;
-                                    //}
                                     break;
                                 #endregion
                                 case "all":
@@ -361,57 +278,7 @@ namespace webservice
                                         case "publish":
                                             cDBI = new DBInteract(_sUser, _sPassword);
 
-                                            #region fb
-                                            //FacebookClient cFacebookClient = new Facebook.FacebookClient(cDBI.AdmPreferencesSocialGet("fb:at"));
-
-                                            //var postParams = new
-                                            //{
-                                            //    name = "Test-Тест:имя",
-                                            //    caption = "Заголовок Caption",
-                                            //    description = "Описание Description",
-                                            //    link = "http://example.com/",
-                                            //    picture = "https://example.com/pic.png"
-                                            //};
-
-                                            //try
-                                            //{
-                                            //    Task<object> cPostTask = cFacebookClient.PostTaskAsync("/me/feed", postParams);
-                                            //    cPostTask.Wait();
-                                            //    IDictionary<string, object> ahResult = (IDictionary<string, object>)cPostTask.Result;
-
-                                            //    string sSuccessMessageDialog = (string)ahResult["id"];
-                                            //}
-                                            //catch (Exception ex)
-                                            //{
-                                            //}
-                                            #endregion
-
-                                            #region tt
-                                            //TwitterContext cTwitterContext = new TwitterContext(new WebAuthorizer() { Credentials = new SessionStateCredentials() });
-                                            //string status = "Testing " + DateTime.Now.ToString();
-                                            //const bool possiblySensitive = false;
-                                            //const decimal latitude = StatusExtensions.NoCoordinate;
-                                            //const decimal longitude = StatusExtensions.NoCoordinate;
-                                            //const bool displayCoordinates = false;
-
-                                            //var mediaItems =
-                                            //    new List<Media>
-                                            //    {
-                                            //        new Media
-                                            //        {
-                                            //            Data = Utilities.GetFileBytes(@"d:\photo\IMG_7705.jpg"),
-                                            //            FileName = "IMG_7705.jpg",
-                                            //            ContentType = MediaContentType.Jpeg
-                                            //        }
-                                            //    };
-                                            //Status tweet = cTwitterContext.TweetWithMedia(
-                                            //    status, possiblySensitive, latitude, longitude, 
-                                            //    null, displayCoordinates, mediaItems, null);
-                                            #endregion
-
                                             #region vk
-                                            //https://api.vk.com/method/'''METHOD_NAME'''?'''PARAMETERS'''&access_token='''ACCESS_TOKEN'''
-                                            //https://api.vk.com/method/users.get.xml?uid=66748&v=5.2&access_token=533bacf01e11f55b536a565b57531ac114461ae8736d6506a3
                                             cOAuth = new OAuth();
                                             if (cOAuth.bAuthorized)
                                             {
@@ -432,8 +299,6 @@ namespace webservice
                                     }
                                     break;
                             }
-                            //var client = new FacebookClient();
-                            //dynamic me = client.Get("isayko.alexey");
                             break;
                         case "exit":
                             _cProfile = null;
@@ -446,7 +311,7 @@ namespace webservice
             { }
             catch (Exception ex)
             {
-                (new Logger()).WriteError(ex);
+                (new Logger()).WriteError("user=" + (Request == null ? "NULL" : Request.QueryString["user"]), ex);
                 sResult = "error('[" + (ex.Message + "][st:" + ex.StackTrace).ForHTML() + "]');";
             }
             Response.Write(sResult);

@@ -15,7 +15,7 @@ namespace helpers.replica.services.dbinteract
 	public class DBInteract : DBInteractSoapClient
 	{
 		static bool _bSessionInited = false;
-		static private BasicHttpBinding EndPointGet()
+		static public BasicHttpBinding EndPointGet()
 		{
 			BasicHttpBinding binding = new BasicHttpBinding(
 		 Application.Current.Host.Source.Scheme.Equals("https", StringComparison.InvariantCultureIgnoreCase)
@@ -28,8 +28,25 @@ namespace helpers.replica.services.dbinteract
 			binding.ReceiveTimeout = TimeSpan.FromHours(5);
 			return binding;
 		}
+		public static string GetUrl(string sUrl)
+		{
+			string sRetVal = sUrl.Replace("/ig", "").Replace("/fake_ig", "").Replace("/fake_replica", "").Replace("/dev/", "/");
+			if (sRetVal.StartsWith("file"))
+				sRetVal = "http://replica/";
+			return sRetVal;
+		}
 		public DBInteract()
-            : base(EndPointGet(), new EndpointAddress(new Uri(new Uri(Application.Current.Host.Source.AbsoluteUri.Replace("/fake_replica", "").Replace("/dev/", "/")), "../services/DBInteract.asmx")))
+			: base(EndPointGet(), new EndpointAddress(new Uri(new Uri(GetUrl(Application.Current.Host.Source.AbsoluteUri)), "../services/DBInteract.asmx")))
+		{
+			if (!_bSessionInited)
+			{
+				_bSessionInited = true;
+				InitSessionAsync();
+			}
+		}
+		public DBInteract(string sAnotherServerName)
+		: base(EndPointGet(), new EndpointAddress(new Uri(new Uri("http://" + sAnotherServerName + "/"), "../services/DBInteract.asmx")))
+		//: base(EndPointGet(), new EndpointAddress("http://" + sAnotherServerName + "/services/DBInteract.asmx"))
 		{
 			if (!_bSessionInited)
 			{

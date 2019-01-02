@@ -132,5 +132,6 @@ namespace replica.sl
 		public class Rotations : ListProvider<IdNamePair> { }
 		public class Palettes : ListProvider<IdNamePair> { }
 		public class Sounds : ListProvider<IdNamePair> { }
+		public class Sex : ListProvider<IdNamePair> { }
 	}
 }

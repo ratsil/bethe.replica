@@ -3,6 +3,7 @@ DROP TYPE "text_bool" CASCADE;
 DROP TYPE "table_name" CASCADE;
 DROP TYPE "error" CASCADE;
 DROP TYPE "target" CASCADE;
+DROP TYPE tINP CASCADE;
 
 
 -- DROP DATABASE "replica";
@@ -55,6 +56,8 @@ DROP USER replica_grid_full;
 DROP USER replica_templates;
 DROP USER replica_templates_full;
 DROP USER replica_init;
+DROP USER stat;
+DROP USER vj;
 
 DROP PROCEDURAL LANGUAGE plpgsql CASCADE;
 DROP FUNCTION plpgsql_call_handler();

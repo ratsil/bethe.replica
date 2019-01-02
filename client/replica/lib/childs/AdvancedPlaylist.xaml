@@ -5,20 +5,21 @@
 	xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
 	xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
 	xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
-	Width="800" Height="300"
-	Background="#FFD0DFE5"
-	Title="Advanced Playlist" BorderThickness="0,0,0,0">
+	Width="1100" Height="300"
+	Background="#FF456D89"
+	Title="Advanced Playlist" BorderThickness="0,0,0,0" Name="_ui_Main">
 	<controls:ChildWindow.Resources>
 		<local:Replica xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
 	</controls:ChildWindow.Resources>
-	<Grid x:Name="LayoutRoot" Margin="0,0,0,0">
+	<Grid x:Name="_ui_gMain" Margin="0,0,0,0">
 		<Grid.RowDefinitions>
 			<RowDefinition />
 			<RowDefinition Height="Auto" />
-		</Grid.RowDefinitions>
-		<sdk:DataGrid Grid.Row="0" Name="_ui_dgAdvancedPL" MaxHeight="450" Margin="2,1,2,0" AutoGenerateColumns="False" FontSize="11" IsReadOnly="True" SelectionChanged="_ui_dgAdvancedPL_SelectionChanged"  TabIndex="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="1" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single">
+            <RowDefinition Height="9" />
+        </Grid.RowDefinitions>
+        <sdk:DataGrid Grid.Row="0" Name="_ui_dgAdvancedPL" Height="Auto" MaxHeight="500" Margin="2,1,2,0" AutoGenerateColumns="False" FontSize="11" IsReadOnly="True" SelectionChanged="_ui_dgAdvancedPL_SelectionChanged"  TabIndex="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="1" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single" Background="#FF456D89">
 			<sdk:DataGrid.Columns>
-				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="160">
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sStart}" Width="160">
 					<sdk:DataGridTextColumn.HeaderStyle>
 						<Style TargetType="p:DataGridColumnHeader">
 							<Setter Property="ContentTemplate">
@@ -31,7 +32,7 @@
 						</Style>
 					</sdk:DataGridTextColumn.HeaderStyle>
 				</sdk:DataGridTextColumn>
-				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="160">
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sStop}" Width="170">
 					<sdk:DataGridTextColumn.HeaderStyle>
 						<Style TargetType="p:DataGridColumnHeader">
 							<Setter Property="ContentTemplate">
@@ -44,7 +45,7 @@
 						</Style>
 					</sdk:DataGridTextColumn.HeaderStyle>
 				</sdk:DataGridTextColumn>
-				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="90">
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sTiming}" Width="100">
 					<sdk:DataGridTextColumn.HeaderStyle>
 						<Style TargetType="p:DataGridColumnHeader">
 							<Setter Property="ContentTemplate">
@@ -57,7 +58,25 @@
 						</Style>
 					</sdk:DataGridTextColumn.HeaderStyle>
 				</sdk:DataGridTextColumn>
-				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="*">
+                <!--<sdk:DataGridTemplateColumn IsReadOnly="True" Width="*">
+                    <sdk:DataGridTemplateColumn.HeaderStyle>
+                        <Style TargetType="p:DataGridColumnHeader">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sName, Source={StaticResource g}}"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </sdk:DataGridTemplateColumn.HeaderStyle>
+                    <sdk:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Background="{StaticResource HighLightColorBrush}" Text="{Binding sName}" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+                        </DataTemplate>
+                    </sdk:DataGridTemplateColumn.CellTemplate>
+                </sdk:DataGridTemplateColumn>-->
+                <sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="*">
 					<sdk:DataGridTextColumn.HeaderStyle>
 						<Style TargetType="p:DataGridColumnHeader">
 							<Setter Property="ContentTemplate">
@@ -69,8 +88,8 @@
 							</Setter>
 						</Style>
 					</sdk:DataGridTextColumn.HeaderStyle>
-				</sdk:DataGridTextColumn>
-				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="60">
+                </sdk:DataGridTextColumn>
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sStatus}" Width="60">
 					<sdk:DataGridTextColumn.HeaderStyle>
 						<Style TargetType="p:DataGridColumnHeader">
 							<Setter Property="ContentTemplate">
@@ -85,10 +104,20 @@
 				</sdk:DataGridTextColumn>
 			</sdk:DataGrid.Columns>
 		</sdk:DataGrid>
+		<StackPanel Grid.Row="1" Width="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" FlowDirection="RightToLeft" Margin="2,1,0,1" Orientation="Horizontal">
+            <Button x:Name="_ui_btnCheckMinimum" Content="{Binding Path=cReplica.sBtnCheckMinimum, Source={StaticResource g}}" Click="_ui_btnCheckMinimum_Click" Width="Auto" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
+            <Button x:Name="_ui_btnStart" Content="{Binding Path=cCommon.sStartNow, Source={StaticResource g}}" Click="_ui_btnStart_Click" Width="Auto" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
+            <Button x:Name="_ui_btnRename" Content="{Binding Path=cCommon.sRename, Source={StaticResource g}}" Click="_ui_btnRename_Click" Width="Auto" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
+			<Button x:Name="_ui_btnEdit" Content="{Binding Path=cCommon.sEdit, Source={StaticResource g}}" Click="_ui_btnEdit_Click" Width="Auto" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
+			<Button x:Name="_ui_btnDelete" Content="{Binding Path=cCommon.sDelete, Source={StaticResource g}}" Click="_ui_btnDelete_Click" Width="Auto" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
+			<Button x:Name="_ui_btnAdd" Content="{Binding Path=cCommon.sAdd, Source={StaticResource g}}" Click="_ui_btnAdd_Click" Width="Auto" Height="23" Margin="0,0,2,0" HorizontalAlignment="Right" />
+        </StackPanel>	
 		<StackPanel Grid.Row="1" Width="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" Margin="0,1,2,1" Orientation="Horizontal">
-			<Button x:Name="_ui_btnAdd" Content="{Binding Path=cCommon.sAdd, Source={StaticResource g}}" Click="_ui_btnAdd_Click" Width="75" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
 			<Button x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click" Width="75" Height="23" Margin="0,0,4,0" HorizontalAlignment="Right" />
-			<Button x:Name="OKButton" Content="OK" Click="OKButton_Click" Width="75" Height="23"  Margin="0,0,4,0" HorizontalAlignment="Right" />
+			<Button x:Name="OKButton" Content="OK" Click="OKButton_Click" Width="75" Height="23"  Margin="0,0,34,0" HorizontalAlignment="Right" />
 		</StackPanel>
-	</Grid>
+        <StackPanel Grid.Row="2" Width="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" FlowDirection="RightToLeft" Margin="0,-3,0,0" Orientation="Horizontal">
+            <sdk:Label Name="_ui_lblStatus" Grid.Row="1" Foreground="#FFC7ECFF" Content="" FontSize="9" />
+        </StackPanel>
+    </Grid>
 </controls:ChildWindow>

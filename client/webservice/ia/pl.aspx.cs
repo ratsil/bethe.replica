@@ -32,14 +32,15 @@ namespace webservice.ia
 				DBInteract cDBI = new DBInteract("replica_ia", "");
 
 				string sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><playlist>";
-				if (!cDBI.IsThereAnyStartedLiveBroadcast())
+				helpers.replica.scr.Shift cSCRShift = cDBI.ShiftCurrentGet();
+				if (null == cSCRShift || null == cSCRShift.cPreset || 0 >= cSCRShift.cPreset.nID)
 				{
 					Queue<PlaylistItem> aqPLIs = cDBI.ComingUpWithAssetsResolvedGet(TimeSpan.FromHours(1));
 					while (0 < aqPLIs.Count)
 						sXML += XML.PlaylistItemGet(aqPLIs.Dequeue());
 				}
 				else
-					sXML += "<live id=\"000\" />";
+					sXML += "<live id=\""+ cSCRShift.cPreset.nID + "\" name=\""+ cSCRShift.cPreset.sName + "\" />";
 				sXML += "</playlist>" + Environment.NewLine;
 
 				Response.Write(sXML);

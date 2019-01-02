@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -23,10 +23,10 @@ namespace replica.player
 		public void ProcessCommands(Delegate[] aDelegates)
 		{
 			try
-			{
+			 {
 				long nCommandQueueID = -1, nCommandStatusID = 3;
 				string sCommandName = null;
-                Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('playlist_recalculate','player_start','player_pause','player_stop','player_skip') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE сделать нормальную обработку символьных имен команд через Preferences
+                Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sCommandName` FROM adm.`vCommandsQueue` WHERE `sCommandName` IN ('playlist_recalculate','player_start','player_pause','player_stop','player_skip') AND 'waiting'=`sCommandStatus` ORDER BY dt"); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РёРјРµРЅ РєРѕРјР°РЅРґ С‡РµСЂРµР· Preferences
 				if (null == aqDBValues)
 					return;
 				Hashtable ahRow = null;
@@ -36,7 +36,7 @@ namespace replica.player
 					{
 						ahRow = aqDBValues.Dequeue();
 						sCommandName = ahRow["sCommandName"].ToString();
-						(new Logger("commands")).WriteNotice("Начало выполнения команды [" + sCommandName + "]");
+						(new Logger("commands")).WriteNotice("РќР°С‡Р°Р»Рѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "]");
 						nCommandQueueID = ahRow["id"].ToID();
 						_cDB.Perform("UPDATE adm.`tCommandsQueue` SET `idCommandStatuses`=2 WHERE id=" + nCommandQueueID);
 						switch (sCommandName)
@@ -54,12 +54,12 @@ namespace replica.player
 									nCommandStatusID = 4;
 								}
 								else
-									(new Logger("commands")).WriteError("отсутствует необходимый метод [PlayerSkip]");
+									(new Logger("commands")).WriteError("РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РЅРµРѕР±С…РѕРґРёРјС‹Р№ РјРµС‚РѕРґ [PlayerSkip]");
                                 break;
                             case "playlist_recalculate":
-								long nPLitemsID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'nPLitemsID'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
-								int nHoursQty = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'nHoursQty'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToInt32(); //UNDONE сделать нормальную обработку символьных названий параметров через Preferences
-								//EMERGENCY а потом руссинке понадобится плейлист считать на два с половиной часа и что ты будешь делать? хотя я знаю... ты добавишь еще один параметр, который будет указывать кол-во минут... =))) Валь, возьми себя в руки =))
+								long nPLitemsID = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'nPLitemsID'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToID(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
+								int nHoursQty = _cDB.GetValue("SELECT `sValue` FROM adm.`tCommandParameters` WHERE 'nHoursQty'=`sKey` AND `idCommandsQueue`=" + nCommandQueueID).ToInt32(); //UNDONE СЃРґРµР»Р°С‚СЊ РЅРѕСЂРјР°Р»СЊРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРёРјРІРѕР»СЊРЅС‹С… РЅР°Р·РІР°РЅРёР№ РїР°СЂР°РјРµС‚СЂРѕРІ С‡РµСЂРµР· Preferences
+								//EMERGENCY Р° РїРѕС‚РѕРј СЂСѓСЃСЃРёРЅРєРµ РїРѕРЅР°РґРѕР±РёС‚СЃСЏ РїР»РµР№Р»РёСЃС‚ СЃС‡РёС‚Р°С‚СЊ РЅР° РґРІР° СЃ РїРѕР»РѕРІРёРЅРѕР№ С‡Р°СЃР° Рё С‡С‚Рѕ С‚С‹ Р±СѓРґРµС€СЊ РґРµР»Р°С‚СЊ? С…РѕС‚СЏ СЏ Р·РЅР°СЋ... С‚С‹ РґРѕР±Р°РІРёС€СЊ РµС‰Рµ РѕРґРёРЅ РїР°СЂР°РјРµС‚СЂ, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ СѓРєР°Р·С‹РІР°С‚СЊ РєРѕР»-РІРѕ РјРёРЅСѓС‚... =))) Р’Р°Р»СЊ, РІРѕР·СЊРјРё СЃРµР±СЏ РІ СЂСѓРєРё =))
 								TimeSpan dtTS;
 								if (0 == nHoursQty || int.MaxValue == nHoursQty)
 								{
@@ -74,12 +74,12 @@ namespace replica.player
 									nCommandStatusID = 3;
 								break;
 							default:
-								throw new Exception("Неизвестная команда");
+								throw new Exception("РќРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°");
 						}
 					}
 					catch (Exception ex)
 					{
-						(new Logger("commands")).WriteError(ex);
+						(new Logger("commands-2")).WriteError(ex);
 					}
 					try
 					{
@@ -88,15 +88,16 @@ namespace replica.player
 					}
 					catch (Exception ex)
 					{
-						(new Logger("commands")).WriteError(ex);
+						(new Logger("commands-3")).WriteError(ex);
 					}
 					if (null != sCommandName)
-						(new Logger("commands")).WriteNotice("Завершение выполнения команды [" + sCommandName + "] [status=" + nCommandStatusID + "]");
+						(new Logger("commands")).WriteNotice("Р—Р°РІРµСЂС€РµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ [" + sCommandName + "] [status=" + nCommandStatusID + "]");
 				}
 			}
 			catch (Exception ex)
 			{
-				(new Logger("commands")).WriteError(ex);
+
+				(new Logger("commands-1")).WriteError(ex);
 			}
 		}
 
@@ -127,18 +128,6 @@ namespace replica.player
 
 			return cRetVal;
 		}
-
-		//public PlaylistItem[] PlaylistItemsPlannedGet(DateTime dtFrom)
-		//{
-		//    List<PlaylistItem> aRetVal = new List<PlaylistItem>();
-		//    Queue<Hashtable> aqDBValues = _cDB.Select("SELECT DISTINCT * FROM pl.`vPlayListResolved` WHERE `dtStartPlanned` >= '" + dtFrom.ToString("yyyy-MM-dd HH:mm:ss") + "' AND 'planned'=`sStatusName` ORDER BY `dtStartPlanned` LIMIT 30");
-		//    if (null != aqDBValues)
-		//    {
-		//        while (0 < aqDBValues.Count)
-		//            aRetVal.Add(new PlaylistItem(aqDBValues.Dequeue()));
-		//    }
-		//    return aRetVal.ToArray();
-		//}
 		public PlaylistItem[] PlaylistItemsPlannedGet()
 		{
 			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
@@ -151,13 +140,21 @@ namespace replica.player
 			return aRetVal.ToArray();
 		}
 
-		public ulong PlaylistItemOnAirFramesLeftGet()
+		public ulong PlaylistItemOnAirFramesLeftGet(int nOneFrameInMs)
 		{
 			ulong nRetVal = 0;
+            ulong nCurrentFramesPast;
+            Hashtable ahRes;
 			try
 			{
-				nRetVal = _cDB.GetValueRaw("SELECT `nFrameStop`-`nFrameStart` as `nFramesQty` FROM pl.`vPlayListResolved` WHERE 'onair'=`sStatusName` ORDER BY `dtStartReal` DESC LIMIT 1").ToULong();
-			}
+                ahRes = _cDB.GetRow("SELECT `nFrameStop`-`nFrameStart` as `nFramesQty`, `dtStartReal` FROM pl.`vPlayListResolved` WHERE 'onair'=`sStatusName` ORDER BY `dtStartReal` DESC LIMIT 1");
+                nRetVal = ahRes["nFramesQty"].ToULong();
+                DateTime dtSR = ahRes["dtStartReal"].ToDT();
+                if (DateTime.Now <= dtSR)
+                    return 0;
+                nCurrentFramesPast = (ulong)(DateTime.Now.Subtract(dtSR).TotalMilliseconds / nOneFrameInMs);
+                nRetVal = nRetVal - nCurrentFramesPast;
+            }
 			catch// (Exception ex)
 			{
 				//(new Logger("playlist")).WriteError(ex);
@@ -173,14 +170,14 @@ namespace replica.player
 				{
 					_cDB.Perform("UPDATE pl.`tItems` SET `idStatuses`=1 WHERE `idStatuses` IN (2, 3, 4)");
 					PlaylistItem cPLICurrent = PlaylistItemCurrentGet();
-					double nDelta = double.MaxValue;
-					if (null == cPLICurrent || 60 < (nDelta = DateTime.Now.Subtract(cPLICurrent.dtTimingsUpdate).TotalMinutes))
+					double nDelta = 1000;
+					if (null == cPLICurrent || 60 < (nDelta = DateTime.Now.Subtract(cPLICurrent.dtTimingsUpdate).TotalMinutes) || 0 > nDelta)
 					{
-						(new Logger("playlist")).WriteNotice("Перед запуском идёт полный пересчет плей-листа, т.к. предыдущий раз пересчет текущего элемента был слишком давно (более 60 минут назад)"); //TODO LANG
+						(new Logger("playlist")).WriteNotice("РџРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј РёРґС‘С‚ РїРѕР»РЅС‹Р№ РїРµСЂРµСЃС‡РµС‚ РїР»РµР№-Р»РёСЃС‚Р°, С‚.Рє. РїСЂРµРґС‹РґСѓС‰РёР№ СЂР°Р· РїРµСЂРµСЃС‡РµС‚ С‚РµРєСѓС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° Р±С‹Р» СЃР»РёС€РєРѕРј РґР°РІРЅРѕ (Р±РѕР»РµРµ 60 РјРёРЅСѓС‚ РЅР°Р·Р°Рґ)"); //TODO LANG
 						PlaylistItemsTimingsUpdate();
 					}
 					else
-						(new Logger("playlist")).WriteNotice("Перед запуском пересчет плей-листа не нужен, т.к. предыдущий раз пересчет текущего элемента был всего лишь " + Math.Round(nDelta, 2) + " минут назад"); //TODO LANG
+						(new Logger("playlist")).WriteNotice("РџРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј РїРµСЂРµСЃС‡РµС‚ РїР»РµР№-Р»РёСЃС‚Р° РЅРµ РЅСѓР¶РµРЅ, С‚.Рє. РїСЂРµРґС‹РґСѓС‰РёР№ СЂР°Р· РїРµСЂРµСЃС‡РµС‚ С‚РµРєСѓС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° Р±С‹Р» РІСЃРµРіРѕ Р»РёС€СЊ " + Math.Round(nDelta, 2) + " РјРёРЅСѓС‚ РЅР°Р·Р°Рґ"); //TODO LANG
 					_cDB.Perform("UPDATE pl.`tItems` SET `idStatuses`=6 WHERE id IN (SELECT id FROM pl.`vPlayListResolved` WHERE `dtStartPlanned` < now() AND 'planned'=`sStatusName`)");
 					break;
 				}
@@ -206,7 +203,7 @@ namespace replica.player
         {
 			lock (playlist.Calculator.cSyncRoot)
             {
-				if (0 > nStartPlitemsID && TimeSpan.MaxValue > tsUpdateScope && TimeSpan.FromSeconds(60) > DateTime.Now.Subtract(playlist.Calculator.dtLast))  // если пересчитывает робот, то не чаще раза в минуту
+				if (0 > nStartPlitemsID && TimeSpan.MaxValue > tsUpdateScope && TimeSpan.FromSeconds(60) > DateTime.Now.Subtract(playlist.Calculator.dtLast))  // РµСЃР»Рё РїРµСЂРµСЃС‡РёС‚С‹РІР°РµС‚ СЂРѕР±РѕС‚, С‚Рѕ РЅРµ С‡Р°С‰Рµ СЂР°Р·Р° РІ РјРёРЅСѓС‚Сѓ
 				{
 					(new Logger("playlist")).WriteNotice("Recalculating was aborted because the last recalculating was less than 60 seconds ago. Info: [startPLI=" + nStartPlitemsID + "][scope=" + tsUpdateScope.TotalHours + " hours]");
 					return true;
@@ -303,6 +300,7 @@ namespace replica.player
 		}
 		private void ItemRemove(long nID)
 		{
+			_cDB.Cache("DELETE FROM pl.`tItemsCached` WHERE `idItems` = " + nID + "");
 			_cDB.Cache("SELECT pl.`fItemRemove`(" + nID + ");");
 		}
 		private void PlugAdd(DateTime dtStart, long nDuration, DateTime dtTimingsUpdate)
@@ -315,27 +313,43 @@ namespace replica.player
 			(new replica.playlist.Calculator.Logger()).WriteNotice("plug update: nID=" + nID + ", start=" + dtStart.ToStr() + ", duration=" + nDuration);
 			_cDB.Cache("SELECT pl.`fItemTimingsUpdateSet`(`nValue`, '" + dtTimingsUpdate.ToStr() + "') FROM pl.`fPlaylistPlugUpdate`(" + nID + ",'" + dtStart.ToStr() + "'," + nDuration + ");");
 			//DELETE FROM pl."tItemDTEvents" WHERE id = (SELECT e.id FROM pl."tItemDTEvents" AS e join pl."tItemDTEventTypes" AS t ON e."idItemDTEventTypes"=t.id WHERE "idItems"=31711 AND "sName"='start_queued')
-			// у локедов мы не апдейтим 
+			// Сѓ Р»РѕРєРµРґРѕРІ РјС‹ РЅРµ Р°РїРґРµР№С‚РёРј 
 			_cDB.Cache("DELETE FROM pl.`tItemDTEvents` WHERE id = (SELECT e.id FROM pl.`tItemDTEvents` AS e join pl.`tItemDTEventTypes` AS t ON e.`idItemDTEventTypes`=t.id WHERE `idItems`=" + nID + " AND `sName`='start_queued')");
 		}
 		private void ItemsRemoveFromCached(List<long> aIDs)
 		{
-			string sIDs = ",";
+			string sIDs = "";
 			foreach (long nID in aIDs)
 			{
-				sIDs += ", " + nID;
-				_cDB.Cache("DELETE FROM pl.`tItemsCached` WHERE `idItems` =" + nID + ";");
+				if ("" == sIDs)
+					sIDs += "" + nID;
+				else
+					sIDs += ", " + nID;
 			}
-			(new replica.playlist.Calculator.Logger()).WriteNotice("remove from cached: nIDs=[" + sIDs.Substring(2) + "]");
+			_cDB.Cache("DELETE FROM pl.`tItemsCached` WHERE `idItems` in (" + sIDs + ")");
+			(new replica.playlist.Calculator.Logger()).WriteNotice("remove from cached: nIDs=[" + sIDs + "]");
 		}
 		#endregion calculator callbacks
+
+		public helpers.replica.pl.Proxy ProxyGet(Class cClass)
+		{
+			try
+			{
+				return helpers.replica.pl.Proxy.Get(cClass);
+			}
+			catch (Exception ex)
+			{
+				(new Logger("playlist")).WriteError(ex);
+			}
+			return null;
+		}
 
 		public void PlaylistItemQueue(PlaylistItem cPLI)
 		{
 			try
 			{
 				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemQueued`(" + cPLI.nID + ", '" + cPLI.dtStartPlanned.ToString("yyyy-MM-dd HH:mm:ss.ff") + "')");
-				//TODO LOG ошибочный статус селекта
+				//TODO LOG РѕС€РёР±РѕС‡РЅС‹Р№ СЃС‚Р°С‚СѓСЃ СЃРµР»РµРєС‚Р°
 			}
 			catch (Exception ex)
 			{
@@ -347,19 +361,19 @@ namespace replica.player
 			try
 			{
 				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemPrepared`(" + cPLI.nID + ")");
-				//TODO LOG ошибочный статус селекта
+				//TODO LOG РѕС€РёР±РѕС‡РЅС‹Р№ СЃС‚Р°С‚СѓСЃ СЃРµР»РµРєС‚Р°
 			}
 			catch (Exception ex)
 			{
 				(new Logger("playlist")).WriteError(ex);
 			}
 		}
-		public void PlaylistItemStart(PlaylistItem cPLI, ulong nDelay) //EMERGENCY нужно обрабатывать delay
+		public void PlaylistItemStart(PlaylistItem cPLI, ulong nDelay) //EMERGENCY РЅСѓР¶РЅРѕ РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ delay
 		{
 			try
 			{
 				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStarted`(" + cPLI.nID + ", " + cPLI.nFrameStart + ");");
-				//TODO LOG ошибочный статус селекта
+				//TODO LOG РѕС€РёР±РѕС‡РЅС‹Р№ СЃС‚Р°С‚СѓСЃ СЃРµР»РµРєС‚Р°
 			}
 			catch (Exception ex)
 			{
@@ -371,7 +385,7 @@ namespace replica.player
 			try
 			{
 				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStopped`(" + cPLI.nID + ")");
-				//TODO LOG ошибочный статус селекта
+				//TODO LOG РѕС€РёР±РѕС‡РЅС‹Р№ СЃС‚Р°С‚СѓСЃ СЃРµР»РµРєС‚Р°
 			}
 			catch (Exception ex)
 			{
@@ -401,7 +415,7 @@ namespace replica.player
 			}
 		}
 
-		#region реализация Playlist.IInteract
+		#region СЂРµР°Р»РёР·Р°С†РёСЏ Playlist.IInteract
 		Playlist.IInteract Playlist.IInteract.Init()
 		{
 			return new DBInteract();
@@ -414,20 +428,20 @@ namespace replica.player
 		PlaylistItem Playlist.IInteract.PlaylistItemCurrentGet() { return this.PlaylistItemCurrentGet(); }
 		PlaylistItem Playlist.IInteract.PlaylistItemLockedPreviousGet() { return this.PlaylistItemLockedPreviousGet(); }
 		PlaylistItem[] Playlist.IInteract.PlaylistItemsPlannedGet() { return this.PlaylistItemsPlannedGet(); }
-		ulong Playlist.IInteract.PlaylistItemOnAirFramesLeftGet() { return this.PlaylistItemOnAirFramesLeftGet(); }
+		ulong Playlist.IInteract.PlaylistItemOnAirFramesLeftGet(int nOneFrameInMs) { return this.PlaylistItemOnAirFramesLeftGet(nOneFrameInMs); }
 
 		bool Playlist.IInteract.PlaylistItemsTimingsUpdate() { return this.PlaylistItemsTimingsUpdate(); }
 		bool Playlist.IInteract.PlaylistItemsTimingsUpdate(TimeSpan tsUpdateScope) { return this.PlaylistItemsTimingsUpdate(tsUpdateScope); }
 		bool Playlist.IInteract.PlaylistItemsTimingsUpdate(TimeSpan tsUpdateScope, int nStartPlitemsID) { return this.PlaylistItemsTimingsUpdate(tsUpdateScope, nStartPlitemsID); }
 
 		void Playlist.IInteract.PlaylistItemFail(PlaylistItem cPLI) { this.PlaylistItemFail(cPLI); }
-		#endregion реализация Playlist.IInteract
-		#region реализация Player.IInteract
+		#endregion СЂРµР°Р»РёР·Р°С†РёСЏ Playlist.IInteract
+		#region СЂРµР°Р»РёР·Р°С†РёСЏ Player.IInteract
 		Player.IInteract Player.IInteract.Init()
 		{
 			return new DBInteract();
 		}
-
+		helpers.replica.pl.Proxy Player.IInteract.ProxyGet(Class cClass) { return ProxyGet(cClass); }
 		void Player.IInteract.PlaylistItemQueue(PlaylistItem cPLI) { this.PlaylistItemQueue(cPLI); }
 		void Player.IInteract.PlaylistItemPrepare(PlaylistItem cPLI) { this.PlaylistItemPrepare(cPLI); }
 		void Player.IInteract.PlaylistItemStart(PlaylistItem cPLI, ulong nDelay) { this.PlaylistItemStart(cPLI, nDelay); }
@@ -437,6 +451,6 @@ namespace replica.player
 		helpers.replica.mam.Macro Player.IInteract.MacroGet(string sMacroName) { return helpers.replica.mam.Macro.Get(sMacroName); }
 		string Player.IInteract.MacroExecute(helpers.replica.mam.Macro cMacro) { return cMacro.Execute(); }
 		PlaylistItem[] Player.IInteract.PlaylistClipsGet() { return _cDB.Select("SELECT * FROM pl.`vPlayListClips` ORDER BY id").Select(o => new PlaylistItem() { nID = o["id"].ToID() }).ToArray(); }
-		#endregion реализация Player.IInteract
+		#endregion СЂРµР°Р»РёР·Р°С†РёСЏ Player.IInteract
 	}
 }

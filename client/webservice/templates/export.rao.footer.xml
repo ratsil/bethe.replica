@@ -1,0 +1,38 @@
+      <Row>
+        <Cell ss:MergeAcross="4" ss:StyleID="table_footer"/>
+      </Row>
+      <Row />
+      <Row>
+        <Cell ss:MergeAcross="4" ss:StyleID="sign">
+          <Data ss:Type="String">М.П.___________________      ____________________________________________         Дата________________</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="4" ss:StyleID="sign">
+          <Data ss:Type="String">                     (подпись)                                 (должность, ФИО руководителя)           </Data>
+        </Cell>
+      </Row>
+      <Row />
+      <Row />
+      <Row>
+        <Cell ss:MergeAcross="4" ss:StyleID="sign">
+          <Data ss:Type="String">ОБЩЕСТВО _____________________(__________) ПОЛЬЗОВАТЕЛЬ___________________(____________)</Data>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell ss:MergeAcross="4" ss:StyleID="sign">
+          <Data ss:Type="String">М.П.                                                                                       М.П.</Data>
+        </Cell>
+      </Row>
+    </Table>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <PageSetup>
+        <Layout x:Orientation="Landscape"/>
+        <Header x:Margin="0.17" x:Data="&amp;ЦЛинейный выход"/>
+        <Footer x:Margin="0.18" x:Data="&amp;ЦСтраница &amp;С"/>
+        <PageMargins x:Bottom="0.41" x:Left="0.74803149606299213" x:Right="0.25"
+         x:Top="0.37"/>
+      </PageSetup>
+    </WorksheetOptions>
+  </Worksheet>
+</Workbook>

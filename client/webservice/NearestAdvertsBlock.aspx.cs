@@ -11,7 +11,7 @@ namespace webservice
 	{
 		protected void Page_Load(object sender, EventArgs e)
 		{
-			(new webservice.services.Logger()).WriteDebug2("nearest_block: " + webservice.services.DBInteract.dtNearestAdvertsBlock);
+			//(new webservice.services.Logger()).WriteDebug2("nearest_block: " + webservice.services.DBInteract.dtNearestAdvertsBlock);
             String sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Environment.NewLine + "<NearestAdvertsBlock>";
 			sXML += webservice.services.DBInteract.dtNearestAdvertsBlock.ToString("dd.MM.yyyy HH:mm:ss") + "</NearestAdvertsBlock>" + Environment.NewLine;
 			Response.Write(sXML);

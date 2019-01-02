@@ -30,7 +30,7 @@ namespace replica.lfrontier
 			try
 			{
 				//Thread.Sleep(15000);
-				(new Logger()).WriteNotice("получен сигнал на запуск");//TODO LANG
+				(new Logger()).WriteWarning("получен сигнал на запуск");//TODO LANG
 				_cMREStop = new ManualResetEvent(false);
 				ThreadPool.QueueUserWorkItem(Play, this);
 
@@ -44,7 +44,7 @@ namespace replica.lfrontier
         {
 			try
 			{
-				(new Logger()).WriteNotice("получен сигнал на остановку");//TODO LANG
+				(new Logger()).WriteWarning("получен сигнал на остановку");//TODO LANG
 				_cMREStop.Set();
 				DateTime dt = DateTime.Now;
 				while (1 > _nThreadsFinished && DateTime.Now.Subtract(dt).TotalSeconds < 2)

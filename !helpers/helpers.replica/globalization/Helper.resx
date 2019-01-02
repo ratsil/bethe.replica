@@ -495,4 +495,25 @@
   <data name="sMix" xml:space="preserve">
     <value>Mix</value>
   </data>
+  <data name="sStartNow" xml:space="preserve">
+    <value>Start now</value>
+  </data>
+  <data name="sSex" xml:space="preserve">
+    <value>Sex</value>
+  </data>
+  <data name="sTSR1" xml:space="preserve">
+    <value>can't connect to DB TSR</value>
+  </data>
+  <data name="sTSR2" xml:space="preserve">
+    <value>can't read from DB TSR</value>
+  </data>
+  <data name="sFilesAgeSet" xml:space="preserve">
+    <value>Set the period of holding files</value>
+  </data>
+  <data name="sAssetsProperties" xml:space="preserve">
+    <value>Multiple assets properties</value>
+  </data>
+  <data name="sCached" xml:space="preserve">
+    <value>Cached</value>
+  </data>
 </root>

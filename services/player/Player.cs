@@ -32,6 +32,7 @@ namespace replica
 
 			//helpers.replica.pl.Proxy ProxyGet(string sMacroName);
 			helpers.replica.mam.Macro MacroGet(string sMacroName);
+			helpers.replica.pl.Proxy ProxyGet(Class cClass);
 			string MacroExecute(helpers.replica.mam.Macro cMacro);
 			PlaylistItem[] PlaylistClipsGet();
 		}
@@ -46,18 +47,11 @@ namespace replica
                     return _cInstance._nFPS;
                 }
             }
-            static public double nThresholdMilliseconds
+            static public int nFrameMs
             {
                 get
                 {
-                    return _cInstance._nThresholdMilliseconds;
-                }
-            }
-            static public ulong nThresholdFrames
-            {
-                get
-                {
-                    return _cInstance._nThresholdFrames;
+                    return _cInstance._nFrameDur;
                 }
             }
             static public string sCacheFolder
@@ -74,14 +68,21 @@ namespace replica
                     return _cInstance._bOpacity;
                 }
             }
+			static public string[] aIgnoreFiles
+			{
+				get
+				{
+					return _cInstance._aIgnoreFiles;
+				}
+			}
 
-            private byte _nFPS;
-            private ulong _nThresholdMilliseconds;
-            private ulong _nThresholdFrames;
+			private byte _nFPS;
+            private int _nFrameDur;
             private string _sCacheFolder;
             private bool _bOpacity;
+			private string[] _aIgnoreFiles;
 
-            public Preferences()
+			public Preferences()
                 : base("//replica/player")
             {
             }
@@ -89,19 +90,30 @@ namespace replica
             {
                 if (null == cXmlNode)
                     return;
-                _nFPS = cXmlNode.AttributeGet<byte>("fps");
-                _nThresholdMilliseconds = (ulong)cXmlNode.AttributeGet<TimeSpan>("threshold").TotalMilliseconds;
-                _nThresholdFrames = _nThresholdMilliseconds * _nFPS / 1000;
+
+                _nFPS = cXmlNode.AttributeGet<byte>("fps");  //TODO get it from ig_server
+                _nFrameDur = 1000 / _nFPS;
                 _sCacheFolder = cXmlNode.AttributeValueGet("cache");
                 if (!System.IO.Directory.Exists(_sCacheFolder))
-                    throw new Exception("указанная папка кэша плеера не существует [cache:" + _sCacheFolder + "][" + cXmlNode.Name + "]"); //TODO LANG
-                try
+					throw new Exception("указанная папка кэша плеера не существует [cache:" + _sCacheFolder + "][" + cXmlNode.Name + "]"); //TODO LANG
+				(new Logger()).WriteNotice("prefs got cache folder: " + _sCacheFolder);
+
+				string sIgnore = cXmlNode.AttributeValueGet("ignor_files", false);
+                if (null != sIgnore)
                 {
-                    _bOpacity = cXmlNode.AttributeGet<bool>("opacity", false);
+                    _aIgnoreFiles = sIgnore.Split(new char[] { ',', ';' }).Select(o => o.Trim()).ToArray();
+                    sIgnore = "";
+                    foreach (string sStr in _aIgnoreFiles)
+                        sIgnore += "[" + sStr + "]\t";
+                    (new Logger()).WriteNotice("prefs got ignor_files:" + sIgnore);
                 }
-                catch { }
-            }
-        }
+                else
+                    _aIgnoreFiles = new string[0];
+
+                _bOpacity = cXmlNode.AttributeOrDefaultGet<bool>("opacity", false);
+				(new Logger()).WriteNotice("prefs got opacity: " + _bOpacity);
+			}
+		}
         public class Logger : helpers.Logger
         {
             static public string sFile = null;
@@ -136,10 +148,29 @@ namespace replica
             get
             {
                 lock (_aqPlaylist)
-                    return (ushort)_aqPlaylist.Count;
+                    return (ushort)_aqPlaylist.Count;   // можно еще из proxy.cplaylist  count брать, но пока не надо вроде
             }
         }
+		public ulong nPlaylistDurationTotal
+		{
+			get
+			{
+				lock(_aqPlaylist)
+				{
+                    if (Proxy.cPlaylist == null)
+                        return 0;
+					ulong nRetVal = Proxy.cPlaylist.nSumDuration;
 
+                    if (_aqPlaylist.IsNullOrEmpty())
+                        return nRetVal;
+                    foreach (Proxy cPr in _aqPlaylist)
+					{
+						nRetVal += cPr.nDuration;
+					}
+					return nRetVal;
+				}
+			}
+		}
         public Player()
         {
 			_bAdding = false;
@@ -187,6 +218,7 @@ namespace replica
             (new Logger()).WriteNotice("модуль воспроизведения запущен");//TODO LANG
             Proxy cProxy = null;
             bool bStarted = false;
+			int nIndxGCForced = 0;
             try
             {
                 IU.Playlist cPlaylist = new IU.Playlist();
@@ -204,7 +236,8 @@ namespace replica
 
                 DateTime dt;
 				Proxy.cPlaylist = cPlaylist;
-                while (_bRunning)
+				Logger.Timings cTimings = new helpers.Logger.Timings("player:Worker");
+				while (_bRunning)
                 {
                     try
                     {
@@ -226,10 +259,10 @@ namespace replica
 							if (null != cProxy)
 							{
 								if (2 < cPlaylist.nEffectsQty || 0 < cPlaylist.nEffectsQty && 1500 < (nPLDuration = cPlaylist.nSumDuration))
-									(new Logger()).WriteNotice("sleeping until small qty in queue:" + cPlaylist.nEffectsQty + "dur: " + nPLDuration);
+									(new Logger()).WriteNotice("sleeping until small qty in queue:" + cPlaylist.nEffectsQty + "   dur: " + nPLDuration);
 								while (2 < cPlaylist.nEffectsQty || 0 < cPlaylist.nEffectsQty && 1500 < (nPLDuration = cPlaylist.nSumDuration))   // копия нижнего условия
 									Thread.Sleep(500);
-								(new Logger()).WriteNotice("sleeping end: queue:" + cPlaylist.nEffectsQty + "dur: " + nPLDuration);
+								(new Logger()).WriteNotice("sleeping end: queue:" + cPlaylist.nEffectsQty + "   dur: " + nPLDuration);
 								break;
 							}
                             Thread.Sleep(500);
@@ -290,7 +323,18 @@ namespace replica
 						nPLDuration = 0;
 						if (2 < cPlaylist.nEffectsQty || 0 < cPlaylist.nEffectsQty && 1500 < cPlaylist.nSumDuration)
                         {
-                            Proxy.mreNextPlaylistItemPrepare.Reset();
+
+							
+							//_nIndxGCForced++;
+							//cTimings.TotalRenew();
+							if (System.Runtime.GCSettings.LatencyMode != System.Runtime.GCLatencyMode.Interactive)
+								System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.Interactive;
+							//GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
+							//cTimings.Stop("GC > 10", "GC-" + "Optimized" + " " + System.Runtime.GCSettings.LatencyMode + " [eff_qty=" + cPlaylist.nEffectsQty + "][sum_dur=" + cPlaylist.nSumDuration + "]", 10);
+
+
+
+							Proxy.mreNextPlaylistItemPrepare.Reset();
                             while (!Proxy.mreNextPlaylistItemPrepare.WaitOne(500))
                             {
                                 lock (_aqCommands)
@@ -357,7 +401,7 @@ namespace replica
 		public void Add(PlaylistItem cPLI)
 		{
 
-#if DEBUG
+#if DEBUG2
 			if (bB && nIDX == 4)
 			{
 				cPLI.cClass = new Class(16, "comingup");  //DNF
@@ -381,8 +425,9 @@ namespace replica
                 if (null == cPLI)
                     return;
 
+				Proxy.CheckCacheAndCopy(cPLI);  // экстренное кеширование вне лока
                 lock (_aqPlaylist)
-                    _aqPlaylist.Enqueue(new Proxy(cPLI));
+                    _aqPlaylist.Enqueue(new Proxy(cPLI));  // заносим в "queued"
 
                 cLogger.WriteNotice("добавлено в очередь: " + cPLI.ToString()); //TODO LANG
             }

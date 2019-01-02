@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <preferences>
 	<replica>
-		<lfrontier folder="d:/cues/emergency/" />
+		<lfrontier folder="/path" />
 	</replica>
 	<ingenie>
 		<initiator>
@@ -12,7 +12,7 @@
 	</ingenie>
 	<helpers>
 		<common>
-			<logger level="debug1">
+			<logger>
 				<mail subject="CHANNEL" source="alerting@example.com" server="smtp.example.com" password="">
 					<targets>
 						<target level="warning">user1@example.com,user2@example.com</target>

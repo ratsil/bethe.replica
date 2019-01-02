@@ -28,6 +28,13 @@ namespace controls.childs.replica.sl
         private MsgBox _cMsgBox;
 		private DBInteract _cDBI;
 		private Asset _cAsset;
+		public AssetSL cAsset
+		{
+			get
+			{
+				return AssetSL.GetAssetSL(_cAsset);
+			}
+		}
 		public long nThisAssetID;
         private bool _bReadOnly;
         public bool bReadOnly    //TODO  сейчас пока просто не вносятся изменения, а по-хорошему надо бы блокировать возможность чо-то делать
@@ -92,11 +99,13 @@ namespace controls.childs.replica.sl
 					_ui_tcFile.IsEnabled = false;
 					_ui_chkbxFile.IsEnabled = false;
 					_ui_chkbxAssetToPL.IsEnabled = false;
-					_ui_ddlClasses.IsEnabled = false;
+					_ui_ctrClasses.IsEnabled = false;
 					_ui_tcClips.IsEnabled = false;
 					_ui_tcChatInOuts.IsEnabled = false;
 					_ui_tcCustom.IsEnabled = false;
 				}
+				if (null != _cAssetType && _cAssetType.eType == AssetType.series)
+                    _ui_ctrClasses.IsEnabled = true;
 			}
 		}
 		private AssetType _eAssetType
@@ -122,7 +131,7 @@ namespace controls.childs.replica.sl
         private List<IdNamePair> _aWordsFor_ui_dgCustomValues;
 		private HaulierDialog ui_dlgArtists;
 		private DateTime _dtNextMouseClickForDoubleClick;
-		private RAOInfo _cRAOIForDoubleClick;
+		private ClipsFragment _cRAOIForDoubleClick;
 
 
 		public AssetProperties()
@@ -143,6 +152,7 @@ namespace controls.childs.replica.sl
 			_cDBI.StylesLoadCompleted += new EventHandler<StylesLoadCompletedEventArgs>(_cDBI_StylesLoadCompleted);
 			_cDBI.RotationsGetCompleted += new EventHandler<RotationsGetCompletedEventArgs>(_cDBI_RotationsGetCompleted);
 			_cDBI.PalettesGetCompleted += new EventHandler<PalettesGetCompletedEventArgs>(_cDBI_PalettesGetCompleted);
+			_cDBI.SexGetCompleted += _cDBI_SexGetCompleted;
 			_cDBI.SoundsGetCompleted += new EventHandler<SoundsGetCompletedEventArgs>(_cDBI_SoundsGetCompleted);
             _cDBI.DesignGetCompleted += new EventHandler<DesignGetCompletedEventArgs>(_cDBI_DesignGetCompleted);
 			_cDBI.ArtistsCueNameGetCompleted += new EventHandler<ArtistsCueNameGetCompletedEventArgs>(_cDBI_ArtistsCueNameGetCompleted);
@@ -184,7 +194,10 @@ namespace controls.childs.replica.sl
             _cDesign = null;
             //_cTimerForCommandResult = null;
             _aWordsFor_ui_dgCustomValues = new List<IdNamePair>();
-		}
+            _ui_tiFile.Header = "    " + (string)_ui_tiFile.Header;
+        }
+
+
 		void _ui_dgClips_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
 		{
 			
@@ -199,13 +212,13 @@ namespace controls.childs.replica.sl
 					if (_dtNextMouseClickForDoubleClick < DateTime.Now)
 					{
 						_dtNextMouseClickForDoubleClick = DateTime.Now.AddMilliseconds(400);
-						_cRAOIForDoubleClick = (RAOInfo)cFEClick.DataContext;
+						_cRAOIForDoubleClick = (ClipsFragment)cFEClick.DataContext;
 					}
 					else
 					{
 						FrameworkElement cFEcolumn2 = _ui_dgClips.Columns[2].GetCellContent(_cRAOIForDoubleClick);
 						_dtNextMouseClickForDoubleClick = DateTime.MinValue;
-						if (_cRAOIForDoubleClick == (RAOInfo)cFEClick.DataContext && cFEcolumn2 == cFEClick)   // значит был даблклик на этом же объекте
+						if (_cRAOIForDoubleClick == (ClipsFragment)cFEClick.DataContext && cFEcolumn2 == cFEClick)   // значит был даблклик на этом же объекте
 						{
 							TimeCodeEnter dlgCodeEnter = new TimeCodeEnter();
 							dlgCodeEnter.nInitialCode = _cRAOIForDoubleClick.nFramesQty;
@@ -224,9 +237,9 @@ namespace controls.childs.replica.sl
 			if (true==dlgCodeEnter.DialogResult)
 			{
 				long nTimeCode = dlgCodeEnter.nResultCode;
-				_cRAOIForDoubleClick = new RAOInfo() { cClip = _cRAOIForDoubleClick.cClip, nFramesQty = nTimeCode };
-				List<RAOInfo> aRAOInfo = (List<RAOInfo>)_ui_dgClips.ItemsSource;
-				RAOInfo cRAOI = aRAOInfo.FirstOrDefault(o => o.cClip.nID == _cRAOIForDoubleClick.cClip.nID);
+				_cRAOIForDoubleClick = new ClipsFragment() { cClip = _cRAOIForDoubleClick.cClip, nFramesQty = nTimeCode };
+				List<ClipsFragment> aClipsFragment = (List<ClipsFragment>)_ui_dgClips.ItemsSource;
+				ClipsFragment cRAOI = aClipsFragment.FirstOrDefault(o => o.cClip.nID == _cRAOIForDoubleClick.cClip.nID);
 				if (null != cRAOI)
 					cRAOI.nFramesQty = nTimeCode;
 			}
@@ -409,10 +422,14 @@ namespace controls.childs.replica.sl
 		{
 			string sS = "", sC = "";
 			int ni = 0;
-			string sCueName;
-			foreach (string sName in e.Result)
+            string sCueName;
+            foreach (string sName in e.Result)
 			{
 				sCueName = sName == "" ? ((List<string>)e.UserState)[ni] : sName;
+
+				if (sName == "")
+                    sCueName = sCueName.ToUpperFirstLetterEveryWord(false);
+
 				sS += sC + sCueName;
 				sC = ", ";
 				ni++;
@@ -440,10 +457,6 @@ namespace controls.childs.replica.sl
                 _bNameEditedByUser_Busy = false;
             _ui_tbName.Mark();
         }
-        private void _ui_ddlClasses_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-			_ui_ddlClasses.Mark(false);
-        }
         private void _ui_ddlSoundStart_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 			_ui_ddlSoundStart.Mark(false);
@@ -460,7 +473,11 @@ namespace controls.childs.replica.sl
         {
 			_ui_ddlPalette.Mark(false);
         }
-        private void _ui_tbCuesArtist_TextChanged(object sender, TextChangedEventArgs e)
+		private void _ui_ddlSex_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			_ui_ddlSex.Mark(false);
+		}
+		private void _ui_tbCuesArtist_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!_bArtistEditedByUser_Busy)
                 _bIs_ui_tbCuesArtistEditedByUser = true;
@@ -511,9 +528,9 @@ namespace controls.childs.replica.sl
 		}
         private void _ui_dgClips_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-			List<RAOInfo> aClips = (List<RAOInfo>)_ui_dgClips.Tag;
+			List<ClipsFragment> aClips = (List<ClipsFragment>)_ui_dgClips.Tag;
             if (null != e.Row)
-				if (null != aClips.FirstOrDefault(o => o.cClip.nID == ((RAOInfo)e.Row.DataContext).cClip.nID))
+				if (null != aClips.FirstOrDefault(o => o.cClip.nID == ((ClipsFragment)e.Row.DataContext).cClip.nID))
 					e.Row.Background = Coloring.Notifications.cTextBoxActive;
                 else
 					e.Row.Background = Coloring.Notifications.cTextBoxChanged;
@@ -703,7 +720,7 @@ namespace controls.childs.replica.sl
         {
             try
             {
-				_ui_tcClips.Tag = (RAOInfo)((FrameworkElement)(((RoutedEventArgs)(e)).OriginalSource)).DataContext;
+				_ui_tcClips.Tag = (ClipsFragment)((FrameworkElement)(((RoutedEventArgs)(e)).OriginalSource)).DataContext;
             }
             catch
             {
@@ -720,7 +737,7 @@ namespace controls.childs.replica.sl
                 if (1 < _ui_dgClips.SelectedItems.Count)
                     _ui_cmClipsDelete.Header += _ui_dgClips.SelectedItems.Count.ToString();
                 else
-					_ui_cmClipsDelete.Header += "'" + ((RAOInfo)_ui_tcClips.Tag).cClip.sName + "'";
+					_ui_cmClipsDelete.Header += "'" + ((ClipsFragment)_ui_tcClips.Tag).cClip.sName + "'";
             }
             _ui_cmClipsAdd.Focus();
             _ui_cmClipsDelete.Focus();
@@ -738,30 +755,30 @@ namespace controls.childs.replica.sl
 			dlgClipChooser.Closed -= dlgClipChooser_Closed;
 			if ((bool)(dlgClipChooser).DialogResult)
             {
-				List<RAOInfo> aRAOInfo = (List<RAOInfo>)_ui_dgClips.ItemsSource;
+				List<ClipsFragment> aClipsFragment = (List<ClipsFragment>)_ui_dgClips.ItemsSource;
                 List<Clip> aSC = ((ClipsChooser)sender).SelectedClips;
                 foreach (Clip cC in aSC)
                 {
-                    if (null == aRAOInfo.FirstOrDefault(s => s.cClip.nID == cC.nID))
-						aRAOInfo.Add(new RAOInfo() { cClip = cC, nFramesQty = cC.nFramesQty });
+                    if (null == aClipsFragment.FirstOrDefault(s => s.cClip.nID == cC.nID))
+						aClipsFragment.Add(new ClipsFragment() { cClip = cC, nFramesQty = cC.nFramesQty });
                 }
                 _ui_dgClips.ItemsSource = null;
-                _ui_dgClips.ItemsSource = aRAOInfo;
+                _ui_dgClips.ItemsSource = aClipsFragment;
 				_ui_dgClips.Mark();
             }
         }
         private void _ui_cmClipsDelete_Click(object sender, RoutedEventArgs e)
         {
-			List<RAOInfo> aRAOInfo = (List<RAOInfo>)_ui_dgClips.ItemsSource;
-			List<RAOInfo> aClipsSelected = new List<RAOInfo>();
+			List<ClipsFragment> aClipsFragment = (List<ClipsFragment>)_ui_dgClips.ItemsSource;
+			List<ClipsFragment> aClipsSelected = new List<ClipsFragment>();
             for (int ni = 0; _ui_dgClips.SelectedItems.Count > ni; ni++)
-				aClipsSelected.Add((RAOInfo)_ui_dgClips.SelectedItems[ni]);
-			foreach (RAOInfo cC in aClipsSelected)
+				aClipsSelected.Add((ClipsFragment)_ui_dgClips.SelectedItems[ni]);
+			foreach (ClipsFragment cC in aClipsSelected)
             {
-                aRAOInfo.Remove(cC);
+                aClipsFragment.Remove(cC);
             }
             _ui_dgClips.ItemsSource = aClipsSelected;
-            _ui_dgClips.ItemsSource = aRAOInfo;
+            _ui_dgClips.ItemsSource = aClipsFragment;
 			_ui_dgClips.Mark();
 		}
         private void _ui_cmClips_Closed(object sender, RoutedEventArgs e)
@@ -875,9 +892,11 @@ namespace controls.childs.replica.sl
 			{
 				SaveAssetCompleted(e.Result);
 			}
-			catch
+			catch(Exception ex)
 			{
-				SaveAssetCompleted(-1);
+                _cMsgBox.ShowError(ex);
+                //_cMsgBox.Closed += _cMsgBoxError_Closed;
+                SaveAssetCompleted(-1);
 			}
 		}
         void _cDBI_AdvertisementSaveCompleted(object sender, AdvertisementSaveCompletedEventArgs e)
@@ -886,9 +905,11 @@ namespace controls.childs.replica.sl
 			{
 				SaveAssetCompleted(e.Result);
 			}
-			catch
+			catch(Exception ex)
 			{
-				SaveAssetCompleted(-1);
+                _cMsgBox.ShowError(ex);
+                //_cMsgBox.Closed += _cMsgBoxError_Closed;
+                SaveAssetCompleted(-1);
 			}
 		}
         void _cDBI_ProgramSaveCompleted(object sender, ProgramSaveCompletedEventArgs e)
@@ -897,7 +918,10 @@ namespace controls.childs.replica.sl
 			{
 				if (null == e.Error && 0 < e.Result)
 				{
-					if (access.scopes.programs.chatinouts.bCanUpdate && null != _ui_dgChatInOuts.ItemsSource)
+					List<ChatInOut> aChat = null;
+					if (null != _ui_dgChatInOuts.ItemsSource)
+						aChat = (List<ChatInOut>)_ui_dgChatInOuts.ItemsSource;
+					if (access.scopes.programs.chatinouts.bCanUpdate && null != aChat && aChat.Count > 0)
 						_cDBI.ChatInOutsSaveAsync(_cProgram, ((List<ChatInOut>)_ui_dgChatInOuts.ItemsSource).ToArray(), e.Result);
 					else
 						SaveAssetCompleted(e.Result);
@@ -908,9 +932,9 @@ namespace controls.childs.replica.sl
 			catch (Exception ex)
 			{
 				_dlgProgress.Close();
-				MessageBox.Show(ex.Message);
-			}
-		}
+                _cMsgBox.ShowError(ex);
+            }
+        }
 		void _cDBI_DesignSaveCompleted(object sender, DesignSaveCompletedEventArgs e)
 		{
 			try
@@ -927,7 +951,8 @@ namespace controls.childs.replica.sl
 			{
 				List<Person> aPers = new List<Person>();
 				aPers.Add((Person)e.UserState);
-				foreach( object cObj in ui_dlgArtists.HaulierControl.aItemsSource)
+				aPers[0].nID = e.Result;
+                foreach ( object cObj in ui_dlgArtists.HaulierControl.aItemsSource)
 					aPers.Add((Person)cObj);
 				ui_dlgArtists.HaulierControl.aItemsSource = new Person[0];
 				ui_dlgArtists.HaulierControl.aItemsSource = aPers.OrderBy(o => o.sName).ToArray();
@@ -950,15 +975,16 @@ namespace controls.childs.replica.sl
 			}
 			catch (Exception ex)
 			{
-				_cMsgBox.ShowError(ex.Message);
-			}
+				_cMsgBox.ShowError(ex);
+                _cMsgBox.Closed += _cMsgBoxError_Closed;
+            }
         }
 		void _cDBI_ClassesGetCompleted(object sender, ClassesGetCompletedEventArgs e)
         {
 			if (null != e.Result)
 			{
 				Classes.Set(e.Result);
-				_ui_ddlClasses.ItemsSource = Classes.Array;
+                _ui_ctrClasses.Show(Classes.Array);
 			}
 			else
 				_cMsgBox.ShowError(g.Replica.sErrorAssetProperties4 + "...");
@@ -1010,10 +1036,12 @@ namespace controls.childs.replica.sl
 				_cAsset = _cClip;
 				ControlsLoad();
 			}
-			catch
+			catch(Exception ex)
 			{
                 MessageBox.Show(g.Common.sErrorDataReceive.ToLower());
-			}
+                _cMsgBox.ShowError(ex);
+                _cMsgBox.Closed += _cMsgBoxError_Closed;
+            }
 		}
 		void _cDBI_AdvertisementGetCompleted(object sender, AdvertisementGetCompletedEventArgs e)
 		{
@@ -1127,6 +1155,15 @@ namespace controls.childs.replica.sl
 				Palettes.Set(e.Result);
 				_ui_ddlPalette.ItemsSource = Palettes.Array;
 			}
+			_cDBI.SexGetAsync(e.UserState);
+		}
+		private void _cDBI_SexGetCompleted(object sender, SexGetCompletedEventArgs e)
+		{
+			if (null != e.Result)
+			{
+				Sex.Set(e.Result);
+				_ui_ddlSex.ItemsSource = Sex.Array;
+			}
 			_cDBI.SoundsGetAsync(e.UserState);
 		}
 		void _cDBI_SoundsGetCompleted(object sender, SoundsGetCompletedEventArgs e)
@@ -1221,8 +1258,11 @@ namespace controls.childs.replica.sl
 		}
 		void _cDBI_ChatInOutsGetCompleted(object sender, ChatInOutsGetCompletedEventArgs e)
 		{
-			_ui_dgChatInOuts.ItemsSource = e.Result.ToList();
-			_ui_dgChatInOuts.Tag = _ui_dgChatInOuts.ItemsSource;
+			if (null != e.Result)
+			{
+				_ui_dgChatInOuts.ItemsSource = e.Result.ToList();
+				_ui_dgChatInOuts.Tag = _ui_dgChatInOuts.ItemsSource;
+			}
 			ControlsLoad();
 		}
 		void _cDBI_ChatInOutsSaveCompleted(object sender, ChatInOutsSaveCompletedEventArgs e)
@@ -1265,7 +1305,7 @@ namespace controls.childs.replica.sl
 					break;
 				case "program":
 					_cProgram = new Program();
-					_cProgram.aRAOInfo = new RAOInfo[0];
+					_cProgram.aClipsFragments = new ClipsFragment[0];
 					_cAsset = _cProgram;
 					_ui_tbName.Text = "";
 					break;
@@ -1292,14 +1332,14 @@ namespace controls.childs.replica.sl
         private void AssetApply()
 		{
 			_cAsset.sName = _ui_tbName.Text;
-            _cAsset.stVideo.sName = _ui_tbName.Text;
-            _cAsset.cFile = (File)_ui_ctrRecalcFileDur._cFile;
-            _cAsset.nFrameIn = _ui_ctrRecalcFileDur.nIn;
-            _cAsset.nFrameOut = _ui_ctrRecalcFileDur.nOut;
-            _cAsset.nFramesQty = _ui_ctrRecalcFileDur.nTotal;
-            _cAsset.aCustomValues = ((IEnumerable<CustomValue>)_ui_dgCustomValues.ItemsSource).ToArray();
-			_cAsset.cClass = (Class)_ui_ddlClasses.SelectedItem;
-			_cAsset.cType = cAssetType;
+			_cAsset.stVideo.sName = _ui_tbName.Text;
+			_cAsset.cFile = (File)_ui_ctrRecalcFileDur._cFile;
+			_cAsset.nFrameIn = _ui_ctrRecalcFileDur._nIn;
+			_cAsset.nFrameOut = _ui_ctrRecalcFileDur._nOut;
+			_cAsset.nFramesQty = _ui_ctrRecalcFileDur._nTotal;
+			_cAsset.aCustomValues = ((IEnumerable<CustomValue>)_ui_dgCustomValues.ItemsSource).ToArray();
+            _cAsset.aClasses = _ui_ctrClasses.aSelectedItems;
+            _cAsset.cType = cAssetType;
 			if (null != _cParent)
 				_cAsset.nIDParent = _cParent.nID;
 			else
@@ -1307,6 +1347,9 @@ namespace controls.childs.replica.sl
 
 			if (null == _cAsset.cFile || false == _ui_chkbxFile.IsChecked)
 				_cAsset.cFile = new File() { nID = -1, cStorage = new Storage() };
+
+			if (_cAsset.cType != null && _cAsset.cType.eType != AssetType.part)
+				_cAsset.cFile = null;
 		}
 		private void ClipApply()
 		{
@@ -1317,7 +1360,8 @@ namespace controls.childs.replica.sl
 
             _cClip.cRotation = (IdNamePair)_ui_ddlRotation.SelectedItem;
             _cClip.cPalette = (IdNamePair)_ui_ddlPalette.SelectedItem;
-            if (null == _cClip.stSoundLevels)
+			_cClip.cSex = (IdNamePair)_ui_ddlSex.SelectedItem;
+			if (null == _cClip.stSoundLevels)
                 _cClip.stSoundLevels = new SoundLevels();
             _cClip.stSoundLevels.cStart = (IdNamePair)_ui_ddlSoundStart.SelectedItem;
             _cClip.stSoundLevels.cStop = (IdNamePair)_ui_ddlSoundStop.SelectedItem;
@@ -1342,7 +1386,7 @@ namespace controls.childs.replica.sl
 		{
 			AssetApply();
 			if (null != _ui_dgClips.ItemsSource)
-				_cProgram.aRAOInfo = ((List<RAOInfo>)_ui_dgClips.ItemsSource).ToArray();
+				_cProgram.aClipsFragments = ((List<ClipsFragment>)_ui_dgClips.ItemsSource).ToArray();
 		}
 		private void SaveAssetCompleted(long nID)
 		{
@@ -1353,7 +1397,7 @@ namespace controls.childs.replica.sl
 		{
 			if (0 < nID)
 			{
-				if (true == _ui_chkbxAssetToPL.IsChecked)
+				if (true == _ui_chkbxAssetToPL.IsChecked && access.scopes.playlist.bCanUpdate)
 				{
 					if (0 < nThisAssetID)
 						_cDBI.AssetParametersToPlaylistSaveAsync(nThisAssetID);
@@ -1399,29 +1443,21 @@ namespace controls.childs.replica.sl
 				{
 					_ui_tbName.Background = Coloring.Notifications.cTextBoxError;
 				}
-				if (null != _cAsset.cClass)
-				{
-					foreach (Class cEnum in _ui_ddlClasses.Items)
-					{
-						if (_cAsset.cClass.nID == cEnum.nID)
-						{
-							_ui_ddlClasses.Tag = cEnum;
-							_ui_ddlClasses.SelectedItem = cEnum;
-							_ui_ddlClasses.Background = Coloring.Notifications.cButtonNormal;
-							break;
-						}
-					}
-				}
-				else if (null == _ui_ddlClasses.SelectedItem && 0 < _ui_ddlClasses.Items.Count)
-					bSetDefaultCuesClass = true;
 
-				CustomTabControlRelease();
+                if (null != _cAsset.aClasses)
+                {
+                    _ui_ctrClasses.aSelectedItems = _cAsset.aClasses;
+                }
+                else if (!_ui_ctrClasses.aClassesSrc.IsNullOrEmpty() && _ui_ctrClasses.aSelectedItems.IsNullOrEmpty())
+                    bSetDefaultCuesClass = true;
+
+                CustomTabControlRelease();
 				if (_cAsset is Clip)
 				{
 					_ui_spClipRow2.Children.Add(_ui_tcCustom);
 					_ui_spClip.Visibility = System.Windows.Visibility.Visible;
 					_cDBI.ArtistsLoadAsync(_cAsset.nID, (TargetControlsLoad)ClipControlsLoad);
-                    sDefaultCuesClass = "Клип (стандартный)"; //EMERGENCY:l надо как-то поменять этот механизм. нужно обсуждать //TODO LANG
+                    sDefaultCuesClass = Preferences.cServer.sDefautClassClip;
 				}
 				else if (_cAsset is Advertisement)
 				{
@@ -1430,7 +1466,7 @@ namespace controls.childs.replica.sl
 					_ui_tcCustom.Margin = new Thickness(0, 0, 0, 0);
 					_ui_tcCustom.Width = LayoutRoot.ActualWidth;
 					_cDBI.CustomsLoadAsync(_cAsset.nID, (TargetControlsLoad)AdvertisementControlsLoad);
-					sDefaultCuesClass = "Реклама (с логотипом)";
+					sDefaultCuesClass = Preferences.cServer.sDefautClassAdvertisement;
 				}
 				else if (_cAsset is Design)
 				{
@@ -1439,7 +1475,7 @@ namespace controls.childs.replica.sl
 					_ui_tcCustom.Margin = new Thickness(0, 0, 0, 0);
 					_ui_tcCustom.Width = LayoutRoot.ActualWidth;
 					_cDBI.CustomsLoadAsync(_cAsset.nID, (TargetControlsLoad)DesignControlsLoad);
-					sDefaultCuesClass = "Оформление (стандартное)";
+					sDefaultCuesClass = Preferences.cServer.sDefautClassDesign;
 				}
 				else if (_cAsset is Program)
 				{
@@ -1448,8 +1484,8 @@ namespace controls.childs.replica.sl
 					swc.Grid.SetColumn(_ui_tcCustom, 1);
 					_ui_grdProgram.Visibility = System.Windows.Visibility.Visible;
 					_cDBI.CustomsLoadAsync(_cAsset.nID, (TargetControlsLoad)ProgramControlsLoad);
-					if (_ui_ddlClasses.IsEnabled)
-						sDefaultCuesClass = "Программа (стандартная)";
+					if (_ui_ctrClasses.IsEnabled)
+						sDefaultCuesClass = Preferences.cServer.sDefautClassProgram;
 					else
 						sDefaultCuesClass = "";
 				}
@@ -1458,21 +1494,26 @@ namespace controls.childs.replica.sl
 				if (bSetDefaultCuesClass)
 				{
 					if (sDefaultCuesClass == null)
-                        sDefaultCuesClass = g.Common.sUnknown;
-					Class[] aClasses = ((Class[])_ui_ddlClasses.ItemsSource).Where(nam => nam.sName.Equals(sDefaultCuesClass)).ToArray();
-					if (!aClasses.IsNullOrEmpty())
-						_ui_ddlClasses.SelectedItem = aClasses[0];
+                        sDefaultCuesClass = Preferences.cServer.sDefautClassUnknown;
+                    Class cClass;
+                    if (null != (cClass = _ui_ctrClasses.aClassesSrc.FirstOrDefault(o => o.sName.Equals(sDefaultCuesClass))))
+                        _ui_ctrClasses.aSelectedItems = new Class[1] { cClass };
 				}
-				if (_ui_ddlClasses.SelectedItem == null && _ui_ddlClasses.IsEnabled)
-					_ui_ddlClasses.Background = Coloring.Notifications.cButtonError;
-
 				_ui_chkbxFile_CheckedChanged(null, null);
 			}
 			catch (Exception ex)
 			{
-				_cMsgBox.ShowError(ex.Message + ":" + ex.StackTrace);
-			}
+                _cMsgBox.Closed += _cMsgBoxError_Closed;
+				_cMsgBox.ShowError(ex);
+            }
 		}
+
+        private void _cMsgBoxError_Closed(object sender, EventArgs e)
+        {
+            _cMsgBox.Closed -= _cMsgBoxError_Closed;
+            _ui_btnCancel_Click(null, null);
+        }
+
         private void CustomTabControlRelease()
         {
             _ui_tcCustom.Margin = new Thickness(6, 0, 0, 0);
@@ -1597,7 +1638,7 @@ namespace controls.childs.replica.sl
         {
             bool bRetVal = true;
             if (Coloring.Notifications.cTextBoxError == _ui_tbName.Background) bRetVal = false;
-            if (Coloring.Notifications.cTextBoxError == _ui_ddlClasses.Background) bRetVal = false;
+            if (_ui_ctrClasses.bMarkedRed) bRetVal = false;
             switch (_cAsset.stVideo.cType.sName)
             {
                 case "clip":
@@ -1611,7 +1652,8 @@ namespace controls.childs.replica.sl
                     if (Coloring.Notifications.cTextBoxError == _ui_ddlSoundStop.Background) bRetVal = false;
                     if (Coloring.Notifications.cTextBoxError == _ui_ddlRotation.Background) bRetVal = false;
                     if (Coloring.Notifications.cTextBoxError == _ui_ddlPalette.Background) bRetVal = false;
-                    if (Coloring.Notifications.cTextBoxError == _ui_tcStyles.Background) bRetVal = false;
+					if (Coloring.Notifications.cTextBoxError == _ui_ddlSex.Background) bRetVal = false;
+					if (Coloring.Notifications.cTextBoxError == _ui_tcStyles.Background) bRetVal = false;
                     break;
                 case "design":
                 case "advertisement":
@@ -1621,7 +1663,7 @@ namespace controls.childs.replica.sl
                     break;
             }
             if (Coloring.Notifications.cTextBoxError == _ui_tcCustom.Background) bRetVal = false;
-			if (null == _ui_ddlClasses.SelectedItem && (null==_cAssetType || _cAssetType.eType== AssetType.part)) bRetVal = false;
+			if (_ui_ctrClasses.aSelectedItems.IsNullOrEmpty() && (null==_cAssetType || _cAssetType.eType== AssetType.part)) bRetVal = false;
             return bRetVal;
         }
 
@@ -1640,6 +1682,8 @@ namespace controls.childs.replica.sl
                 ComboBoxSet(_ui_ddlRotation, "Третья"); //EMERGENCY:l надо как-то поменять этот механизм. нужно обсуждать //TODO LANG
 			if (null == _ui_ddlPalette.SelectedItem && 0 < _ui_ddlPalette.Items.Count)
                 ComboBoxSet(_ui_ddlPalette, g.Common.sUnknown);
+			if (null == _ui_ddlSex.SelectedItem && 0 < _ui_ddlSex.Items.Count)
+				ComboBoxSet(_ui_ddlSex, g.Common.sUnknown);
 			if (null == _ui_ddlSoundStart.SelectedItem && 0 < _ui_ddlSoundStart.Items.Count)
                 ComboBoxSet(_ui_ddlSoundStart, g.Common.sUnknown);
 			if (null == _ui_ddlSoundStop.SelectedItem && 0 < _ui_ddlSoundStop.Items.Count)
@@ -1664,6 +1708,14 @@ namespace controls.childs.replica.sl
                         _ui_ddlPalette.SelectedItem = cEnum;
                         _ui_ddlPalette.Background = Coloring.Notifications.cButtonNormal;
                     }
+			if (null != _cClip.cSex)
+				foreach (IdNamePair cEnum in _ui_ddlSex.Items)
+					if (_cClip.cSex.nID == cEnum.nID)
+					{
+						_ui_ddlSex.Tag = cEnum;
+						_ui_ddlSex.SelectedItem = cEnum;
+						_ui_ddlSex.Background = Coloring.Notifications.cButtonNormal;
+					}
 			if (null != _cClip.stSoundLevels)
 			{
 				if (null != _cClip.stSoundLevels.cStart)
@@ -1741,10 +1793,10 @@ namespace controls.childs.replica.sl
         }
 		private void ProgramControlsLoad()
 		{
-			List<RAOInfo> aRAOI = _cProgram.aRAOInfo.ToList(), aCTag = new List<RAOInfo>();
-            foreach (RAOInfo cRAOI in aRAOI)
+			List<ClipsFragment> aRAOI = _cProgram.aClipsFragments.ToList(), aCTag = new List<ClipsFragment>();
+            foreach (ClipsFragment cRAOI in aRAOI)
             {
-				aCTag.Add(new RAOInfo() { cClip = new Clip { sName = cRAOI.cClip.sName, nID = cRAOI.cClip.nID, nFramesQty = cRAOI.cClip.nFramesQty }, nFramesQty = cRAOI.nFramesQty });
+				aCTag.Add(new ClipsFragment() { cClip = new Clip { sName = cRAOI.cClip.sName, nID = cRAOI.cClip.nID, nFramesQty = cRAOI.cClip.nFramesQty }, nFramesQty = cRAOI.nFramesQty });
             }
 			if (_eAssetType == AssetType.part)
 			{
@@ -1809,13 +1861,13 @@ namespace controls.childs.replica.sl
             return RetVal;
         }
 
-		private void _ui_chkbxFile_Checked(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-	}
-	static public class x
+        private void _ui_chkbxFile_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_ui_chkbxAssetToPL.IsChecked != null && _ui_chkbxAssetToPL.IsChecked.Value)
+                _ui_chkbxAssetToPL.IsChecked = false;
+        }
+    }
+    static public class x
 	{
 		static public bool Mark(this ComboBox ui, bool bCanBeNull)
 		{

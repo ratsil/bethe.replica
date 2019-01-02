@@ -1,6 +1,8 @@
 ﻿using System.IO.IsolatedStorage;
+using System;
 using System.Linq;
 using System.Windows;
+using System.ServiceModel;
 using helpers.replica.services.dbinteract;
 using g = globalization;
 using p = replica.sl.services.preferences;
@@ -22,9 +24,12 @@ namespace replica.sl
 				}
 				public Type eType;
 				public Storage cStorage;
+				public Storage cStorageAdvanced;
 				public string sCaption;
                 public string sPath;
-            }
+				public string sPathAdvanced;
+				public bool bBatch;
+			}
             static public Tab[] aTabs
             {
                 get
@@ -115,9 +120,13 @@ namespace replica.sl
         }
 
         static public void ServerLoad()
-        {
-            p.PreferencesSoapClient cServerSoap = new p.PreferencesSoapClient();
-            cServerSoap.ReplicaGetCompleted += _cInstance.cServerSoap_ReplicaGetCompleted;
+		{
+			p.PreferencesSoapClient cServerSoap = new p.PreferencesSoapClient();
+			//MessageBox.Show("Endpoint: " + cServerSoap.Endpoint.Address.ToString());
+			cServerSoap = new p.PreferencesSoapClient(helpers.replica.services.dbinteract.DBInteract.EndPointGet(), new EndpointAddress(new Uri(new Uri(helpers.replica.services.dbinteract.DBInteract.GetUrl(Application.Current.Host.Source.AbsoluteUri)), "../services/Preferences.asmx")));
+			//MessageBox.Show("Endpoint: " + cServerSoap.Endpoint.Address.ToString() + "\n" + "AbsoluteUri: " + Application.Current.Host.Source.AbsoluteUri);
+
+			cServerSoap.ReplicaGetCompleted += _cInstance.cServerSoap_ReplicaGetCompleted;
             cServerSoap.ReplicaGetAsync();
         }
 
@@ -144,7 +153,7 @@ namespace replica.sl
             try
             {
                 _cServer = e.Result;
-                if (null != _cServer.sLocale)
+				if (null != _cServer.sLocale)
                 {
                     try
                     {

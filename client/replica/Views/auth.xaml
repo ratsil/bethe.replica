@@ -19,8 +19,8 @@
 
                 <TextBlock x:Name="HeaderText" Style="{StaticResource HeaderTextStyle}" 
                                    Text="{Binding Path=cCommon.sAuthorization, Source={StaticResource g}}"/>
-                <TextBlock x:Name="_ui_txtError" Style="{StaticResource ErrorTextStyle}" 
-                                   Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=!, Path=cCommon.sWrongCredentials, Source={StaticResource g}}" Visibility="Collapsed" Margin="50"/>
+				<TextBlock x:Name="_ui_txtError"  Width="auto" HorizontalAlignment="Center" Foreground="#FFFF9D9D" FontSize="11" Margin="0,20,0,20" 
+                                   Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=!, Path=cCommon.sWrongCredentials, Source={StaticResource g}}" Visibility="Collapsed"/>
                 <Grid>
                     <TextBlock x:Name="_ui_txtUserName" Style="{StaticResource ContentTextStyle}" 
                                    Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:, Path=cCommon.sUsername, Source={StaticResource g}}"/>
@@ -37,7 +37,9 @@
 
                 <Button x:Name="_ui_btnOK" Margin="0,20" Width="100" HorizontalAlignment="Right" Click="_ui_btnOK_Click" ClickMode="Press" Content="{Binding Path=cCommon.sEnter, Source={StaticResource g}}"></Button>
                 <sdk:Label Height="28" Name="_ui_lbVersion" Width="120"  HorizontalContentAlignment="Center" Foreground="#FF313131" Margin="0,70" Content="version: " FontSize="9" />
-            </StackPanel>
+
+				<TextBox x:Name="_ui_tbDebug" Text="" FontSize="7" Height="16" Background="#FF50758F" Foreground="#FF456D89" BorderThickness="0" />
+			</StackPanel>
 
         </ScrollViewer>
     </Grid>

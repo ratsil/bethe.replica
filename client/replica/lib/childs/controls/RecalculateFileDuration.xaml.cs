@@ -28,9 +28,10 @@ namespace controls.replica.sl
         MsgBox _dlgMsgBox;
         private AssetSL _cAsset;
         private File _cFileFirst;
+		private bool _bFrameChanging;
         public string sDefaultFileStorageName;
         public File _cFile;
-		public long nIn, nOut, nTotal;
+		public long _nIn, _nOut, _nTotal;
         public delegate void OnFileChanged(File cFile);
         public event OnFileChanged FileChanged;
 		public bool bMarkRed
@@ -44,12 +45,12 @@ namespace controls.replica.sl
 				}
 				else
 				{
-					_ui_spMain.Background = cMainBGColor;
-					_ui_tbFile.Background = cFileBGColor;
+					_ui_spMain.Background = _cMainBGColor;
+					_ui_tbFile.Background = _cFileBGColor;
 				}
 			}
 		}
-		private Brush cMainBGColor, cFileBGColor;
+		private Brush _cMainBGColor, _cFileBGColor;
         private System.Windows.Threading.DispatcherTimer _cTimerForCommandResult = null;
         private DateTime dtCommandBegin;
         public RecalculateFileDuration()
@@ -64,12 +65,18 @@ namespace controls.replica.sl
 				_cDBI.FramesQtyGetCompleted += new EventHandler<FramesQtyGetCompletedEventArgs>(_cDBI_FramesQtyGetCompleted);
 			}
 			catch { }
-			cMainBGColor = _ui_spMain.Background;
-			cFileBGColor = _ui_tbFile.Background;
+			_cMainBGColor = _ui_spMain.Background;
+			_cFileBGColor = _ui_tbFile.Background;
             _ui_tudFrameIn.ValueChanged += new RoutedPropertyChangedEventHandler<DateTime?>(_ui_tudFrameIn_ValueChanged);
             _ui_tudFrameOut.ValueChanged += new RoutedPropertyChangedEventHandler<DateTime?>(_ui_tudFrameOut_ValueChanged);
+			_ui_nudExtraFrames.ValueChanged += _ui_nudExtraFrames_ValueChanged;
+			_ui_nudExtraFrames.Maximum = Preferences.cServer.nFramesBase - 1;
+			_bFrameChanging = false;
+            _ui_tbError.Visibility = Visibility.Collapsed;
         }
-        private void _ui_tbFile_TextChanged(object sender, TextChangedEventArgs e)
+
+
+		private void _ui_tbFile_TextChanged(object sender, TextChangedEventArgs e)
         {
             MarkTB(_ui_tbFile);
         }
@@ -100,14 +107,32 @@ namespace controls.replica.sl
                 MarkAndRecalculateDuration();
             return true;
         }
-        private bool MarkAndRecalculateDuration()
+		private bool MarkNUD(NumericUpDown ui, StackPanel sp, bool bDurationRecalculate)
+		{
+			if (null == ui.Tag)
+				return false;
+			if (DurCalculate() > (long)_ui_tbDuration.Tag)
+				sp.Background = Coloring.Notifications.cTextBoxError;
+			else if ((long)ui.Value != (long)ui.Tag)
+				sp.Background = Coloring.Notifications.cTextBoxChanged;
+			else
+				sp.Background = Coloring.Notifications.cTextBoxActive;
+			if (bDurationRecalculate)
+				MarkAndRecalculateDuration();
+			return true;
+		}
+		private long DurCalculate()
+		{
+			return 1 + _ui_tudFrameOut.Value.Value.ToFrames(false) + (long)_ui_nudExtraFrames.Value - _ui_tudFrameIn.Value.Value.ToFrames(true);
+		}
+		private bool MarkAndRecalculateDuration()
         {
             //reculc
-			long nDuration = 1 + _ui_tudFrameOut.Value.Value.ToFrames(false) - _ui_tudFrameIn.Value.Value.ToFrames(true);  //c 0:00 по 0:11 = 0:11 секунд!!!!!
-			long nDiv = nDuration % 25;
+			long nDuration = DurCalculate();  //c 0:00 по 0:11 = 0:11 секунд!!!!!
+			long nDiv = nDuration % Preferences.cServer.nFramesBase;
             string sPostfix = "";
             if (0 != nDiv)
-				sPostfix = "  +" + nDiv.ToString() + " frames";
+				sPostfix = "." + nDiv.ToString() + ""; // + "frames"
 			_ui_tbDuration.Text = nDuration.ToFramesString(false, false, true) + sPostfix;
             //mark
             _ui_tbRemeins.Text = "";
@@ -117,13 +142,14 @@ namespace controls.replica.sl
 				_ui_tudFrameIn.Background = Coloring.Notifications.cTextBoxError;
 				_ui_tudFrameOut.Background = Coloring.Notifications.cTextBoxError;
                 return false;
-            }
-            else if (nDuration == (long)_ui_tbDuration.Tag)
-            {
+			}
+			else if (nDuration == (long)_ui_tbDuration.Tag)
+			{
 				if (Coloring.Notifications.cErrorForeground == _ui_tbDuration.Foreground)
                 {
                     MarkTUD(_ui_tudFrameIn, false, true);
                     MarkTUD(_ui_tudFrameOut, false, false);
+					MarkNUD(_ui_nudExtraFrames, _ui_spExtraFrames, false);
                 }
 				_ui_tbDuration.Foreground = Coloring.Notifications.cNormalForeground;
             }
@@ -133,7 +159,8 @@ namespace controls.replica.sl
                 {
                     MarkTUD(_ui_tudFrameIn, false, true);
                     MarkTUD(_ui_tudFrameOut, false, false);
-                }
+					MarkNUD(_ui_nudExtraFrames, _ui_spExtraFrames, false);
+				}
 				_ui_tbDuration.Foreground = Coloring.Notifications.cChangedForeground;
                 _ui_tbRemeins.Text = "(" + g.Helper.sCutted.ToLower() + ": " + ((long)_ui_tbDuration.Tag - nDuration).ToFramesString(true, false, true) + ")";
             }
@@ -147,9 +174,19 @@ namespace controls.replica.sl
         {
             MarkTUD(_ui_tudFrameOut, true, false);
         }
-        private void _ui_btnDurationReset_Click(object sender, EventArgs e)
-        {
-            if (null != this.Tag)  // это простой лок
+		private void _ui_nudExtraFrames_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			if (_bFrameChanging)
+				return;
+			_bFrameChanging = true;
+			if (DurCalculate() > (long)_ui_tbDuration.Tag)
+				_ui_nudExtraFrames.Value = (long)_ui_tbDuration.Tag % Preferences.cServer.nFramesBase;
+			MarkNUD(_ui_nudExtraFrames, _ui_spExtraFrames, true);
+			_bFrameChanging = false;
+		}
+		private void _ui_btnDurationReset_Click(object sender, EventArgs e)
+		{
+			if (null != this.Tag)  // это простой лок
                 return;
 
             this.Tag = true;
@@ -179,6 +216,7 @@ namespace controls.replica.sl
             if ((bool)ui_dlgMedia.DialogResult && 0 < ui_dlgMedia.SelectedFiles.Length)
             {
                 _cFile = ui_dlgMedia.SelectedFiles[0];
+                FileErrorsShow();
                 FileDurationUpdate();
             }
             this.Focus();
@@ -191,8 +229,21 @@ namespace controls.replica.sl
             _ui_pbCodesProgress.Width = _ui_spTimeCodes.ActualWidth;
             _ui_spTimeCodes.Tag = _cFile;
             _ui_tbFile.Text = _cFile.sFilename;  // _cFile.cStorage.sPath + 
-
+            FileErrorsShow();
             _cDBI.FileDurationQueryAsync(_cFile.nID);
+        }
+        private void FileErrorsShow()
+        {
+            if (_cFile == null || _cFile.eError == Error.no)
+                _ui_tbError.Visibility = Visibility.Collapsed;
+            else
+            {
+                _ui_tbError.Visibility = Visibility.Visible;
+                if (_cFile.eError == Error.missed)
+                    _ui_tbError.Content = g.Common.sErrorNoFile.ToUpper() + "!";
+                else if (_cFile.eError == Error.unknown)
+                    _ui_tbError.Content = g.Common.sError.ToUpper() + "!";
+            }
         }
         void _cDBI_FileDurationQueryCompleted(object sender, FileDurationQueryCompletedEventArgs e)
         {
@@ -266,14 +317,17 @@ namespace controls.replica.sl
             }
 			_cAsset = cAsset;
 			_cFile = _cFileFirst = _cAsset.cFile;
-			_ui_spTimeCodes.Tag = _cAsset.cFile;
+            FileErrorsShow();
+            _ui_spTimeCodes.Tag = _cAsset.cFile;
 			if (null != _cFile && null != _cFile.sFilename)
 			{
 				_ui_tbFile.Tag = _cFile.sFilename;
 				_ui_tbFile.Text = _cFile.sFilename;
 
 				_ui_tudFrameIn.Tag = _cAsset.nFrameIn;
-				_ui_tudFrameOut.Tag = _cAsset.nFrameOut;
+				long nFrames = _cAsset.nFrameOut % Preferences.cServer.nFramesBase;
+				_ui_tudFrameOut.Tag = _cAsset.nFrameOut - nFrames;
+				_ui_nudExtraFrames.Tag = nFrames;
 			}
 			if (null == _dlgMsgBox)
 				_dlgMsgBox = new MsgBox();
@@ -304,6 +358,7 @@ namespace controls.replica.sl
         {
 			if (Preferences.cServer.nFramesMinimum - 1 > nFrameOut - nFrameIn)
                 return;
+			long nFramesOutRemains = nFrameOut % Preferences.cServer.nFramesBase;
             if (0 == nFramesQty)
                 nFramesQty = nFrameOut;
             this.Tag = true;
@@ -313,35 +368,59 @@ namespace controls.replica.sl
 
             long nOldIn = _ui_tudFrameIn.Tag == null ? 0 : (long)_ui_tudFrameIn.Tag;
             long nOldOut = _ui_tudFrameOut.Tag == null ? 0 : (long)_ui_tudFrameOut.Tag;
+			long nOldFrOut = _ui_nudExtraFrames.Tag == null ? 0 : (long)_ui_nudExtraFrames.Tag;
 
-            _ui_tudFrameIn.Tag = null;  // что б не вызывался MarkTUD;
+			_ui_tudFrameIn.Tag = null;  // что б не вызывался MarkTUD;
 			_ui_tudFrameIn.Maximum = DateTime.Parse((nFramesQty - Preferences.cServer.nFramesMinimum + 1).ToFramesString(false, true, false, true));
             _ui_tudFrameIn.Minimum = DateTime.Parse("0:00:00");
             _ui_tudFrameIn.Value = DateTime.Parse(nFrameIn.ToFramesString(false, true, false, true));
 
-			if (null != _ui_tbFile.Tag && _ui_tbFile.Tag.ToString() != _ui_tbFile.Text)    // если файл не менялся, то тэги кодов тоже д.б. старые
+			if (null != _ui_tbFile.Tag && _ui_tbFile.Tag.ToString() != _ui_tbFile.Text)    
 			{
 				_ui_tudFrameIn.Tag = nFrameIn;
-				_ui_tudFrameOut.Tag = nFrameOut;
+				_ui_tudFrameOut.Tag = nFrameOut - nFramesOutRemains;
+				_ui_nudExtraFrames.Tag = nFramesOutRemains;
 			}
-			else
+			else  // если файл не менялся, то тэги кодов тоже д.б. старые
 			{
 				_ui_tudFrameIn.Tag = nOldIn;
 				_ui_tudFrameOut.Tag = nOldOut;
+				_ui_nudExtraFrames.Tag = nOldFrOut;
 			}
 
-            _ui_tudFrameOut.Maximum = DateTime.Parse(nFrameOut.ToFramesString(false, false, false, true));
+			if (null != _ui_tbFile.Tag && _ui_tbFile.Tag.ToString() == _ui_tbFile.Text)
+			{
+				_ui_spMain.Background = _cMainBGColor;
+				_ui_tbFile.Background = Coloring.Notifications.cTextBoxActive;
+			}
+			else if (null==_ui_tbFile.Tag)
+			{
+				_ui_spMain.Background = Coloring.Notifications.cTextBoxActive;
+				_ui_tbFile.Background = Coloring.Notifications.cTextBoxActive;
+			}
+			else
+			{
+				_ui_spMain.Background = Coloring.Notifications.cTextBoxChanged;
+				_ui_tbFile.Background = Coloring.Notifications.cTextBoxChanged;
+			}
+
+
+
+			_ui_tudFrameOut.Maximum = DateTime.Parse(nFrameOut.ToFramesString(false, false, false, true));
 			_ui_tudFrameOut.Minimum = DateTime.Parse((((DateTime)_ui_tudFrameIn.Minimum).ToFrames(false) + Preferences.cServer.nFramesMinimum).ToFramesString(false, false, false, true));
-            _ui_tudFrameOut.Value = _ui_tudFrameOut.Maximum;
-            this.Tag = null;
-        }
-        void _cDBI_FramesQtyGetCompleted(object sender, FramesQtyGetCompletedEventArgs e)
+			_ui_tudFrameOut.Value = _ui_tudFrameOut.Maximum;
+			if (_ui_nudExtraFrames.Value != nFramesOutRemains)
+				_ui_nudExtraFrames.Value = nFramesOutRemains;
+			this.Tag = null;
+		}
+		void _cDBI_FramesQtyGetCompleted(object sender, FramesQtyGetCompletedEventArgs e)
         {
-            long nFramesQty = long.Parse(e.Result);
+            long nFramesQty = e.Result;
             _ui_btnDurationReset.IsEnabled = true;
             _ui_pbCodesProgress.Visibility = Visibility.Collapsed;
             _ui_spTimeCodes.Visibility = Visibility.Visible;
             TimeCodesControlsReset(nFramesQty);
+
             if (null != FileChanged)
                 FileChanged(_cFile);
         }
@@ -353,11 +432,12 @@ namespace controls.replica.sl
                 throw new Exception(g.Replica.sErrorRecalculate3);
 			if (Coloring.Notifications.cTextBoxError == _ui_tbFile.Background ||
 				Coloring.Notifications.cTextBoxError == _ui_tudFrameIn.Background ||
-				Coloring.Notifications.cTextBoxError == _ui_tudFrameOut.Background)
+				Coloring.Notifications.cTextBoxError == _ui_tudFrameOut.Background ||
+				_ui_spExtraFrames.Background == Coloring.Notifications.cTextBoxError)
                 throw new Exception(g.Common.sErrorWrongFields + "!");
-            nIn = ((DateTime)_ui_tudFrameIn.Value).ToFrames(true);
-			nOut = ((DateTime)_ui_tudFrameOut.Value).ToFrames(false);
-            nTotal = (long)_ui_tbDuration.Tag;
+			_nIn = ((DateTime)_ui_tudFrameIn.Value).ToFrames(true);
+			_nOut = ((DateTime)_ui_tudFrameOut.Value).ToFrames(false) + (long)_ui_nudExtraFrames.Value;
+			_nTotal = (long)_ui_tbDuration.Tag;
         }
     }
 }

@@ -66,7 +66,7 @@
                             <RowDefinition/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <data:DataGrid x:Name="_ui_dgArchived" AlternatingRowBackground="Azure" GridLinesVisibility="None" SelectionMode="Extended" AutoGenerateColumns="False" MaxHeight="400" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23">
+                        <data:DataGrid x:Name="_ui_dgArchived" AlternatingRowBackground="Azure" GridLinesVisibility="None" SelectionMode="Extended" AutoGenerateColumns="False" MaxHeight="400" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23" MinColumnWidth="0">
                             <itk:ContextMenuService.ContextMenu>
                                 <itk:ContextMenu Name="_ui_cmArch" Opened="_ui_cmArch_Opened" Closed="_ui_cmArch_Closed">
                                     <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sNoActionsForThisItem, Source={StaticResource g}}" />
@@ -76,7 +76,14 @@
                                 </itk:ContextMenu>
                             </itk:ContextMenuService.ContextMenu>
                             <data:DataGrid.Columns>
-                                <data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
+								<data:DataGridTemplateColumn IsReadOnly="True" Width="6">
+									<sdk:DataGridTemplateColumn.CellTemplate>
+										<DataTemplate>
+											<TextBox Background="{Binding cBrush}" Text="" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+										</DataTemplate>
+									</sdk:DataGridTemplateColumn.CellTemplate>
+								</data:DataGridTemplateColumn>
+								<data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
@@ -141,7 +148,7 @@
                                         </Style>
                                     </data:DataGridTextColumn.HeaderStyle>
                                 </data:DataGridTextColumn>
-                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" IsReadOnly="True" Width="150">
+								<data:DataGridTextColumn Binding="{Binding sClassName}" IsReadOnly="True" Width="150">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
@@ -188,8 +195,9 @@
                             </data:DataGrid.Columns>
 						</data:DataGrid>
 						<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+							<sdk:DatePicker Height="22" Name="_ui_dtpArchiveDate" Margin="4,0,10,0" VerticalContentAlignment="Center" Width="120" FontSize="11" FontWeight="Bold" />
 							<Button Content="{Binding Path=cCommon.sShow, Source={StaticResource g}}" Name="_ui_btnArchivedDaysBefore" HorizontalAlignment="Left" Margin="0,0,4,0" Width="65" Click="Archived_Click" FlowDirection="LeftToRight" Height="22" FontSize="11" FontWeight="Normal" />
-							<itk:NumericUpDown Height="24" Width="Auto" Name="_ui_nudDaysBeforeQty" Margin="0,0,4,0" ValueChanged="_ui_nudDaysBeforeQty_ValueChanged" FontSize="14" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FF456D89" Minimum="2" Maximum="33" />
+							<itk:NumericUpDown Height="22" Width="Auto" Name="_ui_nudDaysBeforeQty" Margin="0,0,4,0" ValueChanged="_ui_nudDaysBeforeQty_ValueChanged" FontSize="14" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FF456D89" Minimum="2" Maximum="33" />
 							<sdk:Label Height="22" Width="Auto" HorizontalAlignment="Left" Name="_ui_lblDaysBefore" Margin="0,0,2,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="{Binding Path=cReplica.sNoticePlaylist27, Source={StaticResource g}}" FlowDirection="LeftToRight" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
 							<sdk:Label Height="22" Width="Auto" HorizontalAlignment="Left" Name="_ui_lblDaysBefore2" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="{Binding Path=cReplica.sNoticePlaylist30, Source={StaticResource g}}" FlowDirection="LeftToRight" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
 							<Button Content="{Binding Path=cCommon.sYesterday, Source={StaticResource g}}"  Width="100"  Name="_ui_btnArchivedYesterday" HorizontalAlignment="Right" Height="22" Margin="0,0,6,0" Click="Archived_Click" FontSize="11" FontWeight="Normal" />
@@ -207,7 +215,7 @@
                             <RowDefinition/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <data:DataGrid x:Name="_ui_dgOnAir" GridLinesVisibility="Horizontal" SelectionMode="Single" AutoGenerateColumns="False" AllowDrop="False" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23" MaxHeight="400" IsReadOnly="True">
+                        <data:DataGrid x:Name="_ui_dgOnAir" GridLinesVisibility="Horizontal" SelectionMode="Single" AutoGenerateColumns="False" AllowDrop="False" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" CanUserReorderColumns="False" CanUserSortColumns="False" ColumnHeaderHeight="23" RowHeight="23" MaxHeight="400" IsReadOnly="True" MinColumnWidth="0">
                             <itk:ContextMenuService.ContextMenu>
                                 <itk:ContextMenu Name="_ui_cmOnAir" Opened="_ui_cmOnAir_Opened">
                                     <itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sNoActionsForThisItem, Source={StaticResource g}}" />
@@ -216,7 +224,14 @@
                                 </itk:ContextMenu>
                             </itk:ContextMenuService.ContextMenu>
                             <data:DataGrid.Columns>
-                                <data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
+								<data:DataGridTemplateColumn IsReadOnly="True" Width="6">
+									<sdk:DataGridTemplateColumn.CellTemplate>
+										<DataTemplate>
+											<TextBox Background="{Binding cBrush}" Text="" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+										</DataTemplate>
+									</sdk:DataGridTemplateColumn.CellTemplate>
+								</data:DataGridTemplateColumn>
+								<data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
@@ -281,7 +296,7 @@
                                         </Style>
                                     </data:DataGridTextColumn.HeaderStyle>
                                 </data:DataGridTextColumn>
-                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" IsReadOnly="True" Width="150">
+								<data:DataGridTextColumn Binding="{Binding sClassName}" IsReadOnly="True" Width="150">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
@@ -343,7 +358,7 @@
                             <RowDefinition/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <data:DataGrid Grid.Row="1" x:Name="_ui_dgPlanned" SelectionChanged="_ui_dgPlanned_SelectionChanged" AlternatingRowBackground="Azure" GridLinesVisibility="Horizontal" SelectionMode="Extended" AutoGenerateColumns="False" MaxHeight="400" MouseRightButtonDown="_ui_dgPlanned_MouseRightButtonDown" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" HorizontalGridLinesBrush="#FFC9CACA" CanUserSortColumns="True" CanUserReorderColumns="False" AllowDrop="True" ColumnHeaderHeight="23" RowHeight="23" IsReadOnly="True">
+                        <data:DataGrid Grid.Row="1" x:Name="_ui_dgPlanned" SelectionChanged="_ui_dgPlanned_SelectionChanged" AlternatingRowBackground="Azure" GridLinesVisibility="Horizontal" SelectionMode="Extended" AutoGenerateColumns="False" MaxHeight="400" MouseRightButtonDown="_ui_dgPlanned_MouseRightButtonDown" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" FontSize="11" FontWeight="Normal" Foreground="Black" HorizontalGridLinesBrush="#FFC9CACA" CanUserSortColumns="True" CanUserReorderColumns="False" AllowDrop="True" ColumnHeaderHeight="23" RowHeight="23" IsReadOnly="True" MinColumnWidth="0">
                             <itk:ContextMenuService.ContextMenu>
                                 <itk:ContextMenu Name="_ui_cmPlanned" Closed="_ui_cmPlanned_Closed" Opened="_ui_cmPlanned_Opened" Height="Auto">
                                     <itk:MenuItem Name="_ui_cmPlannedMove" Header="{Binding Path=cReplica.sNoticePlaylist22, Source={StaticResource g}}" Click="_ui_cmPlanned_Move" IsEnabled="False" />
@@ -361,8 +376,15 @@
 								</itk:ContextMenu>
                             </itk:ContextMenuService.ContextMenu>
                             <data:DataGrid.Columns>
-                                <data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
-                                    <data:DataGridTextColumn.HeaderStyle>
+								<data:DataGridTemplateColumn IsReadOnly="True" Width="6">
+									<sdk:DataGridTemplateColumn.CellTemplate>
+										<DataTemplate>
+											<TextBox Background="{Binding cBrush}" Text="" IsReadOnly="True" IsTabStop="False" BorderThickness="0" UseLayoutRounding="False" VerticalAlignment="Stretch" />
+										</DataTemplate>
+									</sdk:DataGridTemplateColumn.CellTemplate>
+								</data:DataGridTemplateColumn>
+								<data:DataGridTextColumn Binding="{Binding sdtStart}" IsReadOnly="True" Width="160">
+									<data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
                                                 <Setter.Value>
@@ -373,7 +395,7 @@
                                             </Setter>
                                         </Style>
                                     </data:DataGridTextColumn.HeaderStyle>
-                                </data:DataGridTextColumn>
+								</data:DataGridTextColumn>
                                 <data:DataGridTextColumn Binding="{Binding sName}" IsReadOnly="True" Width="*">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
@@ -426,7 +448,7 @@
                                         </Style>
                                     </data:DataGridTextColumn.HeaderStyle>
                                 </data:DataGridTextColumn>
-                                <data:DataGridTextColumn Binding="{Binding cClass.sName}" IsReadOnly="True" Width="150">
+								<data:DataGridTextColumn Binding="{Binding sClassName}" IsReadOnly="True" Width="150">
                                     <data:DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="p:DataGridColumnHeader">
                                             <Setter Property="ContentTemplate">
@@ -473,10 +495,11 @@
                             </data:DataGrid.Columns>
                         </data:DataGrid>
                         <StackPanel Grid.Row="2" Width="720" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" Orientation="Horizontal">
-                            <Button Content="{Binding Path=cCommon.sShow, Source={StaticResource g}}" Name="_ui_btnChooseDate" HorizontalAlignment="Left" Margin="0,0,2,0" Width="65" Click="Planned_Click" FlowDirection="LeftToRight" Height="22" FontSize="11" FontWeight="Normal" />
+							<sdk:DatePicker Height="22" Name="_ui_dtpPlannedDate" Margin="0,0,6,0" VerticalContentAlignment="Center" FontSize="11" Width="120" FontWeight="Bold" />
+                            <!--<Button Content="{Binding Path=cCommon.sShow, Source={StaticResource g}}" Name="_ui_btnChooseDate" HorizontalAlignment="Left" Margin="0,0,2,0" Width="65" Click="Planned_Click" FlowDirection="LeftToRight" Height="22" FontSize="11" FontWeight="Normal" />
                             <sdk:Label Height="22" Width="29" HorizontalAlignment="Left" Name="_ui_lblDays" Margin="0,0,2,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="{Binding Path=cReplica.sNoticePlaylist27, Source={StaticResource g}}" FlowDirection="LeftToRight" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
                             <itk:NumericUpDown Height="24" Width="Auto" Name="_ui_nudDaysQty" Margin="0,0,4,0" ValueChanged="_ui_nudDaysQty_ValueChanged" FontSize="14" BorderThickness="0" BorderBrush="{x:Null}" Foreground="#FF456D89" Minimum="3" Maximum="33" />
-                            <sdk:Label Height="22" HorizontalAlignment="Right" Margin="0,0,26,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="{Binding Path=cReplica.sNoticePlaylist28, Source={StaticResource g}}" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />
+                            <sdk:Label Height="22" HorizontalAlignment="Right" Margin="0,0,26,0" VerticalAlignment="Center" FontSize="11" Foreground="#FF456D89" Content="{Binding Path=cReplica.sNoticePlaylist28, Source={StaticResource g}}" FontWeight="Bold" VerticalContentAlignment="Top" Background="{x:Null}" FontStretch="Normal" FontStyle="Normal" FontFamily="Arial" />-->
                             <Button Content="{Binding Path=cCommon.sTheDayAfterTomorrow, Source={StaticResource g}}" Name="_ui_btnTheDayAfterTomorrow" HorizontalAlignment="Left" Margin="0,0,6,0" Width="90" Click="Planned_Click"  Height="22" FontSize="11" FontWeight="Normal" />
                             <Button Content="{Binding Path=cCommon.sTomorrow, Source={StaticResource g}}" Name="_ui_btnTomorrow" HorizontalAlignment="Left" Margin="0,0,6,0" Width="80" Click="Planned_Click"  Height="22" FontSize="11" FontWeight="Normal" />
                             <Button  Content="{Binding Path=cCommon.sToday, Source={StaticResource g}}" Name="_ui_btnToday" Width="80" HorizontalAlignment="Right" Click="Planned_Click"  Height="22" Margin="0,0,6,0" FontSize="11" FontWeight="Normal" />

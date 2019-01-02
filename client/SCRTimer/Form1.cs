@@ -26,7 +26,7 @@ namespace SCRTimer
 			_ui_tmrPlayerGet.Enabled = true;
 			_ui_tmrPlayerGet.Interval = 1000;
 			_ui_tmrAdvertGet.Enabled = true;
-			_ui_tmrAdvertGet.Interval = 1000;
+			_ui_tmrAdvertGet.Interval = 5000;
 			_dtPlayerStopPlanned = DateTime.MinValue;
 			_dtNextAdvertsStart = DateTime.MinValue;
 			_cWC_Player = new System.Net.WebClient();

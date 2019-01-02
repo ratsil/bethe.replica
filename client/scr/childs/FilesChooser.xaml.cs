@@ -164,11 +164,11 @@ namespace scr.childs
 			if (_eType == Type.Images)
 				bIsImage = true;
 			aFiles = new List<LivePLItem>();
-
-			foreach (string sFile in aStr)
-				aFiles.Add(new LivePLItem(sFile, sFile, bIsImage));
-			_ui_dgFilesSCR.ItemsSource = new List<LivePLItem>();
-			_ui_dgFilesSCR.ItemsSource = aFiles;
+            if (null != aStr)
+                foreach (string sFile in aStr)
+                    aFiles.Add(new LivePLItem(sFile, sFile, bIsImage));
+            _ui_dgFilesSCR.ItemsSource = new List<LivePLItem>();
+            _ui_dgFilesSCR.ItemsSource = aFiles;
 			LayoutRoot.Visibility = System.Windows.Visibility.Visible;
 		}
 		private void OKButton_Click(object sender, RoutedEventArgs e)

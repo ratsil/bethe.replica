@@ -23,12 +23,11 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="1.6*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="1.4*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" />
-                <TextBox Grid.Column="1" Margin="5,0" HorizontalContentAlignment="Left" HorizontalAlignment="Stretch" Name="_ui_tbName" TextChanged="_ui_tbName_TextChanged" Background="#FFFFF9EB">
+				<TextBlock Grid.Column="0" VerticalAlignment="Top" Margin="0,3,0,0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cCommon.sName, Source={StaticResource g}}" />
+				<TextBox Grid.Column="1" Margin="5,0" Height="24" HorizontalContentAlignment="Left"  VerticalAlignment="Top" HorizontalAlignment="Stretch" Name="_ui_tbName" TextChanged="_ui_tbName_TextChanged" Background="#FFFFF9EB">
                     <itk:ContextMenuService.ContextMenu>
                         <itk:ContextMenu Name="_ui_cmName" Opened="_ui_cmClips_Opened"  Closed="_ui_cmClips_Closed">
                             <itk:MenuItem Name="_ui_cmNameMake" Header="{Binding Path=cReplica.sNoticeAssetProperties1, Source={StaticResource g}}" Click="_ui_cmNameMake_Click" IsEnabled="True" />
@@ -36,17 +35,16 @@
                         </itk:ContextMenu>
                     </itk:ContextMenuService.ContextMenu>
                 </TextBox>
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=:l, Path=cHelper.sClass, Source={StaticResource g}}" />
-                <ComboBox Grid.Column="3" Margin="5,0,0,0" Name="_ui_ddlClasses" DisplayMemberPath="sName" SelectionChanged="_ui_ddlClasses_SelectionChanged" Background="#FFFFBF2E" />
-            </Grid>
+				<slc:Classes x:Name="_ui_ctrClasses" Grid.Column="2" />
+			</Grid>
             <CheckBox Content="{Binding Path=cReplica.sNoticeAssetProperties2, Source={StaticResource g}}" Height="16" Margin="120,4,0,0"  Name="_ui_chkbxAssetToPL" IsChecked="True" />
 			<controls:TabControl Height="Auto" Margin="0,-20,0,0" HorizontalAlignment="Left" Width="735" VerticalContentAlignment="Top" VerticalAlignment="Top" Name="_ui_tcFile" Background="#FFE5E8EB">
-                <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sFile, Source={StaticResource g}}" Margin="0,0,-10,0">
+                <controls:TabItem Name="_ui_tiFile" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sFile, Source={StaticResource g}}" Margin="0,0,0,0">
 					<slc:RecalculateFileDuration x:Name="_ui_ctrRecalcFileDur" />
 				</controls:TabItem>
             </controls:TabControl>
-			<CheckBox Content="" Height="16" Margin="40,-148,0,0"  Name="_ui_chkbxFile" IsChecked="True" />
-			<Grid Name="_ui_grdProgram" Margin="0,5,0,0" MinHeight="300" Visibility="Visible">
+			<CheckBox Content="" Height="16" Margin="4,-148,0,0" HorizontalAlignment="Left"  Name="_ui_chkbxFile" IsChecked="True" Unchecked="_ui_chkbxFile_Unchecked" />
+			<Grid Name="_ui_grdProgram" Margin="0,5,0,0" MinHeight="300" Visibility="Collapsed">
 				<Grid.RowDefinitions>
 					<RowDefinition />
 					<RowDefinition />
@@ -186,7 +184,7 @@
                     </controls:TabItem>
                 </controls:TabControl>
 			</Grid>
-            <StackPanel Name="_ui_spClip" Orientation="Vertical" Visibility="Collapsed">
+            <StackPanel Name="_ui_spClip" Orientation="Vertical" Visibility="Visible">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                     <controls:TabControl Name="_ui_tcArtists" Height="157" HorizontalAlignment="Left" Width="364" VerticalContentAlignment="Top" VerticalAlignment="Top" Margin="0" Background="#FFE5E8EB">
                         <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sArtists, Source={StaticResource g}}">
@@ -250,7 +248,7 @@
                         </controls:TabItem>
                     </controls:TabControl>
                 </StackPanel>
-                <StackPanel Name="_ui_spClipRow2" Orientation="Horizontal" Margin="0,5,0,0" Height="141">
+                <StackPanel Name="_ui_spClipRow2" Orientation="Horizontal" Margin="0,5,0,0" Height="171">
                     <StackPanel Orientation="Vertical">
                         <controls:TabControl Height="90" HorizontalAlignment="Left" Width="182" VerticalContentAlignment="Top" VerticalAlignment="Top" Margin="0" Background="#FFE5E8EB">
                             <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sSound, Source={StaticResource g}}">
@@ -273,6 +271,7 @@
                         <Grid VerticalAlignment="Stretch">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -280,14 +279,16 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sRotation, Source={StaticResource g}}" />
-                            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sPalette, Source={StaticResource g}}" />
                             <ComboBox Name="_ui_ddlRotation" Width="120" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" DisplayMemberPath="sName" SelectionChanged="_ui_ddlRotation_SelectionChanged" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sPalette, Source={StaticResource g}}" />
                             <ComboBox Name="_ui_ddlPalette" Width="120" Grid.Row="1" Grid.Column="1" Margin="0,5,0,0" DisplayMemberPath="sName" SelectionChanged="_ui_ddlPalette_SelectionChanged" Background="#FF1F3B53" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="5,0" HorizontalAlignment="Right" Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sSex, Source={StaticResource g}}" />
+                            <ComboBox Name="_ui_ddlSex" Width="120" Grid.Row="2" Grid.Column="1" Margin="0,5,0,0" DisplayMemberPath="sName" SelectionChanged="_ui_ddlSex_SelectionChanged" Background="#FF1F3B53" />
                         </Grid>
                     </StackPanel>
-                    <controls:TabControl Name="_ui_tcStyles" Width="176" VerticalContentAlignment="Top" Margin="6,0,0,0" Background="#FFE5E8EB">
+                    <controls:TabControl Name="_ui_tcStyles" Width="176"  VerticalContentAlignment="Top" Margin="6,0,0,0" Background="#FFE5E8EB">
                         <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sStyles, Source={StaticResource g}}">
-                            <ListBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="_ui_lbStyles" DisplayMemberPath="sName" IsEnabled="True" Height="105" Background="#FFE5E8EB">
+                            <ListBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="_ui_lbStyles" DisplayMemberPath="sName" IsEnabled="True" Height="Auto" Background="#FFE5E8EB">
                                 <itk:ContextMenuService.ContextMenu>
                                     <itk:ContextMenu Name="_ui_cmStyles" Opened="_ui_cmStyles_Opened" Closed="_ui_cmStyles_Closed">
                                         <itk:MenuItem Name="_ui_cmStylesChange" Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sUpdate, Source={StaticResource g}}" Click="_ui_cmStylesChange_Clicked" IsEnabled="False" />
@@ -298,7 +299,7 @@
                         </controls:TabItem>
                     </controls:TabControl>
                     <controls:TabControl Name="_ui_tcCustom" HorizontalAlignment="Stretch" Width="365" VerticalContentAlignment="Top" VerticalAlignment="Stretch" Margin="6,0,0,0" Background="#FFE5E8EB">
-                        <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cReplica.ssCustomValues, Source={StaticResource g}}" Height="18">
+                        <controls:TabItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cHelper.sCustomValues, Source={StaticResource g}}" Height="18">
                             <sdk:DataGrid Name="_ui_dgCustomValues" RowEditEnded="_ui_dgCustomValues_RowEditEnded" LoadingRow="_ui_dgCustomValues_LoadingRow" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowHeight="21" MouseRightButtonDown="_ui_dgCustomValues_MouseRightButtonDown" Background="#FFFFF9EB" CanUserSortColumns="False" CanUserResizeColumns="False" CanUserReorderColumns="False" RowHeaderWidth="NaN" HeadersVisibility="Column" ColumnHeaderHeight="21" MinColumnWidth="10" GridLinesVisibility="All" RowBackground="#FFFFF9EB">
                                 <itk:ContextMenuService.ContextMenu>
                                     <itk:ContextMenu Name="_ui_cmCustomValues" Opened="_ui_cmCustomValues_Opened" Closed="_ui_cmCustomValues_Closed">

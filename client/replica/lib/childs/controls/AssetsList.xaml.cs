@@ -50,14 +50,18 @@ namespace controls.replica.sl
 						}
 					foreach (AssetSL cAss in value)
 					{
-						if (0 < cAss.nIDParent)
-							if (aID_Parent.ContainsKey(cAss.nIDParent))
-								aID_Parent[cAss.nIDParent].nChildsQty++;
-							else
-							{
-								cAss.nIDParent = -2;
-								aErrorChilds.Add(cAss.sName);
-							}
+                        if (0 < cAss.nIDParent)
+                            if (aID_Parent.ContainsKey(cAss.nIDParent))
+                            {
+                                aID_Parent[cAss.nIDParent].nChildsQty++;
+                                if (cAss.cFile == null || cAss.cFile.eError != Error.no)
+                                    aID_Parent[cAss.nIDParent].bChildError = true;
+                            }
+                            else
+                            {
+                                cAss.nIDParent = -2;  // without parrent, but needs parrent
+                                aErrorChilds.Add(cAss.sName);
+                            }
 					}
 					_aAssetsOriginal = value;
 					MsgBox _dlgErr;
@@ -158,8 +162,7 @@ namespace controls.replica.sl
             InitializeComponent();
 
 			bFirstTime = true;
-
-        }
+		}
 
 		public void Init(Tab eTabDefault)
         {
@@ -410,7 +413,13 @@ namespace controls.replica.sl
             if (null != _ui_dgAssets)
             {
                 _dlgProgress.Show();
-                if (null != e && 0 < e.RemovedItems.Count)
+
+				if (_eTabCurrent == Tab.Programs && 1 == _cCurrentProgramHierarchy.nLevel)
+					_cCurrent_dgAssetsSortState.bBackward = true;
+				else
+					_cCurrent_dgAssetsSortState.bBackward = false;
+
+				if (null != e && 0 < e.RemovedItems.Count)
                     ((TabItem)e.RemovedItems[0]).Content = null;
                 TabItem ui_ti = (TabItem)_ui_tcAssets.SelectedItem;
                 ui_ti.Content = _ui_grdContainer;
@@ -466,23 +475,26 @@ namespace controls.replica.sl
 				ui_dlgAssetProperties.Show(VideoTypeNameGet(_eTabCurrent));
 			}
 			else
-                MessageBox.Show(g.Common.sErrorPermissions.Fmt(g.Common.sToAdd.ToLower(), sError));
+			{
+				_dlgProgress.Show();
+				_dlgProgress.Close();
+				MessageBox.Show(g.Common.sErrorPermissions.Fmt(g.Common.sToAdd.ToLower(), sError));
+			}
 		}
 		private void ui_dlgAssetProperties_Closed(object sender, EventArgs e)
 		{
 			controls.childs.replica.sl.AssetProperties ui_dlgAssetProperties=(controls.childs.replica.sl.AssetProperties)sender;
 			ui_dlgAssetProperties.Closed -= ui_dlgAssetProperties_Closed;
-			if (true == ui_dlgAssetProperties.DialogResult)
+            _dlgProgress.Show();
+            _dlgProgress.Close();
+            if (true == ui_dlgAssetProperties.DialogResult)
 			{
-				_nIDAssetToScrollTo = ((controls.childs.replica.sl.AssetProperties)sender).nThisAssetID;
-				_ui_tcAssets_SelectionChanged(null, null);
-			}
-			else
-			{
-				_dlgProgress.Show();
-				_dlgProgress.Close();
-			}
-		}
+				_nIDAssetToScrollTo = ui_dlgAssetProperties.nThisAssetID;
+				AddAssetToList(ui_dlgAssetProperties.cAsset);
+				_ui_dgAssets.Focus();
+                //_ui_tcAssets_SelectionChanged(null, null);
+            }
+        }
         private void _ui_dgAssets_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (null != dgSelectionChanged && null != _ui_dgAssets.SelectedItems)
@@ -505,19 +517,31 @@ namespace controls.replica.sl
 		{
 			AssetSL cRowItem = (AssetSL)e.Row.DataContext;
 
-			if (_eTabCurrent == Tab.Programs)
-			{
-				if (null != cRowItem.cType && cRowItem.cType.eType == AssetType.series)
-					e.Row.Background = Coloring.AssetsList.cRow_ProgramSeriesBackgr;
-				else if (null != cRowItem.cType && cRowItem.cType.eType == AssetType.episode)
-					e.Row.Background = Coloring.AssetsList.cRow_ProgramEpisodeBackgr;
-				else
-				{
-					if (null == cRowItem.cFile)
-						e.Row.Background = Coloring.AssetsList.cRow_ItemErrorBackgr;
-					else
-						e.Row.Background = Coloring.AssetsList.cRow_ProgramPartBackgr;
-				}
+            if (_eTabCurrent == Tab.Programs)
+            {
+                if (null != cRowItem.cType && cRowItem.cType.eType == AssetType.series)
+                {
+                    e.Row.Background = Coloring.AssetsList.cRow_ProgramSeriesBackgr;
+                    if (cRowItem.nChildsQty <= 0)
+                        e.Row.Background = Coloring.AssetsList.cRow_ProgramParentEmptyBackgr;
+                }
+                else if (null != cRowItem.cType && cRowItem.cType.eType == AssetType.episode)
+                {
+                    e.Row.Background = Coloring.AssetsList.cRow_ProgramEpisodeBackgr;
+                    if (cRowItem.nChildsQty <= 0)
+                        e.Row.Background = Coloring.AssetsList.cRow_ProgramParentEmptyBackgr;
+                    else if (cRowItem.bChildError)
+                        e.Row.Background = Coloring.AssetsList.cRow_ItemErrorNoFileBackgr;
+                }
+                else
+                {
+                    if (null == cRowItem.cFile)
+                        e.Row.Background = Coloring.AssetsList.cRow_ItemErrorBackgr;
+                    else if (cRowItem.cFile.eError != Error.no)
+                        e.Row.Background = Coloring.AssetsList.cRow_ItemErrorNoFileBackgr;
+                    else
+                        e.Row.Background = Coloring.AssetsList.cRow_ProgramPartBackgr;
+                }
 
 				if (-2 == cRowItem.nIDParent)
 					e.Row.Background = Coloring.AssetsList.cRow_ItemErrorBackgr;
@@ -611,8 +635,8 @@ namespace controls.replica.sl
 						else
 						{
 							_cCurrent_dgAssetsSortState.sHeaderName = sHeaderName;
-							_cCurrent_dgAssetsSortState.bBackward = false;
-							_cCurrent_dgAssetsSortState.sBindingPath = ((controls.sl.DataGridTextColumn)_ui_dgAssets.Columns[nColumnNumber]).Binding.Path.Path;
+							_cCurrent_dgAssetsSortState.bBackward = true;
+							_cCurrent_dgAssetsSortState.sBindingPath = ((swc.DataGridTextColumn)_ui_dgAssets.Columns[nColumnNumber]).Binding.Path.Path;  //controls.sl.
 						}
 						_ui_dgAssets.Sort(typeof(AssetSL), _cCurrent_dgAssetsSortState.sBindingPath, _cCurrent_dgAssetsSortState.bBackward);
 					}
@@ -657,11 +681,18 @@ namespace controls.replica.sl
                     _ui_cmAssetsParentAssign.Header = g.Helper.sSetParent + " " + g.Helper.sFor + " '" + sCurrent + "'";
 					_ui_cmAssetsParentAssign.IsEnabled = true;
                     _ui_cmAssetsParentRemove.Header = g.Helper.sUnsetParent + " " + g.Helper.sFor + " '" + sCurrent + "'";
-					_ui_cmAssetsParentRemove.IsEnabled = true;
-				}
+                    _ui_cmAssetsParentRemove.IsEnabled = true;
+                    if (null != ((AssetSL)_ui_dgAssets.SelectedItem).cType && ((AssetSL)_ui_dgAssets.SelectedItem).cType.eType == AssetType.series && access.scopes.programs.bCanUpdate)
+                        _ui_cmAssetsAgeSet.IsEnabled = true;
+                }
             }
             if (1 < _ui_dgAssets.SelectedItems.Count)
             {
+                _ui_cmAssetsProperties.Header = g.Common.sProperties.ToLower() + "     (CTRL+ENTER)";
+                if ((_eTabCurrent == Tab.Clips || _eTabCurrent == Tab.Designs || _eTabCurrent == Tab.Advertisements) && access.scopes.clips.bCanUpdate)
+                    _ui_cmAssetsProperties.IsEnabled = true;
+                else
+                    _ui_cmAssetsProperties.IsEnabled = false;
                 string sRSRQty = " (" + g.Common.sQty + ":" + _ui_dgAssets.SelectedItems.Count + ")";
                 _ui_cmAssetsDelete.Header = sRSRDelete + sRSRQty + "     (CTRL+DELETE)";
                 _ui_cmAssetsDelete.IsEnabled = true;
@@ -673,17 +704,27 @@ namespace controls.replica.sl
 					_ui_cmAssetsParentRemove.IsEnabled = true;
 				}
             }
+            _ui_cmAssetsAgeSet.Foreground = _ui_cmAssetsAgeSet.IsEnabled? Coloring.Notifications.cNormalForeground: Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsDelete.Foreground = _ui_cmAssetsDelete.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsRecalculate.Foreground = _ui_cmAssetsRecalculate.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsProperties.Foreground = _ui_cmAssetsProperties.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsRefresh.Foreground = _ui_cmAssetsRefresh.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsPreview.Foreground = _ui_cmAssetsPreview.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsParentAssign.Foreground = _ui_cmAssetsParentAssign.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsParentRemove.Foreground = _ui_cmAssetsParentRemove.IsEnabled ? Coloring.Notifications.cNormalForeground : Coloring.Notifications.cInactiveForeground;
+            _ui_cmAssetsAgeSet.Focus();
             _ui_cmAssetsDelete.Focus();
             _ui_cmAssetsRecalculate.Focus();
             _ui_cmAssetsProperties.Focus();
             _ui_cmAssetsRefresh.Focus();
-			_ui_cmAssetsPreview.Focus();
-			_ui_cmAssetsParentAssign.Focus();
-			_ui_cmAssetsParentRemove.Focus();
+            _ui_cmAssetsPreview.Focus();
+            _ui_cmAssetsParentAssign.Focus();
+            _ui_cmAssetsParentRemove.Focus();
             _ui_cmAssets.Focus();
 		}
         private void _ui_cmAssets_Closed(object sender, RoutedEventArgs e)
         {
+            _ui_cmAssetsAgeSet.IsEnabled = false;
             _ui_cmAssetsProperties.IsEnabled = false;
             _ui_cmAssetsRecalculate.IsEnabled = false;
             _ui_cmAssetsDelete.IsEnabled = false;
@@ -722,8 +763,8 @@ namespace controls.replica.sl
 		}
         private void msgDelete_Closed(object sender, EventArgs e)
         {
-			_dlgProgress.Show();
-			_dlgProgress.Close();
+			//_dlgProgress.Show();
+			//_dlgProgress.Close();
             MsgBox cMsg = (MsgBox)sender;
             cMsg.Closed -= msgDelete_Closed;
             if (MsgBox.MsgBoxButton.OK == cMsg.enMsgResult)
@@ -745,50 +786,114 @@ namespace controls.replica.sl
 					foreach (AssetSL cAsset in _ui_dgAssets.SelectedItems)
 						aAsset[ni++] = AssetSL.GetAsset(cAsset);
 					_nIDAssetToScrollTo = FindNextItemID((AssetSL)_ui_dgAssets.SelectedItem, _ui_dgAssets.ItemsSource);
-					_cDBI.AssetsRemoveAsync(aAsset);
+					_cDBI.AssetsRemoveAsync(aAsset, aAsset);
 				}
 				else
                     MessageBox.Show(g.Common.sErrorPermissions.Fmt(g.Common.sToDelete.ToLower(), sError));
             }
             _ui_dgAssets.Focus();
         }
-		private void _ui_cmAssets_Properties(object sender, RoutedEventArgs e)
-		{
-			if (null == _cAssetCurrent && 1 > _ui_dgAssets.SelectedItems.Count)
-			{
-                _dlgMsgBox.Show(g.Common.sNoItemsSelected);
+        private void _ui_cmAssetsAgeSet_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (null == _cAssetCurrent && 1 != _ui_dgAssets.SelectedItems.Count)
+                {
+                    _dlgMsgBox.Show(g.Common.sNoSelection);
+                    _ui_dgAssets.Focus();
+                    return;
+                }
+                AssetSL cA = _cAssetCurrent == null ? (AssetSL)_ui_dgAssets.SelectedItems : _cAssetCurrent;
+                controls.childs.replica.sl.FilesAgeSet uiAgeSet = new childs.replica.sl.FilesAgeSet(cA);
+                uiAgeSet.Closed += UiAgeSet_Closed;
+                uiAgeSet.Show();
+            }
+            catch (Exception ex)
+            {
+                _cDBI.ErrorLoggingAsync("AssetsList: " + ex.ToString());
+                _dlgMsgBox.ShowError(ex);
+            }
+        }
+        private void UiAgeSet_Closed(object sender, EventArgs e)
+        {
+            controls.childs.replica.sl.FilesAgeSet uiAgeSet = (controls.childs.replica.sl.FilesAgeSet)sender;
+            uiAgeSet.Closed -= ui_dlgAssetProperties_Closed;
+            _dlgProgress.Show();
+            _dlgProgress.Close();
+            _ui_dgAssets.Focus();
+        }
+
+        private void _ui_cmAssets_Properties(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (null == _cAssetCurrent && 1 > _ui_dgAssets.SelectedItems.Count) // || !_ui_cmAssetsProperties.IsEnabled
+                {
+                    _dlgMsgBox.Show(g.Common.sNoItemsSelected);
+                    _ui_dgAssets.Focus();
+                    return;
+                }
+                if (_ui_dgAssets.SelectedItems.Count > 1)
+                {
+                    controls.childs.replica.sl.AssetsProperties ui_dlgAssetsProperties;
+                    ui_dlgAssetsProperties = new childs.replica.sl.AssetsProperties(_ui_dgAssets.SelectedItems, _eTabCurrent);
+                    ui_dlgAssetsProperties.Closed += Ui_dlgAssetsProperties_Closed;
+                    ui_dlgAssetsProperties.Show();
+                }
+                else
+                {
+                    controls.childs.replica.sl.AssetProperties ui_dlgAssetProperties;
+                    ui_dlgAssetProperties = new controls.childs.replica.sl.AssetProperties();
+                    ui_dlgAssetProperties._aAssets = (AssetSL[])_ui_dgAssets.Tag;
+                    ui_dlgAssetProperties.sDefaultFileStorageName = helper.TranslateVideoTypeIntoStorageName(VideoTypeNameGet(_eTabCurrent));
+                    ui_dlgAssetProperties.Closed += new EventHandler(ui_dlgAssetProperties_Closed);
+                    ui_dlgAssetProperties.bReadOnly = !access.scopes.programs.bCanUpdate;
+                    if (_eTabCurrent == Tab.Programs)
+                    {
+                        ui_dlgAssetProperties.cParent = _cCurrentProgramHierarchy.cParentAsset;
+                    }
+                    try
+                    {
+                        if (null != _cAssetCurrent)
+                        {
+                            ui_dlgAssetProperties.Show(_cAssetCurrent.nID);
+                            if (!_ui_dgAssets.SelectedItems.Contains(_cAssetCurrent))
+                                if (DataGridSelectionMode.Extended == _ui_dgAssets.SelectionMode)
+                                    _ui_dgAssets.SelectedItems.Add(_cAssetCurrent);
+                                else
+                                    _ui_dgAssets.SelectedItem = _cAssetCurrent;
+                        }
+                        else
+                            ui_dlgAssetProperties.Show(((AssetSL)_ui_dgAssets.SelectedItem).nID);
+                    }
+                    catch
+                    {
+                        _dlgMsgBox.Show(g.Common.sYouHaveToRefresh.ToLower() + " " + g.Helper.sPlaylist.ToLower() + "!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //_cDBI.ErrorLoggingAsync("AssetsList: " + ex.ToString());
+                _dlgMsgBox.ShowError(ex);
+            }
+        }
+
+        private void Ui_dlgAssetsProperties_Closed(object sender, EventArgs e)
+        {
+            controls.childs.replica.sl.AssetsProperties ui_dlgAssetsProperties = (controls.childs.replica.sl.AssetsProperties)sender;
+            ui_dlgAssetsProperties.Closed -= Ui_dlgAssetsProperties_Closed;
+            _dlgProgress.Show();
+            _dlgProgress.Close();
+            if (ui_dlgAssetsProperties.DialogResult.Value)
+            {
+                ui_dlgAssetsProperties.ChangesApply();
+                _nIDAssetToScrollTo = ((AssetSL)_ui_dgAssets.SelectedItem).nID;
+                AssetsListRefresh((AssetSL[])_ui_dgAssets.Tag);
                 _ui_dgAssets.Focus();
-				return;
-			}
-			controls.childs.replica.sl.AssetProperties ui_dlgAssetProperties;
-			ui_dlgAssetProperties = new controls.childs.replica.sl.AssetProperties();
-			ui_dlgAssetProperties._aAssets = (AssetSL[])_ui_dgAssets.Tag;
-			ui_dlgAssetProperties.sDefaultFileStorageName = helper.TranslateVideoTypeIntoStorageName(VideoTypeNameGet(_eTabCurrent));
-			ui_dlgAssetProperties.Closed += new EventHandler(ui_dlgAssetProperties_Closed);
-			ui_dlgAssetProperties.bReadOnly = !access.scopes.programs.bCanUpdate;
-			if (_eTabCurrent == Tab.Programs)
-			{
-				ui_dlgAssetProperties.cParent = _cCurrentProgramHierarchy.cParentAsset;
-			}
-			try
-			{
-				if (null != _cAssetCurrent)
-				{
-					ui_dlgAssetProperties.Show(_cAssetCurrent.nID);
-					if (!_ui_dgAssets.SelectedItems.Contains(_cAssetCurrent))
-						if (DataGridSelectionMode.Extended == _ui_dgAssets.SelectionMode)
-							_ui_dgAssets.SelectedItems.Add(_cAssetCurrent);
-						else
-							_ui_dgAssets.SelectedItem = _cAssetCurrent;
-				}
-				else
-					ui_dlgAssetProperties.Show(((AssetSL)_ui_dgAssets.SelectedItem).nID);
-			}
-			catch 
-			{
-                _dlgMsgBox.Show(g.Common.sYouHaveToRefresh.ToLower() + " " + g.Helper.sPlaylist.ToLower() + "!");
-			}
-		}
+            }
+        }
+
         private void _ui_cmAssetsRecalculate_Click(object sender, RoutedEventArgs e)
         {
 			MsgBox dlgDurationRecalculate = new MsgBox(MsgBox.Type.FileDuration);
@@ -812,8 +917,8 @@ namespace controls.replica.sl
                     bAll = true;
                     break;
                 case MsgBox.MsgBoxButton.Cancel:
-                    _dlgProgress.Show();
-                    _dlgProgress.Close();
+                    //_dlgProgress.Show();
+                    //_dlgProgress.Close();
                     _ui_dgAssets.Focus();
                     return;
                 default:
@@ -830,9 +935,9 @@ namespace controls.replica.sl
 			RecalculateFileDuration ui_ctrlRecalculateFileDuration = ((RecalculateFileDuration)((MsgBox)sender).ControlGet());
             foreach (AssetSL cAss in aAssetsToChange)
             {
-				cAss.nFrameIn = ui_ctrlRecalculateFileDuration.nIn;
-				cAss.nFrameOut = ui_ctrlRecalculateFileDuration.nOut;
-				cAss.nFramesQty = ui_ctrlRecalculateFileDuration.nTotal;
+				cAss.nFrameIn = ui_ctrlRecalculateFileDuration._nIn;
+				cAss.nFrameOut = ui_ctrlRecalculateFileDuration._nOut;
+				cAss.nFramesQty = ui_ctrlRecalculateFileDuration._nTotal;
 				cAss.cFile = ui_ctrlRecalculateFileDuration._cFile;
             }
             _cDBI.AssetsSaveAsync(AssetSL.GetArrayOfBases(aAssetsToChange.ToArray()));
@@ -915,8 +1020,8 @@ namespace controls.replica.sl
 		}
 		private void msgParentAssign_Closed(object sender, EventArgs e)
 		{
-			_dlgProgress.Show();
-			_dlgProgress.Close();
+			//_dlgProgress.Show();
+			//_dlgProgress.Close();
 			MsgBox cMsg = (MsgBox)sender;
 			cMsg.Closed -= msgParentAssign_Closed;
 			if (null == cMsg.DialogResult || !cMsg.DialogResult.Value)
@@ -969,10 +1074,10 @@ namespace controls.replica.sl
 			cMsg.Closed += new EventHandler(msgParentRemove_Closed);
             cMsg.Show(g.Replica.sErrorAssetsList9, g.Helper.sRemovingAssetsParent, MsgBox.MsgBoxButton.OKCancel, new ListBox() { ItemsSource = _ui_dgAssets.SelectedItems, DisplayMemberPath = "sName" });
 		}
-		private void msgParentRemove_Closed(object sender, EventArgs e)
+        private void msgParentRemove_Closed(object sender, EventArgs e)
 		{
-			_dlgProgress.Show();
-			_dlgProgress.Close();
+			//_dlgProgress.Show();
+			//_dlgProgress.Close();
 			MsgBox cMsg = (MsgBox)sender;
 			cMsg.Closed -= msgParentRemove_Closed;
 			if (MsgBox.MsgBoxButton.OK == cMsg.enMsgResult)
@@ -1008,9 +1113,42 @@ namespace controls.replica.sl
 			_dlgProgress.Show();
 			_dlgProgress.Close();
 		}
-        #endregion
+		#endregion
 		#endregion
 		#region DBI
+		void AddAssetToList(AssetSL cAsset)
+		{
+			if (_cCurrentProgramHierarchy.aAssetsOriginal != null && _cCurrentProgramHierarchy.aAssetsOriginal.Length > 0)
+			{
+				AssetSL cAssetOld = _cCurrentProgramHierarchy.aAssetsOriginal.FirstOrDefault(o => o.sName == cAsset.sName);
+				if (null != cAssetOld)
+					cAsset.nChildsQty = cAssetOld.nChildsQty;
+				_cCurrentProgramHierarchy.aAssetsOriginal = _cCurrentProgramHierarchy.aAssetsOriginal.AddOrReplaceElement(cAsset);
+			}
+			AssetsListRefresh(((AssetSL[])_ui_dgAssets.Tag).AddOrReplaceElement(cAsset));
+		}
+		void RemoveAssetsFromList(Asset[] aAssetsToRemove)
+		{
+			if (_cCurrentProgramHierarchy.aAssetsOriginal != null && _cCurrentProgramHierarchy.aAssetsOriginal.Length > 0)
+				_cCurrentProgramHierarchy.aAssetsOriginal = _cCurrentProgramHierarchy.aAssetsOriginal.RemoveElements(aAssetsToRemove);
+			AssetsListRefresh(((AssetSL[])_ui_dgAssets.Tag).RemoveElements(aAssetsToRemove));
+		}
+
+		void AssetsListRefresh(AssetSL[] aAssets)
+		{
+			_ui_dgAssets.Tag = aAssets;
+			_ui_dgAssets.ItemsSource = aAssets;
+			_ui_Search.DataContextUpdateInitial();
+			//_ui_Search.Search();
+			_ui_dgAssets.UpdateLayout();
+			_ui_dgAssets.Sort(typeof(AssetSL), _cCurrent_dgAssetsSortState.sBindingPath, _cCurrent_dgAssetsSortState.bBackward);
+
+			if (0 < _nIDAssetToScrollTo)   // scroll to this asset
+			{
+				ScrollTo(_nIDAssetToScrollTo);
+				_nIDAssetToScrollTo = -1;
+			}
+		}
 		void _cDBI_AssetsGetCompleted(object sender, AssetsGetCompletedEventArgs e)
 		{
 			try
@@ -1018,24 +1156,19 @@ namespace controls.replica.sl
 				if (null == e || null == e.Result)
 					throw new NullReferenceException();
 				ColumnsPrepare(_eTabCurrent);
-				if (_eTabCurrent == Tab.Clips)
-					_ui_Search.sDisplayMemberPath = "sCuesName";
-				else
-					_ui_Search.sDisplayMemberPath = "sName";
-				AssetSL[] aRes = AssetSL.GetArrayOfAssetSLs(e.Result);
-				_ui_dgAssets.Tag = aRes;
-				_ui_dgAssets.ItemsSource = aRes;
-				_ui_Search.DataContextUpdateInitial();
-				//_ui_Search.Search();
-				_ui_dgAssets.UpdateLayout();
-				_ui_dgAssets.Sort(typeof(AssetSL), _cCurrent_dgAssetsSortState.sBindingPath, _cCurrent_dgAssetsSortState.bBackward);
-
-				if (0 < _nIDAssetToScrollTo)   // scroll to this asset
-				{
-					ScrollTo(_nIDAssetToScrollTo);
-					_nIDAssetToScrollTo = -1;
-				}
-			}
+                if (_eTabCurrent == Tab.Clips)
+                {
+                    _ui_Search.sDisplayMemberPath = "sCuesName";
+                    _ui_Search.aAdditionalSearchFields = new string[3] { "sName", "nID", "sFilename" };
+                }
+                else
+                {
+                    _ui_Search.sDisplayMemberPath = "sName";
+                    _ui_Search.aAdditionalSearchFields = new string[2] { "nID", "sFilename" };
+                }
+                AssetSL[] aRes = AssetSL.GetArrayOfAssetSLs(e.Result);
+				AssetsListRefresh(aRes);
+            }
 			catch { }
 			_dlgProgress.Close();
 			_ui_dgAssets.Focus();
@@ -1055,7 +1188,8 @@ namespace controls.replica.sl
 				}
 				else
 				{
-					_ui_tcAssets_SelectionChanged(null, null);
+					RemoveAssetsFromList((Asset[])e.UserState);
+					//_ui_tcAssets_SelectionChanged(null, null);
 				}
 			}
 			catch { }
@@ -1101,6 +1235,11 @@ namespace controls.replica.sl
 		{
 			if (null != _cCurrentProgramHierarchy.aAssetsOriginal)
 			{
+				if (_eTabCurrent == Tab.Programs && 1 == _cCurrentProgramHierarchy.nLevel)
+					_cCurrent_dgAssetsSortState.bBackward = true;
+				else
+					_cCurrent_dgAssetsSortState.bBackward = false;
+
 				ColumnsPrepare(Tab.Programs);
 				_ui_Search.sDisplayMemberPath = "sName";
 				_ui_dgAssets.ItemsSource = ProgramsFilter(_cCurrentProgramHierarchy.aAssetsOriginal);

@@ -21,6 +21,12 @@
               <s:element minOccurs="0" maxOccurs="1" name="aPlaques" type="tns:ArrayOfPlaque" />
               <s:element minOccurs="0" maxOccurs="1" name="sTemplateChannelMask" type="s:string" />
               <s:element minOccurs="0" maxOccurs="1" name="sTemplatePresetMask" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sChannelName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sDBUser" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sDBPasswd" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="sDBIServerName" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="nFragmentBeforeNow" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="nFragmentAfterNow" type="s:int" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -57,6 +63,7 @@
         <s:sequence>
           <s:element minOccurs="1" maxOccurs="1" name="eBind" type="tns:Bind" />
           <s:element minOccurs="0" maxOccurs="1" name="sFile" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sTag" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="aOffsets" type="tns:ArrayOfOffset" />
           <s:element minOccurs="0" maxOccurs="1" name="aConflicts" type="tns:ArrayOfConflict" />
           <s:element minOccurs="0" maxOccurs="1" name="aParameters" type="tns:ArrayOfParameters" />
@@ -67,6 +74,7 @@
       </s:complexType>
       <s:simpleType name="Bind">
         <s:restriction base="s:string">
+          <s:enumeration value="unknown" />
           <s:enumeration value="playlist" />
           <s:enumeration value="channel_credits" />
           <s:enumeration value="channel_logo" />
@@ -134,6 +142,8 @@
           <s:element minOccurs="0" maxOccurs="1" name="sText" type="s:string" />
           <s:element minOccurs="1" maxOccurs="1" name="bIsVisible" type="s:boolean" />
           <s:element minOccurs="1" maxOccurs="1" name="bIsEnabled" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="bPlayWith" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="nDelayPlayWith" type="s:int" />
           <s:element minOccurs="1" maxOccurs="1" name="bAutostart" type="s:boolean" />
           <s:element minOccurs="1" maxOccurs="1" name="eFirstAction" type="tns:FirstAction" />
         </s:sequence>
@@ -152,6 +162,7 @@
               <s:element minOccurs="1" maxOccurs="1" name="bClipChooserOpened" type="s:boolean" />
               <s:element minOccurs="1" maxOccurs="1" name="bOpened" type="s:boolean" />
               <s:element minOccurs="0" maxOccurs="1" name="sFolder" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="bPlayTop" type="s:boolean" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
