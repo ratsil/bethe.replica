@@ -65,6 +65,10 @@
       <HintPath>..\..\packages\linqtotwitter.2.1.8\lib\net40\LinqToTwitter.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -104,6 +108,7 @@
     <Content Include="clientaccesspolicy.xml" />
     <Content Include="ClientBin\replica.xap" />
     <Content Include="ia\messages.aspx" />
+    <Content Include="api.aspx" />
     <Content Include="social.aspx" />
     <Content Include="images\social_fb.png" />
     <Content Include="images\social_tt.png" />
@@ -167,6 +172,10 @@
       <DependentUpon>messages.aspx</DependentUpon>
     </Compile>
     <Compile Include="lib\social\OAuth.cs" />
+    <Compile Include="api.aspx.cs">
+      <DependentUpon>api.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="social.aspx.cs">
       <DependentUpon>social.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
