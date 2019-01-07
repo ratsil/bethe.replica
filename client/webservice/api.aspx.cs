@@ -79,7 +79,7 @@ namespace webservice
 
                 if (!_bAuthenticated)
                 {
-                    if (aRequests.Contains("authentication"))
+                    if (aRequests.Contains("signin"))
                     {
                         oResult = false;
                         if (!Request.QueryString["user"].IsNullOrEmpty())
@@ -103,19 +103,31 @@ namespace webservice
                 }
                 else if (1 == aRequests.Length)
                 {
-                    MethodInfo oMethod;
-                    object[] aParameters = JsonConvert.DeserializeObject(RequestBodyGet()).To<object[]>();
-                    Type[] aTypes = null;
-                    if (null == aParameters)
-                        aTypes = new Type[0];
-                    var oDBI = Init();
-                    Type oType = oDBI.GetType();
-                    if (null == aTypes)
-                        oMethod = oType.GetMethod(aRequests[0]);
-                    else
-                        oMethod = oType.GetMethod(aRequests[0], aTypes);
-                    if (null != oMethod)
-                        oResult = oMethod.Invoke(oDBI, aParameters);
+                    switch(aRequests[0])
+                    {
+                        case "authorize":
+                            oResult = _bAuthenticated;
+                            break;
+                        case "signout":
+                            _sUser = _sPassword = null;
+                            _cProfile = null;
+                            break;
+                        default:
+                            MethodInfo oMethod;
+                            object[] aParameters = JsonConvert.DeserializeObject(RequestBodyGet()).To<object[]>();
+                            Type[] aTypes = null;
+                            if (null == aParameters)
+                                aTypes = new Type[0];
+                            var oDBI = Init();
+                            Type oType = oDBI.GetType();
+                            if (null == aTypes)
+                                oMethod = oType.GetMethod(aRequests[0]);
+                            else
+                                oMethod = oType.GetMethod(aRequests[0], aTypes);
+                            if (null != oMethod)
+                                oResult = oMethod.Invoke(oDBI, aParameters);
+                            break;
+                    }
                 }
             }
             catch (ThreadAbortException)

@@ -109,6 +109,8 @@
     <Content Include="ClientBin\replica.xap" />
     <Content Include="ia\messages.aspx" />
     <Content Include="api.aspx" />
+    <Content Include="js\api.js" />
+    <Content Include="js\common.js" />
     <Content Include="social.aspx" />
     <Content Include="images\social_fb.png" />
     <Content Include="images\social_tt.png" />
