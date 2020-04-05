@@ -107,11 +107,61 @@
     </Content>
     <Content Include="clientaccesspolicy.xml" />
     <Content Include="ClientBin\replica.xap" />
+    <Content Include="css\newreplica.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\newreplicaadmin.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\android-chrome-192x192.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\android-chrome-512x512.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\apple-touch-icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\browserconfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\favicon-16x16.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\favicon-32x32.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\favicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\mstile-150x150.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon\safari-pinned-tab.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ia\messages.aspx" />
     <Content Include="api.aspx" />
+    <Content Include="images\Replica.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\ReplicadarkblueOrange.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\ReplicaWhite.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="js\api.js" />
     <Content Include="js\common.js" />
     <Content Include="ia\chat.aspx" />
+    <Content Include="js\newreplicaadmin.js" />
+    <Content Include="js\newreplicalogin.js" />
+    <Content Include="newreplicaadmin.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="newreplicalogin.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="social.aspx" />
     <Content Include="images\social_fb.png" />
     <Content Include="images\social_tt.png" />
@@ -132,6 +182,13 @@
     <Content Include="ia\message.aspx" />
     <Content Include="ia\pl.aspx" />
     <Content Include="ia\vjstatus.aspx" />
+    <Content Include="favicon\site.webmanifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\newreplica.scss">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\newreplicaadmin.scss" />
     <None Include="preferences.xml" />
     <Content Include="NearestAdvertsBlock.aspx" />
     <Content Include="js\replica.js" />
@@ -144,12 +201,52 @@
     <Content Include="index.aspx" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\replica-debug.pubxml" />
     <None Include="Properties\PublishProfiles\replica-local.pubxml" />
     <None Include="Properties\PublishProfiles\replica-release.pubxml" />
     <None Include="services\.htaccess" />
     <None Include="templates\export.rao.row.xml" />
     <None Include="templates\export.rao.footer.xml" />
     <None Include="templates\export.rao.header.xml" />
+    <Content Include="templates\artist\artist.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\assets\assets.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\assets\assets.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\assets\modal-add-ad.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\assets\modal-add-clip.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\assets\modal-add-design.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\net\net.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\net\net.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\playlist\playlist.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\playlist\playlist.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\profile\profile.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\spinner\content.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\stat\stat.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -320,6 +417,9 @@
       <Project>{6d2e75af-bc9f-43fe-9dd7-a0b687092364}</Project>
       <Name>helpers.db</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bootstrap\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,0 +1,191 @@
+<form>
+    <div class="form-group row mb-3">
+        <div class="col-sm-8">
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupName">Name</span>
+                </div>
+                <input type="text" class="form-control form-control-alert" aria-label="Sizing example input" aria-describedby="inputGroupName" autofocus>
+            </div>
+        </div>
+        <div class="col-sm-1">
+            <p class="d-inline">Class: </p>
+        </div>
+        <div class="col-sm-3 py-1 d-inline text-right">
+            <input type="checkbox" id="checkClipCommon" class="chk-btn">
+            <label for="checkClipCommon" class="assetClassCheckbox">clip-common</label>
+            <input type="checkbox" id="checkAdCommon" class="chk-btn">
+            <label for="checkAdCommon" class="assetClassCheckbox">+</label>
+            <!--<input type="checkbox" id="checkAdCommon" class="chk-btn">-->
+            <!--<label for="checkAdCommon" class="assetClassCheckbox">ad-common</label>-->
+            <!--<input type="checkbox" id="checkDesignCommon" class="chk-btn">-->
+            <!--<label for="checkDesignCommon" class="assetClassCheckbox">design-common</label>-->
+            <!--<input type="checkbox" id="checkUnknown" class="chk-btn">-->
+            <!--<label for="checkUnknown" class="assetClassCheckbox">unknown</label>-->
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-12">
+
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Choose</span>
+                </div>
+                <input type="text" class="form-control" id="fileClip">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="btnFileBrowse">Browse</button>
+                    <button class="btn btn-outline-secondary" type="button" id="btnFileClear">Clear</button>
+                </div>
+            </div>
+
+            <div class="input-group input-group-sm mb-4">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">From</span>
+                </div>
+                <input class="form-control" type="time">
+                <span class="input-group-text">to</span>
+                <input class="form-control" type="time">
+                <input class="form-control" type="number">
+                <input type="text" disabled class="form-control" placeholder="= 00:23.4 (cut 2.34)">
+                <div class="input-group-append">
+                    <button class="btn btn-sm btn-outline-secondary">Refresh</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <div class="form-group mb-2">
+                <label for="selectSingers">Artists</label>
+                <button class="ml-2 btn btn-sm btn-outline-primary" id='btnAddArtist'>+</button>
+                <div class="list-group-wrapper" style="height: 10rem;">
+                    <ul class="list-group list-group-sm list-group-flush" id="selectSingers">
+                    </ul>
+                </div>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectStyle">Style:</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectStyle">
+                    <option selected>Choose...</option>
+                    <option value="1">pop</option>
+                    <option value="2">rock</option>
+                    <option value="3">r&b</option>
+                    <option value="4">chanson</option>
+                    <option value="5">classic</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectSoundStart">Sound start</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectSoundStart">
+                    <option selected>Choose...</option>
+                    <option value="1">Высокий</option>
+                    <option value="2">Средний</option>
+                    <option value="3">Низкий</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectSoundEnd">Sound end</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectSoundEnd">
+                    <option selected>Choose...</option>
+                    <option value="1">Высокий</option>
+                    <option value="2">Средний</option>
+                    <option value="3">Низкий</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectSoundPalette">Palette</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectSoundPalette">
+                    <option selected>Choose...</option>
+                    <option value="1">Мультипликация</option>
+                    <option value="2">Сепия</option>
+                    <option value="3">Цветная</option>
+                    <option value="3">Черно-белая</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectSoundSex">Sex</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectSoundSex">
+                    <option selected>Choose...</option>
+                    <option value="1">Мужской</option>
+                    <option value="2">Женский</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="col-sm-6 ">
+            <p>Cues</p>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupArtist">Artist</label>
+                </div>
+                <input type="text" class="form-control form-control-alert" id="inputGroupArtist" aria-label="Text input with segmented dropdown button">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button">+</button>
+                </div>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupSong">Song</span>
+                </div>
+                <input type="text" class="form-control form-control-alert" aria-label="Sizing example input" aria-describedby="inputGroupSong">
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupAlbum">Album</span>
+                </div>
+                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroupAlbum">
+            </div>
+            <div class="input-group input-group-sm mb-1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupYear">Year</span>
+                </div>
+                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroupYear">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupProssessor">Prossessor</span>
+                </div>
+                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroupProssessor">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelectSoundRotation">Rotation</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelectSoundRotation">
+                    <option selected>Choose...</option>
+                    <option value="1">Первая</option>
+                    <option value="2">Вторая</option>
+                    <option value="3">Третья</option>
+                    <option value="4">Стоп</option>
+                    <option value="5">Новинка</option>
+                    <option value="6">Эксклюзив</option>
+                </select>
+            </div>
+            <span>Custom values</span>
+            <button class="ml-2 btn btn-sm btn-outline-primary">+</button>
+            <table class="table table-sm border border-secondary mt-2">
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td>Value</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</form>
+
+<script src="templates/assets/modal-add-clip-body.js"></script>

@@ -1,0 +1,182 @@
+@import '../bootstrap/scss/bootstrap';
+body {
+    background-color: rgb(15, 42, 86);
+}
+
+td {
+    font-size: 0.7rem;
+}
+
+.rmenu-active {
+    font-weight: bold;
+    border-bottom: steelblue 3px solid;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+p {
+    margin-bottom: 5px;
+}
+
+
+/*  Checkboxes for add assets */
+
+input.chk-btn {
+    display: none;
+}
+
+input.chk-btn+label {
+    border: 1px solid grey;
+    //background: ghoswhite;
+    padding: .1rem .5rem;
+    cursor: pointer;
+    border-radius: .2rem;
+    font-size: .9rem;
+}
+
+input.chk-btn:not(:checked)+label:hover {
+    box-shadow: 0px 1px 3px;
+}
+
+input.chk-btn+label:active,
+input.chk-btn:checked+label {
+    background: dimgray;
+    color: white;
+}
+
+
+/*  Checkboxes for add assets --- end */
+
+.form-control-sm {
+    height: calc(1.7rem + 2px);
+    padding: 0.15rem 0.2rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.input-group-sm>.form-control,
+.input-group-sm>.custom-select,
+.input-group-sm>.input-group-prepend>.input-group-text,
+.input-group-sm>.input-group-append>.input-group-text,
+.input-group-sm>.input-group-append>.custom-select,
+.input-group-sm>.input-group-prepend>.custom-select,
+.input-group-sm>.input-group-prepend>.btn,
+.input-group-sm>.input-group-text,
+.input-group-sm>.input-group-append>.btn {
+    height: calc(1.7rem + 2px);
+    padding: 0.15rem 0.2rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.input-group-sm>.form-control:not(textarea),
+.input-group-sm>.custom-select {
+    height: calc(1.7rem + 2px);
+}
+
+.custom-select {
+    background: none;
+}
+
+// .custom-file-input {
+//     height: calc(1.7rem + 2px);
+// }
+#fileClipChooseLabel.custom-file-label,
+#fileClipChooseLabel.custom-file-label::after {
+    height: auto;
+    padding-top: .35rem;
+    padding-bottom: .35rem;
+}
+
+#fileClipChooseLabel {
+    font-size: 0.7rem;
+}
+
+.form-control.form-control-alert {
+    background-color: rgb(253, 221, 209);
+}
+
+
+/* table media control */
+
+.table-media-control>tr,
+.table-media-source>tr {
+    cursor: pointer;
+}
+
+.tr-media-source-broken {
+    background-color: rgb(252, 209, 206);
+}
+
+.tr-media-source-used {
+    background-color: rgb(214, 253, 211);
+}
+
+.table-media-control>tr:hover,
+.table-media-source>tr:hover,
+.table-media-control>tr:active,
+.table-media-source>tr:active {
+    background-color: steelblue;
+    color: white;
+}
+
+.tr-media-control-active,
+.tr-media-source-active {
+    background-color: steelblue;
+    color: white;
+}
+
+
+/* форматирование списков */
+
+#selectSingers .list-group-item,
+#selectedSingers .list-group-item {
+    cursor: pointer;
+}
+
+#selectSingers .list-group-item:hover,
+#selectedSingers .list-group-item:hover {
+    background-color: steelblue;
+    color: white;
+}
+
+.list-group-sm .list-group-item {
+    padding: 0.3rem 1rem;
+    font-size: .75rem;
+}
+
+.list-group-wrapper {
+    height: 20rem;
+    overflow: scroll;
+    border: 1px solid rgb(212, 212, 212);
+    border-radius: 0.25rem;
+    padding: 2px;
+}
+
+
+/* card header transform */
+
+.card-header-sm {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.card-body-sm {
+    padding: 0.25rem;
+}
+
+
+/* table rows control visualisation */
+
+.tr-control {
+    cursor: pointer;
+}
+
+.tr-control:hover {
+    background-color: steelblue;
+    color: white;
+}

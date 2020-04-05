@@ -77,56 +77,72 @@ namespace webservice
             {
                 string[] aRequests = Request.QueryString.GetValues(null) ?? new string[] { };
 
-                if (!_bAuthenticated)
+                if (_bAuthenticated || aRequests.Contains("signin"))
                 {
-                    if (aRequests.Contains("signin"))
+                    if (1 == aRequests.Length)
                     {
-                        oResult = false;
-                        if (!Request.QueryString["user"].IsNullOrEmpty())
+                        switch (aRequests[0])
                         {
-                            try
-                            {
-                                DBInteract cDBI = new DBInteract(Request.QueryString["user"], Request.QueryString["password"]);
-                                _cProfile = new Profile(Request.QueryString["user"], Request.QueryString["password"]);
-                                access.scopes.init(cDBI.AccessScopesGet());
-                                _sUser = Request.QueryString["user"];
-                                _sPassword = Request.QueryString["password"];
-                                new WS.DBInteract();
-                                oResult = true;
-                            }
-                            catch (Exception ex)
-                            {
-                                (new Logger()).WriteError(ex);
-                            }
+                            case "signin":
+                                oResult = false;
+                                if (!Request.QueryString["user"].IsNullOrEmpty())
+                                {
+                                    try
+                                    {
+                                        DBInteract cDBI = new DBInteract(Request.QueryString["user"], Request.QueryString["password"]);
+                                        _cProfile = new Profile(Request.QueryString["user"], Request.QueryString["password"]);
+                                        access.scopes.init(cDBI.AccessScopesGet());
+                                        _sUser = Request.QueryString["user"];
+                                        _sPassword = Request.QueryString["password"];
+                                        new WS.DBInteract();
+                                        oResult = true;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        (new Logger()).WriteError(ex);
+                                    }
+                                }
+                                break;
+                            case "authorize":
+                                oResult = _bAuthenticated;
+                                break;
+                            case "signout":
+                                _sUser = _sPassword = null;
+                                _cProfile = null;
+                                oResult = null;
+                                break;
+                            default:
+                                Data oData = null;
+                                object[] aParameters = null;
+
+                                try
+                                {
+                                    oData = JsonConvert.DeserializeObject<Data>(RequestBodyGet());
+                                    aParameters = oData.data;
+                                } catch { }
+                                MethodInfo oMethod;
+                                //object[] aParameters = JsonConvert.DeserializeObject<Data>(RequestBodyGet()).data;
+                                Type[] aTypes = null;
+                                if (null != aParameters)
+                                {
+                                    aTypes = new Type[aParameters.Length];
+                                    for (int n = 0; aParameters.Length > n; n++) {
+                                        aTypes[n] = Type.GetType(oData.types[n], true);
+                                            }
+                                }
+                                else
+                                    aTypes = new Type[0];
+                                
+                                var oDBI = Init();
+                                Type oType = oDBI.GetType();
+                                if (null == aTypes)
+                                    oMethod = oType.GetMethod(aRequests[0]);
+                                else
+                                    oMethod = oType.GetMethod(aRequests[0], aTypes);
+                                if (null != oMethod)
+                                    oResult = oMethod.Invoke(oDBI, aParameters);
+                                break;
                         }
-                    }
-                }
-                else if (1 == aRequests.Length)
-                {
-                    switch(aRequests[0])
-                    {
-                        case "authorize":
-                            oResult = _bAuthenticated;
-                            break;
-                        case "signout":
-                            _sUser = _sPassword = null;
-                            _cProfile = null;
-                            break;
-                        default:
-                            MethodInfo oMethod;
-                            object[] aParameters = JsonConvert.DeserializeObject(RequestBodyGet()).To<object[]>();
-                            Type[] aTypes = null;
-                            if (null == aParameters)
-                                aTypes = new Type[0];
-                            var oDBI = Init();
-                            Type oType = oDBI.GetType();
-                            if (null == aTypes)
-                                oMethod = oType.GetMethod(aRequests[0]);
-                            else
-                                oMethod = oType.GetMethod(aRequests[0], aTypes);
-                            if (null != oMethod)
-                                oResult = oMethod.Invoke(oDBI, aParameters);
-                            break;
                     }
                 }
             }
@@ -155,6 +171,11 @@ namespace webservice
             WS.DBInteract oRetVal = new services.DBInteract();
             oRetVal.Init(_sUser, _sPassword, "DO_NOT_CHECK_VERSION");
             return oRetVal;
+        }
+        public class Data
+        {
+            public object[] data;
+            public string[] types;
         }
     }
 }

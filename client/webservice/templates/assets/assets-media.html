@@ -1,0 +1,53 @@
+<div class="card-body">
+    <div class="row">
+        <div class="col-4">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Type</th>
+                    </tr>
+                </thead>
+                <tbody class="table-hover table-media-control" data-target='tableMediaControl'>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-8">
+
+            <div class="input-group input-group-sm mb-1">
+                <input type="text" class="form-control" id="inputSearch">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="btnSearch">Search</button>
+                </div>
+            </div>
+
+            <div style="height:58vh; overflow: scroll;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">File name</th>
+                            <th scope="col">Modified date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-hover table-media-source" data-target="tableMediaFile">
+                        <tr>
+                            <td>Mark_Bernes</td>
+                            <td>12-12-2001</td>
+                        </tr>
+                        <tr class="tr-media-source-broken">
+                            <td>Olga_Buzova</td>
+                            <td>23-01-2018</td>
+                        </tr>
+                        <tr class="tr-media-source-used">
+                            <td>Emma_Wotson</td>
+                            <td>21-09-2009</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="templates/assets/assets-media.js"></script>

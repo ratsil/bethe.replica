@@ -1,0 +1,1 @@
+//# sourceURL=stat.js

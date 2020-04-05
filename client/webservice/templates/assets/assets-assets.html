@@ -1,0 +1,186 @@
+<div class="card-body card-body-sm">
+    <ul class="nav nav-tabs" id="assetsTab">
+        <li class="nav-item">
+            <a class="nav-link" href="#navAll" id="navAllTab" data-toggle="tab" role="tab" aria-controls="navAll" aria-selected="false">All</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="#navClip" id="navClipTab" data-toggle="tab" role="tab" aria-controls="navClip" aria-selected="true">Clip</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#navAd" id="navAdTab" data-toggle="tab" role="tab" aria-controls="navAd" aria-selected="false">Advertisement</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#navPrograms" id="navProgramsTab" data-toggle="tab" role="tab" aria-controls="navPrograms" aria-selected="false">Programs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#navDesign" id="navDesignTab" data-toggle="tab" role="tab" aria-controls="navDesign" aria-selected="false">Design</a>
+        </li>
+        <!--<li class="nav-item">-->
+        <!--<a class="nav-link" href="#">+</a>-->
+        <!--</li>-->
+    </ul>
+    <div class="tab-content" id="navtabContent">
+        <div class="tab-pane fade" id="navAll" role="tabpanel" aria-labelledby="navAllTab">
+            <div class="my-2">
+                <div class="input-group input-group-sm">
+                    <input class="form-control" type="text">
+                    <div class="input-group-append">
+                        <button class="btn btn-sm btn-secondary">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div style="height:58vh; overflow: scroll;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">File</th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Class</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-hover" id="tableAssetsAll">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade show active" id="navClip" role="tabpanel" aria-labelledby="navClipTab">
+            <div class="my-2">
+                <div class="row my-1">
+                    <div class="col-sm-1">
+                        <button id='addClip' class="btn btn-sm btn-primary">Add asset</button>
+                    </div>
+                    <div class="col-sm-11">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control" type="text">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-secondary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="height:58vh; overflow: scroll;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">File</th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Rotation</th>
+                            <th scope="col">Class</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-hover" id="tableAssetClips">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="navAd" role="tabpanel" aria-labelledby="navAdTab">
+            <div class="my-2">
+                <div class="row my-1">
+                    <div class="col-sm-1">
+                        <button id='addAd' class="btn btn-sm btn-primary">Add AD</button>
+                    </div>
+                    <div class="col-sm-11">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control" type="text">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-secondary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Class</th>
+                    </tr>
+                </thead>
+                <tbody class="table-hover" id='tableAssetsAdvertisement'>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="navPrograms" role="tabpanel" aria-labelledby="navProgramsTab">
+            <div class="my-2">
+                <div class="row my-1">
+                    <div class="col-sm-1">
+                        <button id='addProgram' class="btn btn-sm btn-primary">Add Program</button>
+                    </div>
+                    <div class="col-sm-11">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control" type="text">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-secondary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Class</th>
+                    </tr>
+                </thead>
+                <tbody class="table-hover" id='tableAssetsPrograms'>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="navDesign" role="tabpanel" aria-labelledby="navDesignTab">
+            <div class="my-2">
+                <div class="row my-1">
+                    <div class="col-sm-1">
+                        <button id='addDesign' class="btn btn-sm btn-primary">Add design</button>
+                    </div>
+                    <div class="col-sm-11">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control" type="text">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-secondary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Class</th>
+                    </tr>
+                </thead>
+                <tbody class="table-hover" id='tableAssetsDesign'>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="templates/assets/assets-assets.js"></script>

@@ -1,0 +1,724 @@
+<div class="col-12">
+
+    <!-- Playlist Archive -->
+
+    <div class="accordion shadow" id="accordionExample">
+    </div>
+    <div class="card">
+        <div class="card-header" id="headingOne">
+            <h2 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Playlist archive
+                </button>
+            </h2>
+        </div>
+
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+            <div class="card-body">
+
+                <button class="btn btn-primary btn-sm mb-2" type="button" data-toggle="collapse" data-target="#collapseFiltersPLArchive" aria-expanded="false" aria-controls="collapseExample">
+                            Use filter
+                          </button>
+
+                <div class="collapse mb-2" id="collapseFiltersPLArchive">
+                    <div class="card card-body mb-2">
+                        <div class="row">
+                            <div class="col-sm">
+                                <!-- name filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Name</span>
+                                        <select class="custom-select" id="nameFilter">
+                                                <option value="Contains" selected>Contains</option>
+                                                <option value="notContains">notContains</option>
+                                                <option value="Equal">Equal</option>
+                                                <option value="notEqual">notEqual</option>
+                                                </select>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                </div>
+                                <!-- file filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">File</span>
+                                        <select class="custom-select" id="fileFilter">
+                                                <option value="Contains" selected>Contains</option>
+                                                <option value="notContains">notContains</option>
+                                                <option value="Equal">Equal</option>
+                                                <option value="notEqual">notEqual</option>
+                                                </select>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                </div>
+
+                                <!-- status filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Status</span>
+                                    </div>
+                                    <select class="custom-select" id="statusFilter">
+                                            <option value="Contains" selected>Contains</option>
+                                            <option value="notContains">notContains</option>
+                                            </select>
+                                    <select class="custom-select" id="statusFilterVal">
+                                        <option value="Planed" selected>Запланировано</option>
+                                        <option value="inQue">Поставлено в очередь</option>
+                                        <option value="Ready">Подготовлено</option>
+                                        <option value="onAir">В эфире</option>
+                                        <option value="Done">Проиграно</option>
+                                        <option value="Skipped">Пропущено</option>
+                                        <option value="withErr">С ошибкой</option>
+                                    </select>
+                                </div>
+                                <!-- class filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Class</span>
+                                    </div>
+                                    <select class="custom-select" id="classFilter">
+                                            <option value="Contains" selected>Contains</option>
+                                            <option value="notContains">notContains</option>
+                                            </select>
+                                    <select class="custom-select" id="classFilterVal">
+                                        <option value="Ad" selected>Advertisement_common</option>
+                                        <option value="Clip">Clip-common</option>
+                                        <option value="Design">Design_common</option>
+                                        <option value="Unknown">Unknown</option>
+                                        </select>
+                                </div>
+
+
+                            </div>
+                            <div class="col-sm">
+
+                                <!-- duration filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Duration</span>
+                                        <select class="custom-select" id="classFilter">
+                                                <option value="More" >More</option>
+                                                <option value="Less">Less</option>
+                                                <option value="Equal" selected>Equal</option>
+                                                <option value="notEqual">notEqual</option>
+                                                </select>
+                                    </div>
+                                    <input type="number" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                </div>
+                                <!-- start filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Start</span>
+                                        <select class="custom-select" id="classFilter">
+                                                <option value="More" >More</option>
+                                                <option value="Less">Less</option>
+                                                <option value="Equal">Equal</option>
+                                                <option value="notEqual">notEqual</option>
+                                                <option value="Between"selected>Between</option>
+                                                </select>
+                                    </div>
+                                    <input type="date" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                    <input type="time" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                    <span class="input-group-text">AND</span>
+                                    <input type="date" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                    <input type="time" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+
+                                </div>
+                                <!-- stop filter -->
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Stop</span>
+                                        <select class="custom-select" id="classFilter">
+                                                <option value="More" selected>More</option>
+                                                <option value="Less">Less</option>
+                                                <option value="Equal">Equal</option>
+                                                <option value="notEqual">notEqual</option>
+                                                </select>
+                                    </div>
+
+                                    <input type="date" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                    <input type="time" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                                </div>
+                                <p>
+                                    <button class="btn btn-primary btn-sm">Apply</button>
+                                    <button class="btn btn-outline-primary btn-sm" disabled>Export</button>
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <table class="table table-sm" style="margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th scope="col">broadcast date and time</th>
+                            <th scope="col">asset name</th>
+                            <th scope="col">timing</th>
+                            <th scope="col">status</th>
+                            <th scope="col">filename</th>
+                            <th scope="col">class</th>
+                            <th scope="col">rotation</th>
+                            <th scope="col">type</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-hover">
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-right">
+                    <span class="pr-3"><strong>0 items total</strong></span>
+                    <input type="date">
+                    <button class="btn btn-outline-secondary btn-sm">Show</button>
+                    <input type="number">
+                    <span class="pr-3">days before</span>
+                    <button class="btn btn-outline-secondary btn-sm">Yestarday</button>
+                    <button class="btn btn-outline-secondary btn-sm">Today</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAO Report -->
+
+    <div class="card">
+        <div class="card-header" id="headingTwo">
+            <h2 class="mb-0">
+                <button class="btn btn-link collapsed d-inline" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    RAO Report
+                </button>
+            </h2>
+        </div>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+            <div class="card-body">
+                <table class="table table-sm mt-3">
+                    <thead>
+                        <tr>
+                            <th scope="col">broadcast date and time</th>
+                            <th scope="col">asset name</th>
+                            <th scope="col">timing</th>
+                            <th scope="col">status</th>
+                            <th scope="col">filename</th>
+                            <th scope="col">class</th>
+                            <th scope="col">rotation</th>
+                            <th scope="col">type</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-hover">
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                            <td>@fat</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-right">
+                    <span class="pr-3"><strong>0 items total</strong></span>
+                    <button class="btn btn-outline-secondary btn-sm">Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming messages -->
+
+    <div class="card">
+        <div class="card-header" id="headingThree">
+            <h2 class="mb-0">
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Incoming messages
+                </button>
+            </h2>
+        </div>
+        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+            <div class="card-body">
+                <div class="col-12">
+                    <table class="table table-sm mt-3">
+                        <thead>
+                            <tr>
+                                <th scope="col">broadcast date and time</th>
+                                <th scope="col">asset name</th>
+                                <th scope="col">timing</th>
+                                <th scope="col">status</th>
+                                <th scope="col">filename</th>
+                                <th scope="col">class</th>
+                                <th scope="col">rotation</th>
+                                <th scope="col">type</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-hover">
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                                <td>@mdo</td>
+                                <td>@mdo</td>
+                                <td>@mdo</td>
+                                <td>@mdo</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                                <td>Thornton</td>
+                                <td>@fat</td>
+                                <td>@fat</td>
+                                <td>@fat</td>
+                                <td>@fat</td>
+                                <td>@fat</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-5">
+                            <button class="btn btn-outline-secondary btn-sm" name="playlistImport">Import</button>
+                            <button class="btn btn-outline-secondary btn-sm" name="insertAssets">Insert</button>
+                            <button class="btn btn-outline-secondary btn-sm">Delete selected</button>
+                            <button class="btn btn-outline-secondary btn-sm">Recalculation</button>
+                            <input type="number">
+                            <span class="pr-3">hrs</span>
+
+                        </div>
+                        <div class="col-2 text-center">
+                            <span class="pr-3"><strong>0 items total</strong></span>
+                        </div>
+                        <div class="col-5 text-right">
+                            <button class="btn btn-outline-secondary btn-sm">Today</button>
+                            <button class="btn btn-outline-secondary btn-sm">Tomorrow</button>
+                            <button class="btn btn-outline-secondary btn-sm">Tomorrow + 1</button>
+                            <input type="date">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Import Playlist -->
+<div class="modal fade" id="playListImport" tabindex="-1" role="dialog" aria-labelledby="playListImportTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="playListImportTitle">Playlist import</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <label for="clipFile" class="col-sm-3 col-form-label">Clip file: </label>
+                        <div class="col-sm-9">
+                            <input type="file" class="form-control" id="clipFile" placeholder="File">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="adFile" class="col-sm-3 col-form-label">Advertisement file: </label>
+                        <div class="col-sm-9">
+                            <input type="file" class="form-control" id="adFile" placeholder="File">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="bindingDate" class="col-sm-3 col-form-label">Binding date: </label>
+                        <div class="col-sm-9">
+                            <input type="date" class="form-control" id="bindingDate" placeholder="File">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="designFile" class="col-sm-3 col-form-label">Design file: </label>
+                        <div class="col-sm-9">
+                            <input type="file" class="form-control" id="designFile" placeholder="File">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+                            <button class="btn btn-warning">Error</button>
+                            <button class="btn btn-primary">Merge playlists</button>
+                            <button class="btn btn-info">Log</button>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">First</th>
+                                        <th scope="col">Last</th>
+                                        <th scope="col">Handle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">1</th>
+                                        <td>Mark</td>
+                                        <td>Otto</td>
+                                        <td>@mdo</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2</th>
+                                        <td>Jacob</td>
+                                        <td>Thornton</td>
+                                        <td>@fat</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">3</th>
+                                        <td colspan="2">Larry the Bird</td>
+                                        <td>@twitter</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Insert Asset -->
+<div class="modal fade" id="insertAsset" tabindex="-1" role="dialog" aria-labelledby="insertAssetTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title" id="insertAssetTitle">Insert Assets</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="insertAllTab" data-toggle="tab" href="#insertAll" role="tab" aria-controls="insertAll" aria-selected="true">All</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="insertClipsTab" data-toggle="tab" href="#insertClips" role="tab" aria-controls="insertClips" aria-selected="false">Clips</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="insertAdTab" data-toggle="tab" href="#insertAd" role="tab" aria-controls="insertAd" aria-selected="false">Advertisement</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="insertProgramsTab" data-toggle="tab" href="#insertPrograms" role="tab" aria-controls="insertPrograms" aria-selected="false">Programs</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="insertDesignTab" data-toggle="tab" href="#insertDesign" role="tab" aria-controls="insertDesign" aria-selected="false">Design</a>
+                            </li>
+                            <!--<li class="nav-item">-->
+                            <!--<a class="nav-link" href="#">+</a>-->
+                            <!--</li>-->
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="insertAll" role="tabpanel" aria-labelledby="insertAllTab">
+                                <div class="my-2">
+                                    <form class="form-inline d-inline ">
+                                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">File</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-hover">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry the Bird</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="insertClips" role="tabpanel" aria-labelledby="insertClipsTab">
+                                <div class="my-2">
+                                    <form class="form-inline d-inline ">
+                                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">File</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-hover">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry the Bird</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="insertAd" role="tabpanel" aria-labelledby="contact-tab">
+                                <div class="my-2">
+                                    <form class="form-inline d-inline ">
+                                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">File</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-hover">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry the Bird</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="insertPrograms" role="tabpanel" aria-labelledby="contact-tab">
+                                <div class="my-2">
+                                    <form class="form-inline d-inline ">
+                                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">File</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-hover">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry the Bird</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="insertDesign" role="tabpanel" aria-labelledby="contact-tab">
+                                <div class="my-2">
+                                    <form class="form-inline d-inline ">
+                                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">File</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Class</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-hover">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry the Bird</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">First</th>
+                                    <th scope="col">Last</th>
+                                    <th scope="col">Handle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Mark</td>
+                                    <td>Otto</td>
+                                    <td>@mdo</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td>Jacob</td>
+                                    <td>Thornton</td>
+                                    <td>@fat</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td colspan="2">Larry the Bird</td>
+                                    <td>@twitter</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="templates/stat/stat.js"></script>
