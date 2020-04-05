@@ -28,9 +28,11 @@ namespace replica.sync
 		private ManualResetEvent _mreWatcherPreviewStopped;
 		private ManualResetEvent _mreWatcherStorageStopping;
 		private ManualResetEvent _mreWatcherStorageStopped;
+        private ManualResetEvent _mreWatcherClearingStorageStopping;
+        private ManualResetEvent _mreWatcherClearingStorageStopped;
 
         private bool _bAbortWatchers;
-        private string _sFilePauseCopying = SIO.Path.Combine(Preferences.cCache.sFolder, SyncConstants.sFilePauseCopying);
+        private string _sFilePauseCopying;
         private CopyFileExtended _cCurrentCopying;
         private object _oLockCopying;
         private CopyFileExtended _cCurrentMoving;
@@ -52,7 +54,8 @@ namespace replica.sync
 				(new Logger("sync")).WriteWarning("получен сигнал на запуск");//TODO LANG
                 _bAbortWatchers = false;
 #if !DEBUG
-                System.Diagnostics.Process.GetCurrentProcess().ProcessorAffinity = Preferences.nAffinity;
+                if (Preferences.nAffinity != IntPtr.Zero)
+                    System.Diagnostics.Process.GetCurrentProcess().ProcessorAffinity = Preferences.nAffinity;
                 if (false) // команд нет пока
                 {
                     _mreWatcherCommandStopping = new ManualResetEvent(false);
@@ -62,6 +65,7 @@ namespace replica.sync
 #endif
                 if (null != Preferences.cCache)
                 {
+                    _sFilePauseCopying = SIO.Path.Combine(Preferences.cCache.sFolder, SyncConstants.sFilePauseCopying);
                     if (SIO.File.Exists(_sFilePauseCopying))
                         SIO.File.Move(_sFilePauseCopying, _sFilePauseCopying + "!");
                     if (!SIO.File.Exists(_sFilePauseCopying + "!"))
@@ -79,8 +83,12 @@ namespace replica.sync
 					_mreWatcherStorageStopping = new ManualResetEvent(false);
 					_mreWatcherStorageStopped = new ManualResetEvent(false);
 					ThreadPool.QueueUserWorkItem((object o) => { WatcherStorage(); });
-				}
-				if (null != Preferences.cPreview)
+
+                    _mreWatcherClearingStorageStopping = new ManualResetEvent(false);
+                    _mreWatcherClearingStorageStopped = new ManualResetEvent(false);
+                    ThreadPool.QueueUserWorkItem((object o) => { WatcherClearingStorage(); });
+                }
+                if (null != Preferences.cPreview)
 				{
 					ffmpeg.net.Logger.eLevel = Logger.Level.notice;
 					_mreWatcherPreviewStopping = new ManualResetEvent(false);
@@ -132,24 +140,29 @@ namespace replica.sync
                 if (null != _mreWatcherStorageStopping)
                 {
                     _mreWatcherStorageStopping.Set();
+                }
+                if (null != _mreWatcherClearingStorageStopping)
+                {
+                    _mreWatcherClearingStorageStopping.Set();
                     lock (_oLockMoving)
                         if (_cCurrentMoving != null)
                             _cCurrentMoving.Cancel();
                 }
-				if (null != _mreWatcherPreviewStopping)
+                if (null != _mreWatcherPreviewStopping)
 					_mreWatcherPreviewStopping.Set();
 
                 if (null != _mreWatcherCommandStopped)
                     _mreWatcherCommandStopped.WaitOne(15000, false);
-                if (null != _mreWatcherCacheStopped)
-                    _mreWatcherCacheStopped.WaitOne(15000, false);
                 if (null != _mreWatcherPreviewStopped)
                     _mreWatcherPreviewStopped.WaitOne(15000, false);
 				if (null != _mreWatcherStorageStopped)
 					_mreWatcherStorageStopped.WaitOne(15000, false);
-
-			}
-			catch (Exception ex)
+                if (null != _mreWatcherClearingStorageStopped)
+                    _mreWatcherClearingStorageStopped.WaitOne(15000, false);
+                if (null != _mreWatcherCacheStopped)
+                    _mreWatcherCacheStopped.WaitOne(15000, false);
+            }
+            catch (Exception ex)
 			{
 				(new Logger("sync")).WriteError(ex);
             }
@@ -234,10 +247,9 @@ namespace replica.sync
 		}
 		private void WatcherStorage()  //модуль синхронизации
         {
-            //Thread.Sleep(10000);
             try
             {
-                (new Logger("WatcherStorage")).WriteNotice("модуль синхронизации запущен");//TODO LANG
+                (new Logger("WatcherStorage")).WriteNotice("модуль синхронизации запущен, ищем БД...");//TODO LANG
                 DBInteract cDBI;
                 do
                     try
@@ -251,22 +263,13 @@ namespace replica.sync
                         Thread.Sleep(100);
                     }
                 while (null == cDBI);
-
                 (new Logger("WatcherStorage")).WriteNotice("connected to DB");
-                DateTime dtNow = DateTime.Now;
-                DateTime dtMoveStorage = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, 0, 30, 0);
-                if (dtNow > dtMoveStorage)
-                    dtMoveStorage = dtMoveStorage.AddDays(1);
+
                 do
                 {
                     try
                     {
                         StoragesSync();
-                        if (DateTime.Now > dtMoveStorage)
-                        {
-                            dtMoveStorage = dtMoveStorage.AddDays(1);
-                            StoragesMoveDelete();
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -286,7 +289,59 @@ namespace replica.sync
                     _mreWatcherStorageStopped.Set();
             }
 		}
-		private void WatcherPreview()  //модуль обеспечения предпросмотра
+        private void WatcherClearingStorage()  //модуль удаления/переноса лишних файлов
+        {
+            try
+            {
+                (new Logger("WatcherClearingStorage")).WriteNotice("модуль синхронизации запущен, ищем БД...");//TODO LANG
+                DBInteract cDBI;
+                do
+                    try
+                    {
+                        cDBI = new DBInteract();
+                    }
+                    catch (Exception ex)
+                    {
+                        (new Logger()).WriteError(ex);
+                        cDBI = null;
+                        Thread.Sleep(1000);
+                    }
+                while (null == cDBI);
+
+                (new Logger("WatcherClearingStorage")).WriteNotice("connected to DB");
+                DateTime dtNow = DateTime.Now;
+                DateTime dtMoveStorage = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, 0, 30, 0);
+                if (dtNow > dtMoveStorage)
+                    dtMoveStorage = dtMoveStorage.AddDays(1);
+                do
+                {
+                    try
+                    {
+                        if (DateTime.Now > dtMoveStorage)
+                        {
+                            dtMoveStorage = dtMoveStorage.AddDays(1);
+                            StoragesMoveDelete();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        (new Logger()).WriteError(ex); //UNDONE
+                    }
+                    System.Threading.Thread.Sleep(1);
+                } while (!_mreWatcherClearingStorageStopping.WaitOne(new TimeSpan(0, 1, 0), false));
+            }
+            catch (Exception ex)
+            {
+                (new Logger("WatcherClearingStorage")).WriteError(ex); //UNDONE
+            }
+            finally
+            {
+                (new Logger("WatcherClearingStorage")).WriteNotice("модуль синхронизации остановлен");//TODO LANG
+                if (null != _mreWatcherClearingStorageStopped)
+                    _mreWatcherClearingStorageStopped.Set();
+            }
+        }
+        private void WatcherPreview()  //модуль обеспечения предпросмотра
         {
             try
             {
@@ -856,6 +911,11 @@ namespace replica.sync
             long nCurrentCacheDur = ClearPlDurations(); //_ahPLDurations
             int nMaxMinutesToCache = int.MaxValue;
             long nMaxFramesToCache = long.MaxValue;
+            bool bCopyTookTooLong = false;
+            bool bCopyTookTooLongFor10Min = false;
+            DateTime dtDiffSumStoreTill = DateTime.MaxValue;
+            double nDiffSum = 0;
+            double nDiffSec;
             if (bDoNotDelete)
             {
                 nMaxMinutesToCache = (int)(Preferences.cCache.nAnalysisDepth * 1.5);
@@ -886,6 +946,7 @@ namespace replica.sync
 			DBInteract cDBI = new DBInteract();
 			DateTime dtStart, dtStopTryingMove, dtStopPause;
             int nIndxTrying;
+            string sParamCode;
             double nFreeSpace;
             foreach (SIO.DriveInfo cDI in SIO.DriveInfo.GetDrives())
             {
@@ -898,7 +959,7 @@ namespace replica.sync
             foreach (long nID in aPLIDsInOrder)
 			{
 #if DEBUG
-				if (bFirstTime)
+                if (bFirstTime)
 					bFirstTime = false;
 				else
                     break;
@@ -937,6 +998,11 @@ namespace replica.sync
                         sDirWithoutSeparates = SIO.Path.GetDirectoryName(ahPLFiles[nID]).ToLower().Replace("\\", "").Replace("/", "");
                         if (sDirWithoutSeparates == sFilter)
                         {
+                            if (ahPLDurs[nID] < Preferences.cCache.aIgnoreStoragesTreshold[sFilter].TotalSeconds * 25)
+                            {
+                                (new Logger("CacheStorageFill")).WriteDebug("путь файла найден в игнорлисте стораджей (см. preferences.xml), но он короче минимума и будет закеширован  [filter=" + sFilter + "][file=" + ahPLFiles[nID] + "][dur=" + ahPLDurs[nID] + "]");
+                                break;
+                            }
                             (new Logger("CacheStorageFill")).WriteDebug("путь файла найден в игнорлисте стораджей (см. preferences.xml) и файл не будет закеширован  [filter=" + sFilter + "][file=" + ahPLFiles[nID] + "]");
                             bIgnored = true;
                             break;
@@ -989,6 +1055,12 @@ namespace replica.sync
                         }
                         continue;
                     }
+                    if (SIO.File.Exists("_" + sCacheFile) || SIO.File.Exists("_" + sCacheFile + "!"))
+                    {
+                        (new Logger("CacheStorageFill")).WriteError("не успели начать копировать - плеер уже копирует сам или взял предыдущую версию файла... [df=" + sCacheFile + "]");
+                        continue;
+                    }
+
                     (new Logger("CacheStorageFill")).WriteDebug("файл копируется: [dur=" + _ahPLDurations[nID].ToFramesString(false, false, true, true, true, false) + "][planned=" + ahPLDates[nID].ToString("yyyy-MM-dd HH:mm:ss") + "][src=" + ahPLFiles[nID] + "][dest=" + sCacheFile + "]");
 
                     if (SIO.File.Exists(sCacheFile + "!"))
@@ -996,7 +1068,7 @@ namespace replica.sync
 
 					dtStart = DateTime.Now;
 
-                    if (Preferences.cCache.bSlowCopy)
+                    if (Preferences.cCache.bSlowCopy && !bCopyTookTooLongFor10Min)
                     {
                         CopyFileExtended.sFilePauseCopying = _sFilePauseCopying;
                         lock (_oLockCopying)
@@ -1006,11 +1078,44 @@ namespace replica.sync
                         _cCurrentCopying.DoCopy2(); // из-за отработки onStop
                         if (_bAbortWatchers && !_cCurrentCopying.bCompleted)
                             return;
+                        nDiffSec = _cCurrentCopying.tsDiff.TotalSeconds;
                     }
                     else
                     {
                         SIO.File.Copy(ahPLFiles[nID], sCacheFile + "!");
+                        TimeSpan tsCopy = DateTime.Now.Subtract(dtStart);
+                        nDiffSec = (tsCopy.TotalMilliseconds - _ahPLDurations[nID] * 40) / 1000;
+                        (new Logger("CacheStorageFill")).WriteDebug("fast copy ended [diff = " + nDiffSec.ToString("0.0") + " sec][dur=" + _ahPLDurations[nID].ToFramesString(false, false, true, true, true, false) + "]");
+                        if (bCopyTookTooLongFor10Min && Preferences.cCache.bSlowCopy)
+                            (new Logger("CacheStorageFill")).WriteError("Copy Took Too Long over than 10 minutes! We will copy files the fastest way until restart. Check raid or net and restart sync to return slow copy [diff_10_min = " + nDiffSum.ToString("0.0") + " sec]");
                         System.Threading.Thread.Sleep(50);
+                    }
+
+                    if (!bCopyTookTooLong && nDiffSec > 0)
+                    {
+                        bCopyTookTooLong = true;
+                        dtDiffSumStoreTill = DateTime.Now.AddMinutes(10);
+                        (new Logger("CacheStorageFill")).WriteDebug("Copy Took Too Long. Current Diff = " + nDiffSec + " sec");
+                    }
+                    if (bCopyTookTooLong)
+                    {
+                        nDiffSum += nDiffSec;
+                        if (nDiffSum >= 0)
+                        {
+                            if (DateTime.Now > dtDiffSumStoreTill)
+                            {
+                                (new Logger("CacheStorageFill")).WriteError("Copy Took Too Long last 10 minutes [sum_diff = " + nDiffSum.ToString("0.0") + " sec]");
+                                bCopyTookTooLongFor10Min = true;
+                            }
+                        }
+                        else
+                        {
+                            nDiffSum = 0;
+                            bCopyTookTooLong = false;
+                            bCopyTookTooLongFor10Min = false;
+                            dtDiffSumStoreTill = DateTime.MinValue;
+                            (new Logger("CacheStorageFill")).WriteDebug("Copy Took Too Long, but normalized during last 10 minutes [diff = " + nDiffSum.ToString("0.0") + " sec]");
+                        }
                     }
 
                     if (SIO.File.Exists(sCacheFile + "!"))
@@ -1022,7 +1127,7 @@ namespace replica.sync
                             while (SIO.File.Exists(sCacheFile))
                             {
                                 nD++;
-                                System.Threading.Thread.Sleep(1);
+                                Thread.Sleep(1);
                             }
                             (new Logger("CacheStorageFill")).WriteDebug("удалили предыдущую версию файла [df=" + sCacheFile + "][checks_count=" + nD + "]");
                         }
@@ -1030,30 +1135,38 @@ namespace replica.sync
                         if (SIO.File.Exists("_" + sCacheFile))
                         {
                             SIO.File.Delete(sCacheFile + "!");
-                            (new Logger("CacheStorageFill")).WriteDebug("не успели покопировать - плеер уже взял предыдущую версию файла к себе. удалили то, что качали... [df=" + sCacheFile + "]");
+                            (new Logger("CacheStorageFill")).WriteError("не успели покопировать - плеер уже взял предыдущую версию файла к себе. удалили то, что качали... [df=" + sCacheFile + "]");
                         }
                         else
                         {
                             dtStopTryingMove = DateTime.Now.AddSeconds(30);
                             nIndxTrying = 0;
+                            sParamCode = "SetAttributes_normal";
                             while (true)
                             {
                                 try
                                 {
+                                    System.IO.File.SetAttributes(sCacheFile + "!", SIO.FileAttributes.Normal); sParamCode = "SetCreationTime"; // if not we cant change file time
+                                    System.IO.File.SetCreationTime(sCacheFile + "!", DateTime.Now); sParamCode = "SetLastWriteTime";
+                                    System.IO.File.SetLastWriteTime(sCacheFile + "!", DateTime.Now); sParamCode = "SetLastAccessTime";
+                                    System.IO.File.SetLastAccessTime(sCacheFile + "!", DateTime.Now); sParamCode = "Move";
                                     SIO.File.Move(sCacheFile + "!", sCacheFile);
                                     break;
                                 }
                                 catch (Exception ex)
                                 {
+                                    (new Logger("CacheStorageFill")).WriteDebug($"не удалось переименовать файл (или изменить его параметры) [param = {sParamCode}]");
                                     if (DateTime.Now > dtStopTryingMove)
-                                        throw new Exception("пытались 30 секунд переименовать файл - никак", ex);
-                                    System.Threading.Thread.Sleep(50);
+                                        throw new Exception($"пытались 30 секунд переименовать файл (или изменить его параметры) - никак [param = {sParamCode}]", ex);
+                                    Thread.Sleep(50);
                                     nIndxTrying += 50;
                                 }
                             }
                             nCurrentCacheDur += _ahPLDurations[nID];
-                            (new Logger("CacheStorageFill")).WriteDebug("файл покопирован: [df=" + sCacheFile + "][trying_ms=" + nIndxTrying + "]");
+                            TimeSpan tsCopy = DateTime.Now.Subtract(dtStart);
+                            (new Logger("CacheStorageFill")).WriteDebug($"файл покопирован: ({tsCopy.ToString("mm\\:ss")})[df=" + sCacheFile + "][trying_ms=" + nIndxTrying + "]");
                         }
+                        
                     }
                     else
                         (new Logger("CacheStorageFill")).WriteError(new Exception("Не удалось загрузить файл в кэш! Возможно диск переполнен!"));
@@ -1070,31 +1183,8 @@ namespace replica.sync
 							(new Logger("CacheStorageFill")).WriteError("не удалось занести информацию о кэшировании элемента ", ex);
 						}
 					}
-					try
-					{
-						System.IO.File.SetCreationTime(sCacheFile, DateTime.Now);
-					}
-					catch (Exception ex)
-					{
-						(new Logger("CacheStorageFill")).WriteNotice("не удалось обновить время создания файла:" + ex.Message);
-					}
-					try
-					{
-						System.IO.File.SetLastWriteTime(sCacheFile, DateTime.Now);
-					}
-					catch (Exception ex)
-					{
-						(new Logger("CacheStorageFill")).WriteNotice("не удалось обновить время записи файла:" + ex.Message);
-					}
-					try
-					{
-						System.IO.File.SetLastAccessTime(sCacheFile, DateTime.Now);
-					}
-					catch (Exception ex)
-					{
-						(new Logger("CacheStorageFill")).WriteNotice("не удалось обновить время доступа к файлу:" + ex.Message);
-					}
-					sFilesCached += nID + sExtension + "(" + DateTime.Now.Subtract(dtStart).TotalSeconds.ToString("0.0") + " s),";
+
+					sFilesCached += nID + sExtension + "(" + DateTime.Now.Subtract(dtStart).TotalSeconds.ToString("0.0") + " s), ";
 				}
 				catch (Exception ex)
                 {
@@ -1130,7 +1220,6 @@ namespace replica.sync
                 ffmpeg.net.Format.Video cFormatVideoInputTarget = new ffmpeg.net.Format.Video(Preferences.cPreview.nVideoWidth, Preferences.cPreview.nVideoHeight, ffmpeg.net.PixelFormat.AV_PIX_FMT_BGR24, 4, ffmpeg.net.AVFieldOrder.AV_FIELD_UNKNOWN);
                 ffmpeg.net.Format.Audio cFormatAudioInputTarget = new ffmpeg.net.Format.Audio(48000, 2, ffmpeg.net.AVSampleFormat.AV_SAMPLE_FMT_S16, 4);
                 cFileSource = new ffmpeg.net.File.Input(sFileSource);
-                cFileSource.tsTimeout = TimeSpan.FromMinutes(1);
                 cFileSource.Prepare(cFormatVideoInputTarget, cFormatAudioInputTarget, ffmpeg.net.File.Input.PlaybackMode.GivesFrameOnDemand);
                 if (!cFileSource.bCached)
                     throw new Exception("file was not prepared!");

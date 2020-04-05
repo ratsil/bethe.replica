@@ -2,6 +2,7 @@
         x:Class="scr.childs.AdvertsBlockChooser"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+		xmlns:itk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
         xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
         xmlns:ctrl="clr-namespace:controls.sl;assembly=controls.sl"
         xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
@@ -79,7 +80,7 @@
                     </sdk:DataGrid.Columns>
                 </sdk:DataGrid>
             </Grid>
-			<Grid x:Name="_ui_gAdverts" Height="311" Visibility="Collapsed" Margin="0,0,0,0">
+			<Grid x:Name="_ui_gAdverts" Height="311" Visibility="Visible" Margin="0,0,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -177,11 +178,19 @@
                     </sdk:DataGrid.Columns>
                 </sdk:DataGrid>
             </Grid>
-			<Grid x:Name="_ui_gCached" Height="Auto" Margin="0,0,0,0" Visibility="Visible">
+			<Grid x:Name="_ui_gCached" Height="Auto" Margin="0,0,0,0" Visibility="Collapsed">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
-				<sdk:DataGrid Grid.Row="0" Margin="1,0,1,0" AutoGenerateColumns="False" Height="608" Name="_ui_dgCached" FontSize="11" IsReadOnly="True" TabIndex="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="0" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single">
+				<sdk:DataGrid Grid.Row="0" Margin="1,0,1,0" AutoGenerateColumns="False" Height="608" Name="_ui_dgCached" FontSize="11" IsReadOnly="True" TabIndex="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="0" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single" MouseRightButtonDown="_ui_dgCached_MouseRightButtonDown">
+					<itk:ContextMenuService.ContextMenu>
+						<itk:ContextMenu Name="_ui_cmCached" Opened="_ui_cmCached_Opened">
+							<itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': l', Path=cCommon.sAdd, Source={StaticResource g}}" Name="_ui_cmCachedToCache" Click="_ui_cmCachedToCache_Click" IsEnabled="False" />
+							<itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=': l', Path=cCommon.sAdd, Source={StaticResource g}}" Name="_ui_cmCachedAdd" Click="_ui_cmCachedAdd_Click" IsEnabled="False" />
+							<!--<itk:Separator/>-->
+							<!--<itk:MenuItem Header="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sRefreshTheList, Source={StaticResource g}}" Click="_ui_cmPL_Refresh" IsEnabled="True" />-->
+						</itk:ContextMenu>
+					</itk:ContextMenuService.ContextMenu>
 					<sdk:DataGrid.Columns>
 						<sdk:DataGridTemplateColumn IsReadOnly="True" Width="100" CanUserSort="False" CanUserReorder="False">
 							<sdk:DataGridTemplateColumn.HeaderStyle>

@@ -89,6 +89,7 @@ namespace controls.replica.sl
 
         private System.Windows.Threading.DispatcherTimer _cTimerForStartedPause;
         private System.Windows.Threading.DispatcherTimer _cTimerForStoppedPause;
+        private System.Windows.Threading.DispatcherTimer _cTimerForSkippedPause;
         private System.Windows.Threading.DispatcherTimer _cTimerForErrorPause;
         private System.Windows.Threading.DispatcherTimer _cTimerForSkipErrorPause;
         private bool _bSkipResult;
@@ -129,11 +130,7 @@ namespace controls.replica.sl
             set
             {
                 _bSkipResult = value;
-                if (value)
-                {
-                    SkipErrorEnd(null, null);
-                }
-                else
+                if (!value)
                 {
                     ((TextBlock)_ui_btnSkip.Content).Text = "ERROR";
 					_ui_btnSkip.Background = Coloring.Notifications.cButtonError;
@@ -256,7 +253,8 @@ namespace controls.replica.sl
             }
             set
             {
-                _ui_btnSkip.IsEnabled = value;
+                if (!_cTimerForSkippedPause.IsEnabled)
+                    _ui_btnSkip.IsEnabled = value;
             }
         }
 		public string sLog { get; set; }
@@ -270,6 +268,9 @@ namespace controls.replica.sl
             _cTimerForStoppedPause = new System.Windows.Threading.DispatcherTimer();
             _cTimerForStoppedPause.Tick += new EventHandler(StoppedEnd);
             _cTimerForStoppedPause.Interval = new TimeSpan(0, 0, 0, 0, 2000);
+            _cTimerForSkippedPause = new System.Windows.Threading.DispatcherTimer();
+            _cTimerForSkippedPause.Tick += new EventHandler(SkippedEnd);
+            _cTimerForSkippedPause.Interval = new TimeSpan(0, 0, 0, 0, 4000);
             _cTimerForErrorPause = new System.Windows.Threading.DispatcherTimer();
             _cTimerForErrorPause.Tick += new EventHandler(StoppedEnd);
             _cTimerForErrorPause.Interval = new TimeSpan(0, 0, 0, 0, 7000);
@@ -346,11 +347,18 @@ namespace controls.replica.sl
 			_ui_btnSkip.Background = Coloring.Notifications.cTextBoxActive;
             _cTimerForSkipErrorPause.Stop();
         }
+        private void SkippedEnd(object s, EventArgs args)
+        {
+            ((TextBlock)_ui_btnSkip.Content).Text = "SKIP";
+            _ui_btnSkip.IsEnabled = true;
+            _ui_btnSkip.Background = Coloring.Notifications.cTextBoxActive;
+            _cTimerForSkippedPause.Stop();
+        }
         private void StartedEnd(object s, EventArgs args)
         {
             _ui_btnTemplate.Content = sText + "STOP";
             _ui_btnTemplate.Background = Coloring.Notifications.cButtonError;
-            _ui_btnSkip.IsEnabled = _ui_btnStop.IsEnabled = _ui_btnTemplate.IsEnabled = true;
+            _ui_btnStop.IsEnabled = _ui_btnTemplate.IsEnabled = true; //_ui_btnSkip.IsEnabled
             _ui_btnPlay.IsEnabled = false;
             ((TextBlock)_ui_btnPlay.Content).Text = "STARTED";
             _ui_btnPlay.Background = Coloring.Notifications.cButtonChanged;
@@ -377,7 +385,7 @@ namespace controls.replica.sl
 			if (null != s && null != TemplateStopped)  // т.е. если по таймеру
 				TemplateStopped(this, null);
         }
-		public void BreakStopedTimer()
+        public void BreakStopedTimer()
 		{
 			if (_cTimerForStoppedPause.IsEnabled || _cTimerForErrorPause.IsEnabled)
 			{
@@ -444,10 +452,11 @@ namespace controls.replica.sl
         {
             if (null != sender && null != e)
                 bPressedByUser = true;
-			TemplateSkip(this, null);
             ((TextBlock)_ui_btnSkip.Content).Text = "SKIPPING";
             _ui_btnSkip.Background = Coloring.Notifications.cButtonChanged;
             _ui_btnSkip.IsEnabled = false;
+            _cTimerForSkippedPause.Start();
+            TemplateSkip(this, null);
         }
         private void _ui_btnStop_Click(object sender, RoutedEventArgs e)
         {

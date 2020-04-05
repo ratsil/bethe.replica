@@ -248,7 +248,7 @@ namespace replica
                         {
                             if (DateTime.Now.Subtract(dt).TotalMinutes > 2)
                             {
-                                (new Logger()).WriteNotice("до сих пор торчим в ожидании _aqPlaylist:" + cPlaylist.nEffectsQty);
+                                (new Logger()).WriteError("до сих пор торчим в ожидании _aqPlaylist qty:" + cPlaylist.nEffectsQty);
                                 dt = DateTime.Now;
                             }
                             lock (_aqPlaylist)

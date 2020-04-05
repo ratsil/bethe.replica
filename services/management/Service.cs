@@ -112,8 +112,8 @@ namespace replica.management
 			try
 			{
 				(new Logger("playlist")).WriteNotice("управление плейлистом запущено");//TODO LANG
-
-				_ahVIFilesChecked = new Dictionary<DateTime, VIPlaylist>();
+                (new Logger("playlist")).WriteNotice("playlist minimum = " + Preferences.tsPlaylistMinimumLength.TotalHours + " hours");//TODO LANG
+                _ahVIFilesChecked = new Dictionary<DateTime, VIPlaylist>();
 				_ahVIFilesModified = new Dictionary<DateTime, DateTime>();
 
 				do
@@ -225,9 +225,12 @@ namespace replica.management
                         dtNow = DateTime.Now;
                         if (dtLastDump.Date < dtNow.Date)
                         {
-                            if (MakeDBBackup(Preferences.sPgDumpPath, Preferences.sPgDumpName, Preferences.sPgDumpBinPath, Preferences.sPgDBHostName, Preferences.sPgDBPort, 
-                                             Preferences.sPgDBName, "user", Preferences.sPgDumpCopyToPath, Preferences.sPgDumpCopyToLogin, Preferences.sPgDumpCopyToPass))
+                            string sFileZip = MakeDBBackup(Preferences.sPgDumpPath, Preferences.sPgDumpName, Preferences.sPgDumpBinPath, Preferences.sPgDBHostName, Preferences.sPgDBPort, Preferences.sPgDBName, "user");
+                            if (!sFileZip.IsNullOrEmpty())
+                            {
                                 dtLastDump = DateTime.Now;
+                                CopyDBBackup(sFileZip, Preferences.sPgDumpCopyToPath, Preferences.sPgDumpCopyToLogin, Preferences.sPgDumpCopyToPass);
+                            }
                         }
 					}
 					catch (Exception ex)
@@ -251,13 +254,12 @@ namespace replica.management
 			if (null != _mreDBBackupWatcherStopped)
 				_mreDBBackupWatcherStopped.Set();
 		}
-        public bool MakeDBBackup(string sPgDumpPath, string sPgDumpName, string sPgDumpBinPath, string sPgDBHostName, string sPgDBPort, string sPgDBName, string sPgDBUser, 
-                                 string sPgDumpCopyToPath, string sPgDumpCopyToLogin, string sPgDumpCopyToPass)
+        public string MakeDBBackup(string sPgDumpPath, string sPgDumpName, string sPgDumpBinPath, string sPgDBHostName, string sPgDBPort, string sPgDBName, string sPgDBUser)
         {
-            string sFileOutGlobals, sFileOut, sFileLog, sFileZip, sLogger = "", sCopyName;
+            string sFileOutGlobals, sFileOut, sFileLog, sFileZip, sLogger = "";
             string sFName, sFileOptimized, sFileWithoutArchive, sFileArchive;
             DateTime dtNow = DateTime.Now;
-            bool bRetVal = false;
+            string sRetVal = "";
 
             sFileOutGlobals = System.IO.Path.Combine(sPgDumpPath, sPgDumpName + "__" + dtNow.ToString("yyyy_MM_dd_HHmm") + "_backup_globals.sql");
             sFileOut = System.IO.Path.Combine(sPgDumpPath, sPgDumpName + "__" + dtNow.ToString("yyyy_MM_dd_HHmm") + "_backup.sql");
@@ -293,7 +295,7 @@ namespace replica.management
                 Zip.ZipFiles(aFiles.ToArray(), sFileZip, true, true, System.IO.Compression.CompressionLevel.Optimal);
                 Thread.Sleep(200);
                 File.Delete(sFileOut);
-                bRetVal = true;
+                sRetVal = sFileZip;
 
                 foreach (string sF in Directory.GetFiles(sPgDumpPath))
                 {
@@ -301,25 +303,29 @@ namespace replica.management
                     if (sF != sFileZip && sFName.StartsWith(sPgDumpName) && sFName.EndsWith(".zip"))
                         File.Delete(sF);
                 }
-
-                if (null != sPgDumpCopyToPath)
-                {
-                    if (null != sPgDumpCopyToLogin && null != sPgDumpCopyToPass)
-                    {
-                        string sErrors = helpers.PinvokeWindowsNetworking.connectToRemote(sPgDumpCopyToPath, sPgDumpCopyToLogin, sPgDumpCopyToPass);
-                        if (sErrors != null)
-                            throw new Exception("can't copy to share - no share found. error is <br>[" + sErrors + "]");
-                    }
-                    sCopyName = Path.Combine(sPgDumpCopyToPath, Path.GetFileName(sFileZip));
-                    if (File.Exists(sCopyName))
-                    {
-                        File.Delete(sCopyName);
-                        Thread.Sleep(500);
-                    }
-                    File.Copy(sFileZip, sCopyName);  // иногда даёт разные варианты "System.IO.__Error.WinIOError", если херь с сетевым путём. Например 'превышен таймаут семафора'.
-                }
             }
-            return bRetVal;
+            return sRetVal;
+        }
+        public bool CopyDBBackup(string sFileZip, string sPgDumpCopyToPath, string sPgDumpCopyToLogin, string sPgDumpCopyToPass)
+        {
+            if (null != sPgDumpCopyToPath)
+            {
+                if (null != sPgDumpCopyToLogin && null != sPgDumpCopyToPass)
+                {
+                    string sErrors = helpers.PinvokeWindowsNetworking.connectToRemote(sPgDumpCopyToPath, sPgDumpCopyToLogin, sPgDumpCopyToPass);
+                    if (sErrors != null)
+                        throw new Exception("can't copy to share - no share found. error is <br>[" + sErrors + "]");
+                }
+                string sCopyName = Path.Combine(sPgDumpCopyToPath, Path.GetFileName(sFileZip));
+                if (File.Exists(sCopyName))
+                {
+                    File.Delete(sCopyName);
+                    Thread.Sleep(500);
+                }
+                File.Copy(sFileZip, sCopyName);  // иногда даёт разные варианты "System.IO.__Error.WinIOError", если херь с сетевым путём. Например 'превышен таймаут семафора'.
+                return true;
+            }
+            return false;
         }
         public void PgDumpFileOptimize(string sFile, out string sFileOptimized)
 		{
@@ -929,13 +935,13 @@ namespace replica.management
 		{
 			switch (Preferences.sChannel)
 			{
-				case "autochannel":
-					return PlayListForAUTOCHANNELGet(tsInterval);
+                case "default":
+					return PlayListForDefaultGet(tsInterval);
 				case "channel2":
 					return PlayListForChannel2Get(tsInterval);
 				default:
 					(new Logger("playlist")).WriteError("нет такого канала! Укажите в настройках параметр 'channel' правильно");
-					return PlayListForAUTOCHANNELGet(tsInterval);
+					return PlayListForDefaultGet(tsInterval);
 			}
 		}
 		private DateTime StartTimeGet()
@@ -1128,8 +1134,8 @@ namespace replica.management
 				return false;
 		}
 #endregion
-		#region generate.autochannel
-		public List<Asset> PlayListForAUTOCHANNELGet(TimeSpan tsInterval)
+		#region generate.default
+		public List<Asset> PlayListForDefaultGet(TimeSpan tsInterval)
 		{
 			DBInteract cDBI = new DBInteract();
 			List<Asset> aRetVal = new List<Asset>();
@@ -1148,8 +1154,8 @@ namespace replica.management
             while (dtCurrent < dtStop)
             {
                 nTotalIndex++;
-                if (0 == nTotalIndex % 4)
-                    cCurrentAsset = NextBumperGet("Отбивка");
+                if (!Preferences.sBlockAdvTemplate.IsNullOrEmpty() && 0 == nTotalIndex % 4)
+                    cCurrentAsset = NextBumperGet(Preferences.sBlockAdvTemplate);
                 else
                     cCurrentAsset = cRotations.GetNextClip(cRotations.CurrentRotationNumberGet(nTotalIndex), dtCurrent);   // (nIndexInHour++))
                 if (null == cCurrentAsset)

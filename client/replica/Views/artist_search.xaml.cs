@@ -59,7 +59,7 @@ namespace replica.sl.Views
 		void _cDBI_InitCompleted(object sender, InitCompletedEventArgs e)
 		{
 			_dlgProgress.sInfo = "_cDBI.AssetsGetAsync";
-			_cDBI.AssetsGetAsync("clip");
+			_cDBI.AssetsGetAsync("clip", null, 0);
 		}
 		void _cDBI_AssetsGetCompleted(object sender, AssetsGetCompletedEventArgs e)
 		{

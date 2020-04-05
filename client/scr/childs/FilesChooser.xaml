@@ -5,7 +5,7 @@
         xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
         xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
         xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=System.Windows.Controls.Data"
-        Width="400" Height="300">
+        Width="600" Height="300">
     <controls:ChildWindow.Resources>
         <local:SCR xmlns:local="clr-namespace:globalization.xaml" x:Key="g" />
     </controls:ChildWindow.Resources>
@@ -28,9 +28,9 @@
             <TextBox Grid.Column="0" Height="23" HorizontalAlignment="Stretch" Margin="0,0,2,0" Name="_ui_tbPath" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
             <Button Grid.Column="1" x:Name="_ui_btnShow" Content="{Binding Path=cCommon.sShow, Source={StaticResource g}}" Click="_ui_btnShow_Click"  Width="75" Height="23" HorizontalAlignment="Right" Margin="0,0,0,0" />
         </Grid>
-        <sdk:DataGrid Grid.Row="2" Name="_ui_dgFilesSCR" MaxHeight="250" Margin="2,0,2,0" AutoGenerateColumns="False" FontSize="11" IsReadOnly="True" SelectionChanged="_ui_dgFilesSCR_SelectionChanged"  TabIndex="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="1" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" GridLinesVisibility="All" SelectionMode="Single">
+        <sdk:DataGrid Grid.Row="2" Name="_ui_dgFilesSCR" MaxHeight="250" Margin="2,0,2,0" AutoGenerateColumns="False" FontSize="11" IsReadOnly="True" SelectionChanged="_ui_dgFilesSCR_SelectionChanged"  TabIndex="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalGridLinesBrush="#FFE2E2E2" BorderThickness="1" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="True" GridLinesVisibility="All" SelectionMode="Single">
             <sdk:DataGrid.Columns>
-                <sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="False" Binding="{Binding sName}" Width="*">
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="True" Binding="{Binding sName}" Width="*">
                     <sdk:DataGridTextColumn.HeaderStyle>
                         <Style TargetType="p:DataGridColumnHeader">
                             <Setter Property="ContentTemplate">
@@ -43,7 +43,20 @@
                         </Style>
                     </sdk:DataGridTextColumn.HeaderStyle>
                 </sdk:DataGridTextColumn>
-            </sdk:DataGrid.Columns>
+				<sdk:DataGridTextColumn CanUserReorder="False" CanUserSort="True" Binding="{Binding sModificationDate}" Width="170">
+					<sdk:DataGridTextColumn.HeaderStyle>
+						<Style TargetType="p:DataGridColumnHeader">
+							<Setter Property="ContentTemplate">
+								<Setter.Value>
+									<DataTemplate>
+										<TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource g}, ConverterParameter=l, Path=cCommon.sModifiedDate, Source={StaticResource g}}"/>
+									</DataTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</sdk:DataGridTextColumn.HeaderStyle>
+				</sdk:DataGridTextColumn>
+			</sdk:DataGrid.Columns>
         </sdk:DataGrid>
         <sdk:Label Grid.Row="3" Height="18" HorizontalAlignment="Left" Margin="2,12,2,2" Name="_ui_lblSelected" VerticalAlignment="Top" Content="Some_Artist.mov" />
         <Button x:Name="CancelButton" Content="{Binding Path=cCommon.sCancel, Source={StaticResource g}}" Click="CancelButton_Click" Width="75" Height="23" HorizontalAlignment="Right" Margin="0,12,0,0" Grid.Row="3" />

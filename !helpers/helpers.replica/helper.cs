@@ -592,17 +592,31 @@ namespace helpers.replica.mam
 			}
 			catch (Exception ex)
 			{
-				(new Logger()).WriteNotice("error info: [cDBI " + (cDBI == null ? "is NULL" : "not NULL") + "][name=" + sName + "]");
+				(new Logger()).WriteNotice("error info: [cDBI " + (cDBI == null ? "is NULL" : "is not NULL") + "][name=" + sName + "]");
 				(new Logger()).WriteError(ex);
 			}
 			return cRetVal;
 		}
 		static public string MacroExecute(this DBInteract cDBI, Macro cMacro)
 		{
-			if ("value" == cMacro.cType.sName) //EMERGENCY:l это зачем такое? мне что-то подсказывает, что подобное делается иначе и через рот... а не так...
-				return cMacro.sValue;
-			else
-				return cDBI.ValueGet(cMacro.sValue).FromDB();
+            if ("value" != cMacro.cType.sName)
+            {
+                try
+                {
+                    string sValue = cDBI.ValueGet(cMacro.sValue);
+                    if (sValue.IsNullOrEmpty())
+                        throw new Exception("Got null value in cDBI.ValueGet.");
+                    else
+                        return sValue.FromDB();
+                }
+                catch (Exception ex)
+                {
+                    (new Logger()).WriteNotice("error info: [cDBI " + (cDBI == null ? "is NULL" : "not NULL") + "][cMacro " + (cMacro == null ? "is NULL" : "[name=" + cMacro.sName + "][val=" + cMacro.sValue + "]") + "]");
+                    throw;
+                }
+            }
+            else
+                return cMacro.sValue;
 		}
 		static public Person Load(this Person cObj, long nID)
 		{
@@ -853,6 +867,7 @@ namespace helpers.replica.mam
         public pl.Class[] aClasses;
         public long nIDParent;  //EMERGENCY:l обычно у нас nParentID, хотя в твоем варианте есть иерархический смысл)
 		public Type cType;
+        public object oTag;
 
 		public Asset()
 		{
@@ -2423,7 +2438,8 @@ namespace helpers.replica.tsr
 			АНОНС,
 			NULL
 		}
-		private static string sSelect = "SELECT DISTINCT [mdVersion],[mdShortName],[mdName],[atpName],SUBSTRING([prgName], 1, 3) AS [mdType],[mtName] FROM [POWERGOLD].[dbo].[USER] ";  // top 1
+		//EMERGENCY:l название таблицы [RMG].[dbo].[RUTV_MEDIADATA] нужно вынести в настройки или параметры:
+		private static string sSelect = "SELECT DISTINCT [mdVersion],[mdShortName],[mdName],[atpName],SUBSTRING([prgName], 1, 3) AS [mdType],[mtName] FROM [RMG].[dbo].[RUTV_MEDIADATA] ";  // top 1
 		public string sS_Code;
 		public string sVI_Code;
 		public string sName;
@@ -2572,4 +2588,38 @@ namespace helpers.replica.tsr
                 return sio.Path.GetFileNameWithoutExtension(sFilename);    //.Replace(sio.Path.GetExtension(sFilename), ".mov"); // само имя файла тогда является кодом vi
 		}
 	}
+}
+namespace helpers.replica.logs
+{
+    public class ChatLog
+    {
+        public long nID;
+        public DateTime dtStart;
+        public DateTime dtStop;
+        public ChatLog(Hashtable ahDBRow)
+        {
+            nID = ahDBRow["id"].ToID();
+            dtStart = ahDBRow["dtStart"].ToDT();
+            dtStop = ahDBRow["dtStop"].ToDT(); // max val by def
+        }
+    }
+    static public class x
+    {
+        static public ChatLog ChatLastLogGet(this DBInteract cDBI)
+        {
+            Queue<Hashtable> ahRows = cDBI.RowsGet("SELECT * FROM logs.`tChat` order by id desc limit 1");
+            if (ahRows.IsNullOrEmpty())
+                return null;
+
+            return ahRows.Select(o => new ChatLog(o)).ToArray()[0];
+        }
+        static public bool ChatLogStartAdd(this DBInteract cDBI, DateTime dtStart)
+        {
+            return cDBI.ValueGet("SELECT logs.`fChatStartAdd`('" + dtStart.ToString("yyyy-MM-dd HH:mm:ss") + "')").ToBool();
+        }
+            static public bool ChatLogStopAdd(this DBInteract cDBI, DateTime dtStop)
+        {
+            return cDBI.ValueGet("SELECT logs.`fChatStopAdd`('" + dtStop.ToString("yyyy-MM-dd HH:mm:ss") + "')").ToBool();
+        }
+    }
 }

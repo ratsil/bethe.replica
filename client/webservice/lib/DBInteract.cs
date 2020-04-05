@@ -269,7 +269,7 @@ namespace webservice
             try
             {
                 //EMERGENCY:l вот от таких твоих конструкций я теряю сознание, конечно(( Ведь если делать правильно, то отталкиваться от имени нельзя никогда!!! нужно делать справочник
-                return _cDB.Select("SELECT * FROM mam.`vMacros` WHERE substring(`sName` FROM 19 FOR 5)='CRAWL' ORDER BY `sName`").Select(o => new Macro(o)).ToArray();
+                return _cDB.Select("SELECT * FROM cues.`vMacros` WHERE substring(`sName` FROM 19 FOR 5)='CRAWL' ORDER BY `sName`").Select(o => new Macro(o)).ToArray();
             }
             catch (Exception ex)
             {

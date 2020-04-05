@@ -550,3 +550,353 @@
 		END;
 		$BODY$
 		LANGUAGE plpgsql VOLATILE;
+
+----------------------------------- cues."tMacro"
+	CREATE OR REPLACE FUNCTION cues."fMacroAdd"(
+			idmacrotypes integer,
+			sname character varying,
+			svalue text)
+		RETURNS int_bool AS
+		$BODY$
+		DECLARE
+			stTable table_name;
+			aColumns text[][];
+			stRetVal int_bool;
+		BEGIN
+			stTable."sSchema":='cues';
+			stTable."sName":='tMacros';
+			aColumns := '{{idMacroTypes,'||idMacroTypes||'},{sName,0},{sValue,0}}';
+			aColumns[2][2] := sName; --обходим недоработку switch'а на 386 строке файла arrayfuncs.c
+			aColumns[3][2] := sValue; --обходим недоработку switch'а на 386 строке файла arrayfuncs.c
+			stRetVal := "fTableAdd"(stTable, aColumns);
+			RETURN stRetVal;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fMacroAdd"(
+			stypename character varying,
+			sname character varying,
+			svalue text)
+		RETURNS int_bool AS
+		$BODY$
+		DECLARE
+			idMacroTypes integer;
+			stRetVal int_bool;
+		BEGIN
+			stRetVal := cues."fMacroTypeGet"(sTypeName);
+			IF NOT stRetVal."bValue" THEN
+				RETURN stRetVal;
+			END IF;
+			idMacroTypes := stRetVal."nValue";
+			stRetVal := cues."fMacroAdd"(idMacroTypes, sName, sValue);
+			RETURN stRetVal;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fMacroGet"(
+			idmacrotypes integer,
+			sname character varying)
+		RETURNS int_bool AS
+		$BODY$
+		DECLARE
+			stTable table_name;
+			aColumns text[][];
+			stRetVal int_bool;
+		BEGIN
+			stTable."sSchema":='cues';
+			stTable."sName":='tMacros';
+			aColumns := '{{idMacroTypes,'||idMacroTypes||'},{sName,0}}';
+			aColumns[2][2] := sName; --обходим недоработку switch'а на 386 строке файла arrayfuncs.c
+			stRetVal := "fTableGet"(stTable, aColumns);
+			RETURN stRetVal;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fMacroTypeAdd"(sname character varying)
+		RETURNS int_bool AS
+		$BODY$
+		DECLARE
+			stTable table_name;
+			aColumns text[][];
+			stRetVal int_bool;
+		BEGIN
+			stTable."sSchema":='cues';
+			stTable."sName":='tMacroTypes';
+			aColumns := '{{sName,0}}';
+			aColumns[1][2] := sName; --обходим недоработку switch'а на 386 строке файла arrayfuncs.c
+			stRetVal := "fTableAdd"(stTable, aColumns);
+			RETURN stRetVal;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fMacroTypeGet"(sname character varying)
+		RETURNS int_bool AS
+		$BODY$
+		DECLARE
+			stTable table_name;
+			aColumns text[][];
+			stRetVal int_bool;
+		BEGIN
+			stTable."sSchema":='cues';
+			stTable."sName":='tMacroTypes';
+			aColumns := '{{sName,0}}';
+			aColumns[1][2] := sName; --обходим недоработку switch'а на 386 строке файла arrayfuncs.c
+			stRetVal := "fTableGet"(stTable, aColumns);
+			RETURN stRetVal;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+----------------------------------- cues."tPlugins"
+	CREATE OR REPLACE FUNCTION cues."fPluginPlaylistItemSave"(oPLI cues.tPluginPlaylistItem, bException bool) RETURNS cues.tPluginPlaylistItem AS
+		$BODY$
+		DECLARE
+			nValue bigint;
+			nID bigint;
+			oPLISaved record;
+			oRetVal cues.tPluginPlaylistItem;
+		BEGIN
+			SELECT * INTO oPLISaved FROM cues."vPluginPlaylistItems" WHERE oPLI.id=("oItem").id;
+			oPLISaved := oPLISaved."oItem";
+			IF oPLISaved IS NULL THEN
+				IF bException THEN
+					RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST ITEM [%]', oPLI.id;
+				END IF;
+				RETURN NULL;
+			END IF;
+			IF oPLI."oStatus" <> oPLISaved."oStatus" OR ( oPLI."oStatus").id <> (oPLISaved."oStatus").id THEN
+				SELECT b.id INTO nID FROM cues."vBinds" b WHERE oPLI.id = b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'pl' = (i."oTableTarget")."sSchema" AND 'tStatuses' = (i."oTableTarget")."sName" AND 'status'=b."sName";
+				IF FOUND THEN
+					UPDATE cues."tBinds" SET "nValue"=(oPLI."oStatus").id WHERE nID=id;
+				ELSIF oPLI."oStatus" IS NOT NULL THEN
+					PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('pl','tStatuses'), 'status', (oPLI."oStatus").id, true);
+				END IF;
+			END IF;
+			IF oPLI."oAsset" <> oPLISaved."oAsset" OR ( oPLI."oAsset").id <> (oPLISaved."oAsset").id THEN
+				SELECT b.id INTO nID FROM cues."vBinds" b WHERE oPLI.id=b.id;
+				IF FOUND THEN
+					UPDATE cues."tBinds" SET "nValue"=(oPLI."oAsset").id WHERE nID=id;
+				ELSIF oPLI."oStatus" IS NOT NULL THEN
+					PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+				END IF;
+			END IF;
+			IF oPLI."dtStarted" <> oPLISaved."dtStarted" THEN
+				IF EXISTS(SELECT b.id INTO nID FROM cues."vBindTimestamps" b WHERE oPLI.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'started'=b."sName") THEN
+					nValue := NULL;
+					IF oPLI."dtStarted" IS NOT NULL THEN
+						nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPLI."dtStarted") || '}}')::text[][], true, false);
+					END IF;
+					UPDATE cues."tBinds" SET "nValue"=nValue WHERE nID=id;
+				ELSE
+					IF oPLI."dtStarted" IS NOT NULL THEN
+						nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPLI."dtStarted") || '}}')::text[][], true, false);
+						PERFORM "fBindAdd"(ROW('cues','tBinds'), oPLI.id, ROW('cues','tTimestamps'), 'started', nValue, true);
+					END IF;
+				END IF;
+			END IF;
+			SELECT * INTO oPLISaved FROM cues."vPluginPlaylistItems" WHERE oPLI.id=("oItem").id;
+			RETURN oPLISaved."oItem";
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+	CREATE OR REPLACE FUNCTION cues."fPluginPlaylistItemSave"(oXML xml) RETURNS cues.tPluginPlaylist AS
+		$BODY$
+			SELECT cues."fPluginPlaylistItemSave"(oXML::cues.tPluginPlaylistItem, true);
+		$BODY$
+		LANGUAGE sql VOLATILE;
+
+
+	CREATE OR REPLACE FUNCTION cues."fPluginPlaylistSave"(oPlaylist cues.tPluginPlaylist, bException bool) RETURNS cues.tPluginPlaylist AS
+		$BODY$
+		DECLARE
+			oTable table_name;
+			nValue bigint;
+			oPlaylistSaved record;
+			oPLI cues.tPluginPlaylistItem;
+		BEGIN
+			
+			oTable := ROW('cues','tBinds');
+			IF oPlaylist.id IS NOT NULL THEN
+				SELECT * INTO oPlaylistSaved FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+				oPlaylistSaved := oPlaylistSaved."oPlaylist";
+				IF oPlaylistSaved IS NULL THEN
+					IF bException THEN
+						RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST [%]', ROW(oPlaylist.id, oPlaylist."sName");
+					END IF;
+					RETURN NULL;
+				END IF;
+				IF oPlaylist."sName" <> oPlaylistSaved."sName" THEN
+					nValue := "fTableAdd"(ROW('cues','tStrings'), ('{{oValue, ' || oPlaylist."sName" || '}}')::text[][], true, false);
+					UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindStrings" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'name'=b."sName");
+				END IF;
+				IF oPlaylist."dtStart" <> oPlaylistSaved."dtStart" THEN
+					nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStart") || '}}')::text[][], true, false);
+					UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindTimestamps" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'start'=b."sName");
+				END IF;
+				IF oPlaylist."dtStop" <> oPlaylistSaved."dtStop" THEN
+					nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStop") || '}}')::text[][], true, false);
+					UPDATE cues."tBinds" SET "nValue"=nValue WHERE id IN (SELECT b.id FROM cues."vBindTimestamps" b WHERE oPlaylist.id=b."idSource" AND 'cues' = (b."oTableSource")."sSchema" AND 'tBinds' = (b."oTableSource")."sName" AND 'stop'=b."sName");
+				END IF;
+				FOR nIndx IN array_lower(oPlaylist."aItems", 1) .. array_upper(oPlaylist."aItems", 1) LOOP
+					oPLI := oPlaylist."aItems"[nIndx];
+					IF oPLI.id IS NULL THEN
+						oPLI.id := "fBindAdd"(oTable, oPlaylist.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+						oPlaylist."aItems"[nIndx] := oPLI;
+					END IF;
+				END LOOP;
+				FOR oPLI IN SELECT * FROM unnest(oPlaylistSaved."aItems") ac WHERE ac.id NOT IN (SELECT an.id FROM unnest(oPlaylist."aItems") an) LOOP
+					DELETE FROM cues."tBinds" WHERE oPLI.id=id OR id IN(SELECT b.id FROM cues."vBinds" b WHERE oPLI.id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName");
+				END LOOP;
+			ELSIF EXISTS(SELECT "oPlaylist" FROM cues."vPluginPlaylists" WHERE oPlaylist."sName"=("oPlaylist")."sName") THEN
+				IF bException THEN
+					RAISE EXCEPTION 'PLUGIN PLAYLIST WITH SPECIFIED NAME ALREADY EXISTS [%]', oPlaylist."sName";
+				END IF;
+				RETURN NULL;
+			ELSE
+				nValue := "fTableGet"(ROW('cues','tPlugins'), '{{sName, "playlist"}}'::text[][], true);
+				oPlaylist.id := "fBindAdd"(ROW('cues','tPlugins'), nValue, NULL, 'instance', NULL, true);
+				nValue := "fTableAdd"(ROW('cues','tStrings'), ('{{oValue, ' || oPlaylist."sName" || '}}')::text[][], true, false);
+				PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tStrings'), 'name', nValue, true);
+				nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, ' || quote_literal(oPlaylist."dtStart") || '}}')::text[][], true, false);
+				PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tTimestamps'), 'start', nValue, true);
+				nValue := "fTableAdd"(ROW('cues','tTimestamps'), ('{{oValue, "' || quote_literal(oPlaylist."dtStop") || '"}}')::text[][], true, false);
+				PERFORM "fBindAdd"(oTable, oPlaylist.id, ROW('cues','tTimestamps'), 'stop', nValue, true);
+				FOR nIndx IN array_lower(oPlaylist."aItems", 1) .. array_upper(oPlaylist."aItems", 1) LOOP
+					oPLI := oPlaylist."aItems"[nIndx];
+					oPLI.id := "fBindAdd"(oTable, oPlaylist.id, ROW('mam','tAssets'), 'item', (oPLI."oAsset").id, true);
+					oPlaylist."aItems"[nIndx] := oPLI;
+				END LOOP;
+			END IF;
+			FOR nIndx IN array_lower(oPlaylist."aItems", 1) .. array_upper(oPlaylist."aItems", 1) LOOP
+				PERFORM cues."fPluginPlaylistItemSave"(oPlaylist."aItems"[nIndx], true);
+			END LOOP;
+
+			SELECT * INTO oPlaylistSaved FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+			RETURN oPlaylistSaved."oPlaylist";
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+	CREATE OR REPLACE FUNCTION cues."fPluginPlaylistSave"(oXML xml) RETURNS cues.tPluginPlaylist AS
+		$BODY$
+			SELECT cues."fPluginPlaylistSave"(oXML::cues.tPluginPlaylist, true);
+		$BODY$
+		LANGUAGE sql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fPluginPlaylistDelete"(oPlaylist cues.tPluginPlaylist, bException bool) RETURNS VOID AS
+		$BODY$
+		DECLARE
+			oValue record;
+		BEGIN
+			SELECT * INTO oValue FROM cues."vPluginPlaylists" WHERE oPlaylist.id=("oPlaylist").id;
+			IF oValue IS NULL THEN
+				IF bException THEN
+					RAISE EXCEPTION 'CANNOT FIND SPECIFIED PLUGIN PLAYLIST [id:%]',oPlaylist.id;
+				END IF;
+				RETURN;
+			END IF;
+			oPlaylist := oValue."oPlaylist";
+			DELETE FROM cues."tBinds" WHERE id IN(
+					SELECT b.id FROM unnest(oPlaylist."aItems") as i, cues."vBinds" b WHERE (i).id=b.id OR ((i).id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName")
+					UNION
+					SELECT b.id FROM cues."vBinds" b WHERE oPlaylist.id=b.id OR (oPlaylist.id=b."idSource" AND 'cues'=(b."oTableSource")."sSchema" AND 'tBinds'=(b."oTableSource")."sName")
+				);
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE;
+
+	CREATE OR REPLACE FUNCTION cues."fIsGameActual"(stitem pl."vPlayListResolved") RETURNS boolean AS
+		$BODY$
+		DECLARE
+			idAssets integer;
+			dtPLIStart timestamp with time zone;
+			dtMondayStart timestamp with time zone;
+			dtDayStart timestamp with time zone;
+			nHStart integer;
+			nMaxPerDay integer;
+			nHEndDay integer;
+			nD integer;
+			nH integer;
+			bRetVal boolean;
+			nVal integer;
+			nRemainsH double precision;
+			P integer;
+		BEGIN
+			IF stItem IS NULL THEN
+				RETURN false;
+			END IF;
+
+			dtPLIStart = stItem."dtStartPlanned";
+			IF dtPLIStart < '2018-11-22 13:00:00+03' OR dtPLIStart > '2019-01-01 13:00:00+03' THEN
+				RETURN false; -- ========= СТАРТ И СТОП ВСЕЙ ИГРЫ =========
+			END IF;
+			
+			SELECT "bIsActual" INTO bRetVal FROM logs."tGame" WHERE "idPlaylistItems" = stItem.id;
+			IF NOT bRetVal IS NULL THEN
+				RETURN bRetVal; -- уже ранее на этом PLI что-то решали
+			END IF;
+			IF dtPLIStart > now() + interval '1 hour' THEN
+				RETURN false; -- нас дёрнули слишком заранее - наверно бекап или вручную
+			END IF;
+			idAssets = stItem."idAssets";
+		RAISE NOTICE 'idA=%, dtS=%', idAssets, dtPLIStart;
+			nD = EXTRACT(DOW FROM (dtPLIStart)); -- текущий день недели у PLI
+			nH = EXTRACT(HOUR FROM (dtPLIStart)); -- текущий час у PLI
+			
+			-- ========= CONSTANTs =========
+			nHStart = 18; -- ежесуточный старт начала учёта игры (сколько плашек выйдет именно от этого часа)
+			nMaxPerDay = 12; -- целевой максимум выходов за сутки
+			nHEndDay = 13;
+			IF nD in (6, 0) THEN
+				nHEndDay = 18; -- ежесуточный конец дня (не включительно)
+			END IF;	
+
+			IF nH >= nHEndDay AND nH < nHStart THEN
+				RETURN false; -- необслуживаемый диапазон
+			END IF;
+
+			dtMondayStart = date_trunc('week', dtPLIStart) + nHStart * interval '1 hour'; -- 18 часов понедельника
+			SELECT id INTO nVal FROM logs."tGame" WHERE "idAssets" = idAssets AND "bIsActual" = true AND "dtStartPlanned" >= dtMondayStart LIMIT 1;
+		RAISE NOTICE 'dtM=%, nVal=%', dtMondayStart, nVal;
+			IF NOT nVal IS NULL THEN
+				RETURN false; -- этот ассет уже был в игре с понедельника
+			END IF;
+
+			dtDayStart = date_trunc('day', dtPLIStart) + nHStart * interval '1 hour';
+			IF nH < nHStart THEN
+				dtDayStart = dtDayStart - interval '1 day';
+			END IF;
+		RAISE NOTICE 'dtDStart=%, nH=%, nD=%', dtDayStart, nH, nD;
+
+			SELECT COUNT("bIsActual") INTO nVal FROM logs."tGame" WHERE "bIsActual" = true AND "dtStartPlanned" >= dtDayStart GROUP BY "bIsActual";
+			IF nVal IS NULL THEN
+				nVal = 0;
+			ELSIF nVal >= nMaxPerDay THEN
+				RETURN false; -- на сегодня превышено количество
+			END IF;
+			nVal = nMaxPerDay - nVal;
+			nRemainsH = EXTRACT(epoch FROM dtDayStart + interval '1 day' - dtPLIStart - (nHStart - nHEndDay) * interval '1 hour')/3600;
+		RAISE NOTICE 'nRemainQty=%, nRemHours=%', nVal, nRemainsH;
+
+			P = floor((60 * nRemainsH / nVal) / 3.5); -- вероятность - это 1/P; 3.5 - минут в среднем клип
+		RAISE NOTICE 'P=%', P;
+			IF nH in (0, 1, 2, 3, 4, 5, 6) THEN -- ========= НОЧНЫЕ ЧАСЫ + ВЕРОЯТНОСТЬ =========
+				P = P * 3; -- понижаем вероятность втрое ночью
+			END IF;
+			IF P <= 1  OR  2 = floor(random() * P  + 1) THEN -- розыгрыш успешный - даём плашку. floor(random()* (high-low + 1) + low);
+				INSERT INTO logs."tGame" ("idPlaylistItems", "idAssets", "dtStartPlanned", "bIsActual") VALUES (stItem.id, idAssets, dtPLIStart, true);
+				RETURN true;
+			ELSE
+				INSERT INTO logs."tGame" ("idPlaylistItems", "idAssets", "dtStartPlanned", "bIsActual") VALUES (stItem.id, idAssets, dtPLIStart, false);
+			END IF;
+
+			RETURN false;
+		END;
+		$BODY$
+		LANGUAGE plpgsql VOLATILE
+		COST 100;
+		ALTER FUNCTION cues."fIsGameActual"(pl."vPlayListResolved")
+		OWNER TO pgsql;

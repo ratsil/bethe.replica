@@ -405,6 +405,7 @@ namespace replica
                                                 {
                                                     ffmpeg.net.File.Input cFile = new ffmpeg.net.File.Input(Playlist.Preferences.cDefaultPlug.sFile, 0);  //d:\storages\clips\reflex_yaneborazbila_9.mov
                                                     Playlist.Preferences.cDefaultPlug.nFramesQTY = (int)cFile.nFramesQty;
+                                                    cFile.Close();
                                                     int nFrQty;
                                                     PlaylistItem cPlug, cPre= cPLIPrevious;
                                                     while (nDiff > Playlist.Preferences.nStartHardThresholdMs)

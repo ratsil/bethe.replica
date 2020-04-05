@@ -374,9 +374,9 @@ namespace helpers.replica.services.dbinteract {
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://replica/services/DBInteract.asmx/AssetsGet", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        System.IAsyncResult BeginAssetsGet(string sVideoTypeFilter, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginAssetsGet(helpers.replica.services.dbinteract.AssetsGetRequest request, System.AsyncCallback callback, object asyncState);
         
-        helpers.replica.services.dbinteract.Asset[] EndAssetsGet(System.IAsyncResult result);
+        helpers.replica.services.dbinteract.AssetsGetResponse EndAssetsGet(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://replica/services/DBInteract.asmx/ProgramsGet", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -938,7 +938,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class RegisteredTable : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1024,7 +1024,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class PluginPlaylistItem : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1111,7 +1111,7 @@ namespace helpers.replica.services.dbinteract {
     
     /// <remarks/>
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Class))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class IdNamePair : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1155,7 +1155,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Class : IdNamePair {
@@ -1166,7 +1166,7 @@ namespace helpers.replica.services.dbinteract {
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Advertisement))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Program))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Clip))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Asset : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1365,7 +1365,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Video : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1423,7 +1423,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class CustomValue : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1481,7 +1481,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class File : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1791,7 +1791,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Storage : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1891,7 +1891,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum Error {
         
@@ -1906,7 +1906,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum Status {
         
@@ -1924,7 +1924,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Type : object, System.ComponentModel.INotifyPropertyChanged {
@@ -1968,7 +1968,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum AssetType {
         
@@ -1983,21 +1983,21 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Design : Asset {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Advertisement : Asset {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Program : Asset {
@@ -2018,7 +2018,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class ClipsFragment : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2062,7 +2062,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Clip : Asset {
@@ -2195,7 +2195,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Person : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2253,7 +2253,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class SoundLevels : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2297,7 +2297,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Cues : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2397,7 +2397,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Playlist : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2484,7 +2484,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class MyInt : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2514,7 +2514,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class TimeRange : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2614,7 +2614,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class ChatInOut : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2658,7 +2658,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class AlterString : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2688,7 +2688,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Profile : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2732,7 +2732,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class AccessScope : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2777,7 +2777,7 @@ namespace helpers.replica.services.dbinteract {
     
     /// <remarks/>
     [System.FlagsAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum AccessScopePermissions {
         
@@ -2792,7 +2792,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class WebServiceError : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2864,7 +2864,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class TSRItem : object, System.ComponentModel.INotifyPropertyChanged {
@@ -2964,7 +2964,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum TSRType {
         
@@ -2979,7 +2979,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum Block {
         
@@ -2998,7 +2998,7 @@ namespace helpers.replica.services.dbinteract {
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(IngestProgram))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(IngestDesign))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(IngestClip))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Ingest : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3168,7 +3168,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class IngestAdvertisement : Ingest {
@@ -3231,7 +3231,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class IngestProgram : Ingest {
@@ -3280,7 +3280,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class IngestDesign : Ingest {
@@ -3343,7 +3343,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class IngestClip : Ingest {
@@ -3476,7 +3476,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class TransliterationPair : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3521,7 +3521,7 @@ namespace helpers.replica.services.dbinteract {
     
     /// <remarks/>
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(DBFilter))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class DBFiltersGroup : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3579,7 +3579,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum Binds {
         
@@ -3591,7 +3591,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class DBFilter : DBFiltersGroup {
@@ -3626,7 +3626,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum DBFiltersOperators {
         
@@ -3656,7 +3656,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class DBFilters : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3686,7 +3686,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class StoragesMappings : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3744,7 +3744,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Plaque : object, System.ComponentModel.INotifyPropertyChanged {
@@ -3830,7 +3830,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class PlaylistItem : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4126,7 +4126,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Message : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4254,7 +4254,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Announcement : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4312,7 +4312,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Shift : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4412,7 +4412,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class TemplatesSchedule : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4540,7 +4540,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class TemplateBind : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4640,7 +4640,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Template : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4698,7 +4698,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class DictionaryElement : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4784,7 +4784,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public partial class Macro : object, System.ComponentModel.INotifyPropertyChanged {
@@ -4954,6 +4954,49 @@ namespace helpers.replica.services.dbinteract {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="AssetsGet", WrapperNamespace="http://replica/services/DBInteract.asmx", IsWrapped=true)]
+    public partial class AssetsGetRequest {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://replica/services/DBInteract.asmx", Order=0)]
+        public string sVideoTypeFilter;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://replica/services/DBInteract.asmx", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public System.Nullable<AssetType> eAssetType;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://replica/services/DBInteract.asmx", Order=2)]
+        public uint nLimit;
+        
+        public AssetsGetRequest() {
+        }
+        
+        public AssetsGetRequest(string sVideoTypeFilter, System.Nullable<AssetType> eAssetType, uint nLimit) {
+            this.sVideoTypeFilter = sVideoTypeFilter;
+            this.eAssetType = eAssetType;
+            this.nLimit = nLimit;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="AssetsGetResponse", WrapperNamespace="http://replica/services/DBInteract.asmx", IsWrapped=true)]
+    public partial class AssetsGetResponse {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://replica/services/DBInteract.asmx", Order=0)]
+        public helpers.replica.services.dbinteract.Asset[] AssetsGetResult;
+        
+        public AssetsGetResponse() {
+        }
+        
+        public AssetsGetResponse(helpers.replica.services.dbinteract.Asset[] AssetsGetResult) {
+            this.AssetsGetResult = AssetsGetResult;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
     [System.ServiceModel.MessageContractAttribute(WrapperName="CustomsLoad", WrapperNamespace="http://replica/services/DBInteract.asmx", IsWrapped=true)]
     public partial class CustomsLoadRequest {
         
@@ -5022,7 +5065,7 @@ namespace helpers.replica.services.dbinteract {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3062.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.3752.0")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://replica/services/DBInteract.asmx")]
     public enum FileIsInPlaylist {
         
@@ -11677,22 +11720,39 @@ namespace helpers.replica.services.dbinteract {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        System.IAsyncResult helpers.replica.services.dbinteract.DBInteractSoap.BeginAssetsGet(string sVideoTypeFilter, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginAssetsGet(sVideoTypeFilter, callback, asyncState);
+        System.IAsyncResult helpers.replica.services.dbinteract.DBInteractSoap.BeginAssetsGet(helpers.replica.services.dbinteract.AssetsGetRequest request, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginAssetsGet(request, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        helpers.replica.services.dbinteract.Asset[] helpers.replica.services.dbinteract.DBInteractSoap.EndAssetsGet(System.IAsyncResult result) {
+        private System.IAsyncResult BeginAssetsGet(string sVideoTypeFilter, System.Nullable<AssetType> eAssetType, uint nLimit, System.AsyncCallback callback, object asyncState) {
+            helpers.replica.services.dbinteract.AssetsGetRequest inValue = new helpers.replica.services.dbinteract.AssetsGetRequest();
+            inValue.sVideoTypeFilter = sVideoTypeFilter;
+            inValue.eAssetType = eAssetType;
+            inValue.nLimit = nLimit;
+            return ((helpers.replica.services.dbinteract.DBInteractSoap)(this)).BeginAssetsGet(inValue, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        helpers.replica.services.dbinteract.AssetsGetResponse helpers.replica.services.dbinteract.DBInteractSoap.EndAssetsGet(System.IAsyncResult result) {
             return base.Channel.EndAssetsGet(result);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        private helpers.replica.services.dbinteract.Asset[] EndAssetsGet(System.IAsyncResult result) {
+            helpers.replica.services.dbinteract.AssetsGetResponse retVal = ((helpers.replica.services.dbinteract.DBInteractSoap)(this)).EndAssetsGet(result);
+            return retVal.AssetsGetResult;
         }
         
         private System.IAsyncResult OnBeginAssetsGet(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string sVideoTypeFilter = ((string)(inValues[0]));
-            return ((helpers.replica.services.dbinteract.DBInteractSoap)(this)).BeginAssetsGet(sVideoTypeFilter, callback, asyncState);
+            System.Nullable<AssetType> eAssetType = ((System.Nullable<AssetType>)(inValues[1]));
+            uint nLimit = ((uint)(inValues[2]));
+            return this.BeginAssetsGet(sVideoTypeFilter, eAssetType, nLimit, callback, asyncState);
         }
         
         private object[] OnEndAssetsGet(System.IAsyncResult result) {
-            helpers.replica.services.dbinteract.Asset[] retVal = ((helpers.replica.services.dbinteract.DBInteractSoap)(this)).EndAssetsGet(result);
+            helpers.replica.services.dbinteract.Asset[] retVal = this.EndAssetsGet(result);
             return new object[] {
                     retVal};
         }
@@ -11704,11 +11764,11 @@ namespace helpers.replica.services.dbinteract {
             }
         }
         
-        public void AssetsGetAsync(string sVideoTypeFilter) {
-            this.AssetsGetAsync(sVideoTypeFilter, null);
+        public void AssetsGetAsync(string sVideoTypeFilter, System.Nullable<AssetType> eAssetType, uint nLimit) {
+            this.AssetsGetAsync(sVideoTypeFilter, eAssetType, nLimit, null);
         }
         
-        public void AssetsGetAsync(string sVideoTypeFilter, object userState) {
+        public void AssetsGetAsync(string sVideoTypeFilter, System.Nullable<AssetType> eAssetType, uint nLimit, object userState) {
             if ((this.onBeginAssetsGetDelegate == null)) {
                 this.onBeginAssetsGetDelegate = new BeginOperationDelegate(this.OnBeginAssetsGet);
             }
@@ -11719,7 +11779,9 @@ namespace helpers.replica.services.dbinteract {
                 this.onAssetsGetCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnAssetsGetCompleted);
             }
             base.InvokeAsync(this.onBeginAssetsGetDelegate, new object[] {
-                        sVideoTypeFilter}, this.onEndAssetsGetDelegate, this.onAssetsGetCompletedDelegate, userState);
+                        sVideoTypeFilter,
+                        eAssetType,
+                        nLimit}, this.onEndAssetsGetDelegate, this.onAssetsGetCompletedDelegate, userState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -16855,16 +16917,16 @@ namespace helpers.replica.services.dbinteract {
                 return _result;
             }
             
-            public System.IAsyncResult BeginAssetsGet(string sVideoTypeFilter, System.AsyncCallback callback, object asyncState) {
+            public System.IAsyncResult BeginAssetsGet(helpers.replica.services.dbinteract.AssetsGetRequest request, System.AsyncCallback callback, object asyncState) {
                 object[] _args = new object[1];
-                _args[0] = sVideoTypeFilter;
+                _args[0] = request;
                 System.IAsyncResult _result = base.BeginInvoke("AssetsGet", _args, callback, asyncState);
                 return _result;
             }
             
-            public helpers.replica.services.dbinteract.Asset[] EndAssetsGet(System.IAsyncResult result) {
+            public helpers.replica.services.dbinteract.AssetsGetResponse EndAssetsGet(System.IAsyncResult result) {
                 object[] _args = new object[0];
-                helpers.replica.services.dbinteract.Asset[] _result = ((helpers.replica.services.dbinteract.Asset[])(base.EndInvoke("AssetsGet", _args, result)));
+                helpers.replica.services.dbinteract.AssetsGetResponse _result = ((helpers.replica.services.dbinteract.AssetsGetResponse)(base.EndInvoke("AssetsGet", _args, result)));
                 return _result;
             }
             

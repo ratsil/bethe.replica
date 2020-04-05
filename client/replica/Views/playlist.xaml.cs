@@ -288,8 +288,8 @@ namespace replica.sl
 		{
 			if (null == _ui_nudDaysBeforeQty)
 				return;
-			_ui_lblDaysBefore.Content = GetCorrectWordForm(g.Helper.sDays, _ui_nudDaysBeforeQty.Value.ToInt32());
-		}
+            _ui_lblDaysBefore.Content = g.Helper.sDays.GetWordInCorrectMaturity(_ui_nudDaysBeforeQty.Value.ToInt32());
+        }
 		private void Planned_Click(object sender, RoutedEventArgs e)
         {
             _dlgProgress.Show();
@@ -422,7 +422,7 @@ namespace replica.sl
 					if (0 == nHrsQty)
 						dlgRecalculate = new MsgBox(g.Replica.sNoticePlaylist1 + "?", g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
 					else if (0 < nHrsQty && 0 < nID)
-                        dlgRecalculate = new MsgBox(g.Replica.sNoticePlaylist2.Fmt(nHrsQty.ToStr(), GetCorrectWordForm(g.Helper.sHours, _ui_nudHoursQty.Value.ToInt32()), _cPlayListItemCurrent.sName), g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
+                        dlgRecalculate = new MsgBox(g.Replica.sNoticePlaylist2.Fmt(nHrsQty.ToStr(), g.Helper.sHours.GetWordInCorrectMaturity(_ui_nudHoursQty.Value.ToInt32()), _cPlayListItemCurrent.sName), g.Common.sAttention + "!", MsgBox.MsgBoxButton.OKCancel);
 					else
 					{
 						_dlgMsg.ShowError(g.Replica.sErrorPlaylist2);

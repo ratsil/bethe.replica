@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <preferences>
+	<replica>
+		<cues sleep="00:00:00.5" >
+			<!-- <commands sleep="00:00:00.3" /> -->
+		</cues>
+	</replica>
 	<helpers>
 		<common>
 			<database server="db.channel.replica" port="5432" name="replica" user="replica_cues" password="" timeout="240" />

@@ -110,7 +110,7 @@ namespace controls.childs.replica.sl
         new public void Show()
         {
             if (null == _ui_dgClips.Tag)
-                _cDBI.AssetsGetAsync(_sAssetType);
+                _cDBI.AssetsGetAsync(_sAssetType, null, 0);
             else
                 _cDBI_AssetsGetCompleted(null, null);
             base.Show();

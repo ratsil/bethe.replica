@@ -164,12 +164,22 @@ namespace scr.childs
 			if (_eType == Type.Images)
 				bIsImage = true;
 			aFiles = new List<LivePLItem>();
+            string[] aF;
             if (null != aStr)
                 foreach (string sFile in aStr)
-                    aFiles.Add(new LivePLItem(sFile, sFile, bIsImage));
+                {
+                    aF = sFile.Split(';');
+                    LivePLItem cLPLI = new LivePLItem(aF[0], aF[0], bIsImage);
+                    cLPLI.sModificationDate = aF.Length > 1 ? aF[1] : " ";
+                    aFiles.Add(cLPLI);
+
+                }
             _ui_dgFilesSCR.ItemsSource = new List<LivePLItem>();
-            _ui_dgFilesSCR.ItemsSource = aFiles;
-			LayoutRoot.Visibility = System.Windows.Visibility.Visible;
+            if (App.cPreferences.sFilesDefaultSort == "name")
+                _ui_dgFilesSCR.ItemsSource = aFiles.OrderBy(o => o.sName);
+            else
+                _ui_dgFilesSCR.ItemsSource = aFiles; // default sorting - by date desc
+            LayoutRoot.Visibility = System.Windows.Visibility.Visible;
 		}
 		private void OKButton_Click(object sender, RoutedEventArgs e)
 		{

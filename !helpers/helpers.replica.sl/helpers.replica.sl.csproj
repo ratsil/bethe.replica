@@ -159,6 +159,9 @@
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.Asset1.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.AssetsGetResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\services.dbinteract\helpers.replica.services.dbinteract.ChatInOut.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

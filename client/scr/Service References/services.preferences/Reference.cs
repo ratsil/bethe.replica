@@ -80,6 +80,10 @@ namespace scr.services.preferences {
         
         private int nFragmentAfterNowField;
         
+        private bool bIsWithCacheModeField;
+        
+        private string sFilesDefaultSortField;
+        
         [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false)]
         public scr.services.preferences.Preset[] aPresets {
             get {
@@ -219,6 +223,32 @@ namespace scr.services.preferences {
                 if ((this.nFragmentAfterNowField.Equals(value) != true)) {
                     this.nFragmentAfterNowField = value;
                     this.RaisePropertyChanged("nFragmentAfterNow");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=11)]
+        public bool bIsWithCacheMode {
+            get {
+                return this.bIsWithCacheModeField;
+            }
+            set {
+                if ((this.bIsWithCacheModeField.Equals(value) != true)) {
+                    this.bIsWithCacheModeField = value;
+                    this.RaisePropertyChanged("bIsWithCacheMode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=12)]
+        public string sFilesDefaultSort {
+            get {
+                return this.sFilesDefaultSortField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.sFilesDefaultSortField, value) != true)) {
+                    this.sFilesDefaultSortField = value;
+                    this.RaisePropertyChanged("sFilesDefaultSort");
                 }
             }
         }

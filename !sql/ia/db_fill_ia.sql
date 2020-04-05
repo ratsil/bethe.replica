@@ -7,9 +7,8 @@
 ----------------------------------- ia."tGateways"
     SELECT ia."fGatewayAdd"('тестовый');
 ----------------------------------- ia."tGatewayIPs"
-    SELECT ia."fGatewayIPAdd"('тестовый','213.243.85.167');
-    SELECT ia."fGatewayIPAdd"('тестовый','192.168.10.31');
-    SELECT ia."fGatewayIPAdd"('тестовый','192.168.10.12');
+    SELECT ia."fGatewayIPAdd"('тестовый','127.0.0.1');
+    SELECT ia."fGatewayIPAdd"('тестовый','192.168.0.1');
 ----------------------------------- ia."tNumbers"
 ----------------------------------- ia."tTexts"
 ----------------------------------- ia."tImages"

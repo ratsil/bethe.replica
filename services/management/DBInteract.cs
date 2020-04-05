@@ -519,11 +519,11 @@ namespace replica.management
 					}
 				}
 			}
-			catch //(Exception ex)
+			catch (Exception ex)
 			{
 				_cDB.TransactionRollBack();
-				//(new Logger()).WriteError(ex);
-			}
+                (new Logger()).WriteWarning("catch-1:  " + ex); 
+            }
 
 			int nRetVal = 0;
 			int nCount = 0;

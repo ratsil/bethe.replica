@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.IO.IsolatedStorage;
+using controls.childs.sl;
 
 using replica.sl;
 using controls.sl;
@@ -134,8 +136,10 @@ namespace controls.childs.replica.sl
             _ui_nudFramesQty.ValueChanged += _ui_nudFramesQty_ValueChanged;
 			bChangedByMe = false;
         }
+        private Progress _dlgProgress;
+        
 
-		private void _ui_nudFramesQty_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void _ui_nudFramesQty_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			if (_ui_lbClipsSelected.SelectedItem == null)
 				return;
@@ -172,21 +176,38 @@ namespace controls.childs.replica.sl
 					_ui_tmpDateTime.ValueChanged += _ui_tmpDateTime_ValueChanged;
 				}
         }
-
-		protected override void OnOpened()
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _dlgProgress.Show();
+            _dlgProgress.Close();
+        }
+        protected override void OnOpened()
 		{
-			base.OnOpened();
-			_ui_al.Init(controls.replica.sl.AssetsList.Tab.Clips);
+            base.OnOpened();
+            controls.replica.sl.AssetsList.Tab eDefault = controls.replica.sl.AssetsList.Tab.Clips;
+            if (IsolatedStorageSettings.ApplicationSettings.Contains("ac_default_tab"))
+                eDefault = (controls.replica.sl.AssetsList.Tab)IsolatedStorageSettings.ApplicationSettings["ac_default_tab"];
 			_ui_al.dgSelectionChanged = SelectionChanged;
 			_ui_al.dgDoubleClick = OnDoubleClick;
-			_ui_btnDelete.IsEnabled = false;
+            _ui_al.dgOnTabChanged = OnTabChanged;
+            _ui_al.Init(eDefault);
+            _ui_btnDelete.IsEnabled = false;
 			_ui_btnDown.IsEnabled = false;
 			_ui_btnUp.IsEnabled = false;
 			_ui_nudFramesQty.Minimum = 25;
 			_ui_nudFramesQty.IsEnabled = false;
             _ui_tbDuration.Text = "----";
-		}
-		private DateTime DateTimeGet()
+            _dlgProgress = new Progress();
+        }
+
+        private void OnTabChanged(controls.replica.sl.AssetsList.Tab eCurrentTab)
+        {
+            IsolatedStorageSettings.ApplicationSettings["ac_default_tab"] = eCurrentTab;
+            IsolatedStorageSettings.ApplicationSettings.Save();
+        }
+
+        private DateTime DateTimeGet()
 		{
 			DateTime dtD, dtT;
 			dtT = _ui_tmpDateTime.Value.Value;

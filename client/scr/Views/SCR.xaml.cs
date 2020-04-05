@@ -58,6 +58,7 @@ namespace scr
 				return new DBI.Plaque() { nID = cItem.nID, cPreset = cItem.cPreset, sFirstLine = cItem.sFirstLine, sSecondLine = cItem.sSecondLine, sName = cItem.sName };
 			}
 		}
+        public static bool _bIsWithCacheMode;
 		private Progress _dlgProgress;
 		private DBInteract _cDBI;
 		private PlayerSoapClient _cPlayer;
@@ -188,9 +189,10 @@ namespace scr
 					ui_ti.Name = cPreset.sName;
 				}
 
+                _bIsWithCacheMode = App.cPreferences.bIsWithCacheMode;
+                _ui_hlbtnCached.IsEnabled = _bIsWithCacheMode;
 
-
-				_aTemplateButtons = new TemplateButton[] {
+               _aTemplateButtons = new TemplateButton[] {
 					_ui_ctrTB_Credits,
 					_ui_ctrTB_Logo,
 					_ui_ctrTB_PlayList,
@@ -232,22 +234,7 @@ namespace scr
                 }
 
                 #region dbi
-                _cDBI = new DBInteract(App.cPreferences.sDBIServerName);  // "replica"
-                _cDBI.InitCompleted += new EventHandler<helpers.replica.services.dbinteract.InitCompletedEventArgs>(_cDBI_InitCompleted);
-				_cDBI.PlaquesGetCompleted += new EventHandler<PlaquesGetCompletedEventArgs>(_cDBI_PlaquesGetCompleted);
-				_cDBI.PlaqueAddCompleted += new EventHandler<PlaqueAddCompletedEventArgs>(_cDBI_PlaqueAddCompleted);
-				_cDBI.PlaqueDeleteCompleted += new EventHandler<PlaqueDeleteCompletedEventArgs>(_cDBI_PlaqueDeleteCompleted);
-				_cDBI.PlaqueChangeCompleted += new EventHandler<PlaqueChangeCompletedEventArgs>(_cDBI_PlaqueChangeCompleted);
-				_cDBI.ShiftAddCompleted += new EventHandler<ShiftAddCompletedEventArgs>(_cDBI_ShiftAddCompleted);
-				_cDBI.ShiftStartCompleted += new EventHandler<ShiftStartCompletedEventArgs>(_cDBI_ShiftStartCompleted);
-				_cDBI.ShiftStopCompleted += new EventHandler<ShiftStopCompletedEventArgs>(_cDBI_ShiftStopCompleted);
-				_cDBI.ShiftCurrentGetCompleted += new EventHandler<ShiftCurrentGetCompletedEventArgs>(_cDBI_ShiftCurrentGetCompleted);
-				_cDBI.NearestAdvertsBlockCompleted += new EventHandler<NearestAdvertsBlockCompletedEventArgs>(_cDBI_NearestAdvertsBlockCompleted);
-				_cDBI.PingCompleted += new EventHandler<PingCompletedEventArgs>(_cDBI_PingCompleted);
-				_cDBI.CuesGetCompleted += new EventHandler<CuesGetCompletedEventArgs>(_cDBI_CuesGetCompleted);
-				_cDBI.StorageSCRGetCompleted += new EventHandler<StorageSCRGetCompletedEventArgs>(_cDBI_StorageSCRGetCompleted);
-				_cDBI.ClipsBDLogCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_ClipsBDLogCompleted);
-				_cDBI.PLFragmentGetCompleted += _cDBI_PLFragmentGetCompleted;
+                ResetDBIAndHandlers();
                 #endregion
 
                 #region player
@@ -479,7 +466,7 @@ namespace scr
 
                 //_cCues.WriteNoticeAsync("DBI ");
                 _sCurrentVersion = (new System.Reflection.AssemblyName(System.Reflection.Assembly.GetExecutingAssembly().FullName)).Version.ToString();
-                _cDBI.InitAsync(App.cPreferences.sDBUser, App.cPreferences.sDBPasswd, "DO_NOT_CHECK_VERSION");
+                _cDBI.InitAsync(App.cPreferences.sDBUser, App.cPreferences.sDBPasswd, "DO_NOT_CHECK_VERSION", "from_constructor");
 
                 //(new MsgBox()).Show("assembly = "+ System.Reflection.Assembly.GetExecutingAssembly().FullName + "\nver = " + _sCurrentVersion);  
 
@@ -495,6 +482,43 @@ namespace scr
 			}
 		}
 
+        private void ResetDBIAndHandlers()
+        {
+            if (_cDBI != null)
+            {
+                _cDBI.InitCompleted -= _cDBI_InitCompleted;
+                _cDBI.PlaquesGetCompleted -= _cDBI_PlaquesGetCompleted;
+                _cDBI.PlaqueAddCompleted -= _cDBI_PlaqueAddCompleted;
+                _cDBI.PlaqueDeleteCompleted -= _cDBI_PlaqueDeleteCompleted;
+                _cDBI.PlaqueChangeCompleted -= _cDBI_PlaqueChangeCompleted;
+                _cDBI.ShiftAddCompleted -= _cDBI_ShiftAddCompleted;
+                _cDBI.ShiftStartCompleted -= _cDBI_ShiftStartCompleted;
+                _cDBI.ShiftStopCompleted -= _cDBI_ShiftStopCompleted;
+                _cDBI.ShiftCurrentGetCompleted -= _cDBI_ShiftCurrentGetCompleted;
+                _cDBI.NearestAdvertsBlockCompleted -= _cDBI_NearestAdvertsBlockCompleted;
+                _cDBI.PingCompleted -= _cDBI_PingCompleted;
+                _cDBI.CuesGetCompleted -= _cDBI_CuesGetCompleted;
+                _cDBI.StorageSCRGetCompleted -= _cDBI_StorageSCRGetCompleted;
+                _cDBI.ClipsBDLogCompleted -= _cDBI_ClipsBDLogCompleted;
+                _cDBI.PLFragmentGetCompleted -= _cDBI_PLFragmentGetCompleted;
+            }
+            _cDBI = new DBInteract(App.cPreferences.sDBIServerName);  // "replica"
+            _cDBI.InitCompleted += new EventHandler<helpers.replica.services.dbinteract.InitCompletedEventArgs>(_cDBI_InitCompleted);
+            _cDBI.PlaquesGetCompleted += new EventHandler<PlaquesGetCompletedEventArgs>(_cDBI_PlaquesGetCompleted);
+            _cDBI.PlaqueAddCompleted += new EventHandler<PlaqueAddCompletedEventArgs>(_cDBI_PlaqueAddCompleted);
+            _cDBI.PlaqueDeleteCompleted += new EventHandler<PlaqueDeleteCompletedEventArgs>(_cDBI_PlaqueDeleteCompleted);
+            _cDBI.PlaqueChangeCompleted += new EventHandler<PlaqueChangeCompletedEventArgs>(_cDBI_PlaqueChangeCompleted);
+            _cDBI.ShiftAddCompleted += new EventHandler<ShiftAddCompletedEventArgs>(_cDBI_ShiftAddCompleted);
+            _cDBI.ShiftStartCompleted += new EventHandler<ShiftStartCompletedEventArgs>(_cDBI_ShiftStartCompleted);
+            _cDBI.ShiftStopCompleted += new EventHandler<ShiftStopCompletedEventArgs>(_cDBI_ShiftStopCompleted);
+            _cDBI.ShiftCurrentGetCompleted += new EventHandler<ShiftCurrentGetCompletedEventArgs>(_cDBI_ShiftCurrentGetCompleted);
+            _cDBI.NearestAdvertsBlockCompleted += new EventHandler<NearestAdvertsBlockCompletedEventArgs>(_cDBI_NearestAdvertsBlockCompleted);
+            _cDBI.PingCompleted += new EventHandler<PingCompletedEventArgs>(_cDBI_PingCompleted);
+            _cDBI.CuesGetCompleted += new EventHandler<CuesGetCompletedEventArgs>(_cDBI_CuesGetCompleted);
+            _cDBI.StorageSCRGetCompleted += new EventHandler<StorageSCRGetCompletedEventArgs>(_cDBI_StorageSCRGetCompleted);
+            _cDBI.ClipsBDLogCompleted += new EventHandler<System.ComponentModel.AsyncCompletedEventArgs>(_cDBI_ClipsBDLogCompleted);
+            _cDBI.PLFragmentGetCompleted += _cDBI_PLFragmentGetCompleted;
+        }
         private void Content_Resized(object sender, EventArgs e)
 		{
 			this.Width = App.Current.Host.Content.ActualWidth;
@@ -533,20 +557,27 @@ namespace scr
             {
                 if (e.Result == null)  // || e.Result == "true"     убрать "true" после обновления web-a   // убрал
                 {
-					_cTimerForLinearPLFragmentGetting.Start();
+                    if (e.UserState == "from_constructor")
+                    {
+                        _cTimerForLinearPLFragmentGetting.Start();
 
-					string sWorkstationID = common.CookieGet("this_comp_id");
-					if (null == sWorkstationID || "" == sWorkstationID)
-					{
-						_nWorkstationID = DateTime.Now.Subtract(new DateTime(2011, 1, 1)).TotalMilliseconds.ToULong();
-						common.CookieSet("this_comp_id", _nWorkstationID.ToString());
-					}
-					else
-						_nWorkstationID = ulong.Parse(sWorkstationID);
-					_cPlayer.InitAsync(_nWorkstationID, _sCurrentVersion);
-					_dlgProgress.sInfo = g.SCR.sNotice3;
-					_cTimerForPingDBI.Start();
-				}
+                        string sWorkstationID = common.CookieGet("this_comp_id");
+                        if (null == sWorkstationID || "" == sWorkstationID)
+                        {
+                            _nWorkstationID = DateTime.Now.Subtract(new DateTime(2011, 1, 1)).TotalMilliseconds.ToULong();
+                            common.CookieSet("this_comp_id", _nWorkstationID.ToString());
+                        }
+                        else
+                            _nWorkstationID = ulong.Parse(sWorkstationID);
+                        _cPlayer.InitAsync(_nWorkstationID, _sCurrentVersion);
+                        _dlgProgress.sInfo = g.SCR.sNotice3;
+                        _cTimerForPingDBI.Start();
+                    }
+                    else if (e.UserState == "from_ping")
+                    {
+                        _cTimerForPingDBI.Start();
+                    }
+                }
                 else
                     _dlgMsgBox.ShowError(g.SCR.sError1 + "\n[res=" + e.Result + "]");
             }
@@ -647,16 +678,28 @@ namespace scr
 			{
                 if (null != e.Error)
                     throw e.Error;
-                if (!e.Result)  //TODO переделать на таймеры (если ответа нет за опред. время и т.п.)
-					_dlgMsgBox.ShowError(g.SCR.sError2.Fmt(Environment.NewLine));
+                if (!e.Result)  //TODO переделать на таймеры (если ответа нет за опред. время и т.п.) // да вродь норм пашет ))
+                {
+                    _dlgMsgBox.Closed += _dlgMsgBox_PingError_Closed;
+                    _dlgMsgBox.ShowError(g.SCR.sError2.Fmt(Environment.NewLine));
+                    return;
+                }
 			}
 			catch (Exception ex)
 			{
-				_dlgMsgBox.ShowError(g.SCR.sError3.Fmt(Environment.NewLine), ex);
-			}
-			_cTimerForPingDBI.Start();
+                _dlgMsgBox.Closed += _dlgMsgBox_PingError_Closed;
+                _dlgMsgBox.ShowError(g.SCR.sError3.Fmt(Environment.NewLine), ex);
+                return;
+            }
+            _cTimerForPingDBI.Start();
 		}
-		void _cDBI_CuesGetCompleted(object sender, CuesGetCompletedEventArgs e)
+        private void _dlgMsgBox_PingError_Closed(object sender, EventArgs e)
+        {
+            _dlgMsgBox.Closed -= _dlgMsgBox_PingError_Closed;
+            ResetDBIAndHandlers();
+            _cDBI.InitAsync(App.cPreferences.sDBUser, App.cPreferences.sDBPasswd, "DO_NOT_CHECK_VERSION", "from_ping");
+        }
+        void _cDBI_CuesGetCompleted(object sender, CuesGetCompletedEventArgs e)
 		{
 			try
 			{
@@ -2403,10 +2446,16 @@ namespace scr
                                     && (_ahCachedAssetIDs_StartPlanned[cT.nID] >= dtLimit || _ahCachedAssetIDs_StartPlanned[cT.nID] < DateTime.MinValue.AddYears(1));
             if (cT.bLocked)
             {
-                e.Row.Foreground = bInCache ? Coloring.SCR.cClipsRow_BlockedForegr : Coloring.SCR.cClipsRow_BlockedForegrNotCached;
+                e.Row.Foreground = Coloring.SCR.cClipsRow_BlockedForegr;
+                if (_bIsWithCacheMode)
+                    e.Row.Foreground = bInCache ? Coloring.SCR.cClipsRow_BlockedForegr : Coloring.SCR.cClipsRow_BlockedForegrNotCached;
             }
             else
-                e.Row.Foreground = bInCache ? Coloring.SCR.cClipsRow_NormalForegr : Coloring.SCR.cClipsRow_NormalForegrNotCached;
+            {
+                e.Row.Foreground = Coloring.SCR.cClipsRow_NormalForegr;
+                if (_bIsWithCacheMode)
+                    e.Row.Foreground = bInCache ? Coloring.SCR.cClipsRow_NormalForegr : Coloring.SCR.cClipsRow_NormalForegrNotCached;
+            }
         }
         void _ui_rpClips_IsOpenChanged(object sender, EventArgs e)
         {
@@ -2617,7 +2666,7 @@ namespace scr
                 {
                     _ui_cmClipsSCRAdd.Header = g.SCR.sNotice18 + ": \"" + ((IP.Clip)_ui_dgClipsSCR.SelectedItem).sName + "\"";
                     _ui_cmClipsSCRToCache.Header = g.SCR.sNotice44 + ": \"" + ((IP.Clip)_ui_dgClipsSCR.SelectedItem).sName + "\"";
-                    _ui_cmClipsSCRToCache.IsEnabled = true;
+                    _ui_cmClipsSCRToCache.IsEnabled = _bIsWithCacheMode;
                 }
                 else
                     _ui_cmClipsSCRAdd.Header = g.SCR.sNotice19 + ": " + _ui_dgClipsSCR.SelectedItems.Count + " items";
@@ -2679,12 +2728,13 @@ namespace scr
                 foreach (object objClip in _ui_dgClipsSCR.SelectedItems)
                 {
                     cIPC = (IP.Clip)objClip;
-                    if (!_ahCachedAssetIDs_StartPlanned.ContainsKey(cIPC.nID) 
-                        || (_ahCachedAssetIDs_StartPlanned[cIPC.nID] < dtLimit && _ahCachedAssetIDs_StartPlanned[cIPC.nID] > DateTime.MinValue.AddYears(1)))
-                    {
-                        _dlgMsgBox.ShowError(g.SCR.sError24.Fmt(Environment.NewLine));
-                        return;
-                    }
+                    if (_bIsWithCacheMode)
+                        if (!_ahCachedAssetIDs_StartPlanned.ContainsKey(cIPC.nID)
+                            || (_ahCachedAssetIDs_StartPlanned[cIPC.nID] < dtLimit && _ahCachedAssetIDs_StartPlanned[cIPC.nID] > DateTime.MinValue.AddYears(1)))
+                        {
+                            _dlgMsgBox.ShowError(g.SCR.sError24.Fmt(Environment.NewLine));
+                            return;
+                        }
                     aSelectedClips.Add(new LivePLItem(cIPC));
                 }
                 if (TemplateButton.Status.Started == _ui_ctrTB_PlayList.eStatus)
@@ -2833,7 +2883,7 @@ namespace scr
         {
             TemplateButton ui_tplb = (TemplateButton)sender;
             _cCues.WriteNoticeAsync("PlayListSkip: begin: [file = " + ui_tplb.sFile + "][pressed_by_user = " + ui_tplb.bPressedByUser + " ]");
-            if (_cLPLWatcher.cCurrentLPLItem.eType == PLIType.AdvBlockItem || _cLPLWatcher.cCurrentLPLItem.eType == PLIType.AdvBlock)
+            if (_cLPLWatcher.cCurrentLPLItem == null || _cLPLWatcher.cCurrentLPLItem.eType == PLIType.AdvBlockItem || _cLPLWatcher.cCurrentLPLItem.eType == PLIType.AdvBlock)
             {
                 _dlgMsgBox.ShowAttention(g.SCR.sNotice20);
                 ui_tplb.SkippingCancel();

@@ -111,6 +111,7 @@
     <Content Include="api.aspx" />
     <Content Include="js\api.js" />
     <Content Include="js\common.js" />
+    <Content Include="ia\chat.aspx" />
     <Content Include="social.aspx" />
     <Content Include="images\social_fb.png" />
     <Content Include="images\social_tt.png" />
@@ -143,7 +144,6 @@
     <Content Include="index.aspx" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
-    <None Include="Properties\PublishProfiles\replica-debug.pubxml" />
     <None Include="Properties\PublishProfiles\replica-local.pubxml" />
     <None Include="Properties\PublishProfiles\replica-release.pubxml" />
     <None Include="services\.htaccess" />
@@ -173,11 +173,16 @@
     <Compile Include="ia\messages.aspx.designer.cs">
       <DependentUpon>messages.aspx</DependentUpon>
     </Compile>
-    <Compile Include="lib\social\OAuth.cs" />
     <Compile Include="api.aspx.cs">
       <DependentUpon>api.aspx</DependentUpon>
+    <Compile Include="ia\chat.aspx.cs">
+      <DependentUpon>chat.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="ia\chat.aspx.designer.cs">
+      <DependentUpon>chat.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="lib\social\OAuth.cs" />
     <Compile Include="social.aspx.cs">
       <DependentUpon>social.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -340,7 +345,7 @@
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/dev</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
-          <IISAppRootUrl>http://replica/</IISAppRootUrl>
+          <IISAppRootUrl>http://replica</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>http://127.0.0.1/</CustomServerUrl>

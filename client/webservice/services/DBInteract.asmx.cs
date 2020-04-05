@@ -666,28 +666,28 @@ namespace webservice.services
 		}
 
 		[WebMethod(EnableSession = true)]
-		new public Asset[] AssetsGet(string sVideoTypeFilter)
+		public Asset[] AssetsGet(string sVideoTypeFilter, Asset.Type.AssetType? eAssetType , uint nLimit)
 		{
 			try
 			{
 				IdNamePair cVideoTypeFilter = null;
 				if (null != sVideoTypeFilter && 0 < sVideoTypeFilter.Length)
 					cVideoTypeFilter = new IdNamePair(webservice.Preferences.cDBKeysMap.GetValueByKey(DBKeysMap.MapClass.asset_videotype, sVideoTypeFilter));
-				List<Asset> aAssets = base.AssetsGet(cVideoTypeFilter).ToList();
-				if (null == sVideoTypeFilter || "clip" == sVideoTypeFilter)
-				{
-					List<Clip> aClips = base.ClipsGet().ToList();
-					Clip cClip;
-					for (int nI = 0; aAssets.Count > nI; nI++)
-					{
-						if (null != (cClip = aClips.FirstOrDefault(o => o.nID == aAssets[nI].nID)))
-						{
-							aClips.Remove(cClip);
-							aAssets[nI] = cClip;
-						}
-					}
-				}
-				return aAssets.ToArray();
+				List<Asset> aAssets = base.AssetsGet(cVideoTypeFilter, eAssetType, nLimit).ToList();
+                //if (null == sVideoTypeFilter || "clip" == sVideoTypeFilter)  // this work the "Asset AssetGet(Hashtable ahValues)" does inside previous line
+                //{
+                //	List<Clip> aClips = base.ClipsGet().ToList();
+                //	Clip cClip;
+                //	for (int nI = 0; aAssets.Count > nI; nI++)
+                //	{
+                //		if (null != (cClip = aClips.FirstOrDefault(o => o.nID == aAssets[nI].nID)))
+                //		{
+                //			aClips.Remove(cClip);
+                //			aAssets[nI] = cClip;
+                //		}
+                //	}
+                //}
+                return aAssets.ToArray();
 			}
 			catch (Exception ex)
 			{
@@ -744,7 +744,7 @@ namespace webservice.services
 		public Asset[] AdvertisementsGet()
 		{
 			Asset[] aRetVal = null;
-			Queue<helpers.replica.mam.Asset> aqAssets = base.AssetsGet(new IdNamePair(webservice.Preferences.cDBKeysMap.GetValueByKey(DBKeysMap.MapClass.asset_videotype, "advertisement")));
+			Queue<helpers.replica.mam.Asset> aqAssets = base.AssetsGet(new IdNamePair(webservice.Preferences.cDBKeysMap.GetValueByKey(DBKeysMap.MapClass.asset_videotype, "advertisement")), null, 0);
 			if (null != aqAssets)
                 aRetVal = aqAssets.ToArray();
 			return aRetVal;
@@ -759,8 +759,8 @@ namespace webservice.services
 		public Asset[] DesignsGet()
 		{
 			Asset[] aRetVal = null;
-			Queue<helpers.replica.mam.Asset> aqAssets = base.AssetsGet(new IdNamePair(webservice.Preferences.cDBKeysMap.GetValueByKey(DBKeysMap.MapClass.asset_videotype, "design")));
-			if (null != aqAssets)
+			Queue<helpers.replica.mam.Asset> aqAssets = base.AssetsGet(new IdNamePair(webservice.Preferences.cDBKeysMap.GetValueByKey(DBKeysMap.MapClass.asset_videotype, "design")), null, 0);
+            if (null != aqAssets)
                 aRetVal = aqAssets.ToArray();
 			return aRetVal;
 		}
@@ -1494,10 +1494,18 @@ namespace webservice.services
 			Dictionary<string, string> ahVICodes_Names = aFilenames.ToDictionary(o => TSRItem.VICodeGet(o), o => o);
             List<string> aFilesTMP = ahVICodes_Names.Keys.ToList();
             List<TSRItem> aTSRIs = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, ahVICodes_Names.Keys.ToList());
-			foreach (TSRItem cTSRI in aTSRIs)
+            List<TSRItem> aRetVal = new List<TSRItem>();
+
+            foreach (TSRItem cTSRI in aTSRIs)
 			{
-				cTSRI.oTag = ahVICodes_Names[cTSRI.sVI_Code];
-                aFilesTMP.Remove(cTSRI.sVI_Code);
+                if (ahVICodes_Names.ContainsKey(cTSRI.sVI_Code))
+                {
+                    cTSRI.oTag = ahVICodes_Names[cTSRI.sVI_Code];
+                    aFilesTMP.Remove(cTSRI.sVI_Code);
+                    aRetVal.Add(cTSRI);
+                }
+                else
+                    WebServiceError.Add(_cSI, "[TSRItemsGet: strange vicode: '"+ cTSRI.sVI_Code + "'][user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
             }
             if (!aFilesTMP.IsNullOrEmpty())
             {
@@ -1505,10 +1513,15 @@ namespace webservice.services
                 List<TSRItem> aTSRIs2 = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, aFilesTMP2);
                 foreach (TSRItem cTSRI in aTSRIs2)
                 {
-                    cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
-                    aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                    if (ahVICodes_Names.ContainsKey(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)))
+                    {
+                        cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
+                        aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                        aRetVal.Add(cTSRI);
+                    }
+                    else
+                        WebServiceError.Add(_cSI, "[TSRItemsGet: strange vicode: '" + cTSRI.sVI_Code + "'][user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
                 }
-                aTSRIs.AddRange(aTSRIs2);
             }
             if (!aFilesTMP.IsNullOrEmpty())
             {
@@ -1516,12 +1529,17 @@ namespace webservice.services
                 List<TSRItem> aTSRIs3 = TSRItem.ItemsGetByVICodes(webservice.Preferences.sTSRConnection, aFilesTMP3);
                 foreach (TSRItem cTSRI in aTSRIs3)
                 {
-                    cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
-                    aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                    if (ahVICodes_Names.ContainsKey(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)))
+                    {
+                        cTSRI.oTag = ahVICodes_Names[SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code)];
+                        aFilesTMP.Remove(SIO.Path.GetFileNameWithoutExtension(cTSRI.sVI_Code));
+                        aRetVal.Add(cTSRI);
+                    }
+                    else
+                        WebServiceError.Add(_cSI, "[TSRItemsGet: strange vicode: '" + cTSRI.sVI_Code + "'][user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
                 }
-                aTSRIs.AddRange(aTSRIs3);
             }
-            return aTSRIs.ToArray();
+            return aRetVal.ToArray();
 		}
         [WebMethod(EnableSession = true)]
         public bool IngestForReplacedFile(File cFile)
@@ -2262,7 +2280,7 @@ namespace webservice.services
                         aRetVal.Add(cID);
                         continue;
                     }
-                    base.PlaylistItemUncahe(cID.nID);
+                    base.PlaylistItemUncache(cID.nID);
                     if (!base.PlaylistItemDelete(cID.nID))
 						aRetVal.Add(cID);
 				}
@@ -2771,7 +2789,7 @@ namespace webservice.services
 				catch (Exception ex)
 				{
 					WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
-					throw new Exception("can't find one of the intermediate PLs");
+					throw new Exception(" can't find one of the intermediate PLs 1");
 				}
 				PlaylistImport cPlaylistImport = new PlaylistImport(this);
 				aRetVal = cPlaylistImport.PlaylistsMerge(aqPGPL, cVIPL, dtAdvertisementBind, ahDsgnPL);

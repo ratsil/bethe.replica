@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Navigation;
+using System.IO.IsolatedStorage;
 
 using controls.sl;
 using controls.childs.sl;
@@ -37,15 +38,23 @@ namespace replica.sl
             _ui_rpPersons.IsOpenChanged += _ui_rpPersons_IsOpenChanged;
 
 			_ui_rpAssets.IsOpen = true;
-			_ui_al.Init(AssetsList.Tab.Clips); 
-
+            controls.replica.sl.AssetsList.Tab eDefault = controls.replica.sl.AssetsList.Tab.Clips;
+            if (IsolatedStorageSettings.ApplicationSettings.Contains("a_default_tab"))
+                eDefault = (controls.replica.sl.AssetsList.Tab)IsolatedStorageSettings.ApplicationSettings["a_default_tab"];
+            _ui_al.dgOnTabChanged = OnTabChanged;
+            _ui_al.Init(eDefault);
             _ui_rpMedia.IsOpen = false;
             _ui_rpPersons.IsOpen = false;
         }
-		#region event handlers
-		#region UI
-		// Executes when the user navigates to this page.
-		protected override void OnNavigatedTo(NavigationEventArgs e)
+        #region event handlers
+        private void OnTabChanged(controls.replica.sl.AssetsList.Tab eCurrentTab)
+        {
+            IsolatedStorageSettings.ApplicationSettings["a_default_tab"] = eCurrentTab;
+            IsolatedStorageSettings.ApplicationSettings.Save();
+        }
+        #region UI
+        // Executes when the user navigates to this page.
+        protected override void OnNavigatedTo(NavigationEventArgs e)
 		{
 		}
 		private void _ui_rpAssets_Loaded(object sender, RoutedEventArgs e)
@@ -66,7 +75,11 @@ namespace replica.sl
             {
                 _ui_rpMedia.IsOpen = false;
                 _ui_rpPersons.IsOpen = false;
-                _ui_al.Init(AssetsList.Tab.Clips);
+
+                controls.replica.sl.AssetsList.Tab eDefault = controls.replica.sl.AssetsList.Tab.Clips;
+                if (IsolatedStorageSettings.ApplicationSettings.Contains("a_default_tab"))
+                    eDefault = (controls.replica.sl.AssetsList.Tab)IsolatedStorageSettings.ApplicationSettings["a_default_tab"];
+                _ui_al.Init(eDefault);
             }
         }
         void _ui_rpMedia_IsOpenChanged(object sender, EventArgs e)

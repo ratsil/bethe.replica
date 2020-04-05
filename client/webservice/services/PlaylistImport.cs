@@ -559,7 +559,7 @@ namespace webservice.services
                 Queue<Asset> aqDesignAssets = null;
 				TimeSpan tsBlockTime = TimeSpan.MinValue, ts;
 				TimeSpan tsPrevBlockTime = TimeSpan.MinValue;
-				string sTime, sText, sNote;
+				string sTime, sText, sNote, sText2;
 				int nBlockExcelStart, nBlockAdvertisementStart;
 				Asset cAsset = null;
 
@@ -575,7 +575,8 @@ namespace webservice.services
 						continue;
 					sTime = aRow[0].ToString().Trim();
 					sText = aRow[1].ToString().Trim();
-					sNote = aRow[5].ToString().Trim();
+                    sText2 = aRow[3].ToString().Trim();
+                    sNote = aRow[5].ToString().Trim();
 					if (1 > sTime.Length && 1 > sText.Length && 1 > sNote.Length)
 						continue;
 					if ("Клипы" == sText)
@@ -676,7 +677,9 @@ namespace webservice.services
 					if (null == cAsset)
 						continue;
 
-					aqDesignAssets.Enqueue(cAsset);
+                    if (!sText2.IsNullOrEmpty())
+                        cAsset.oTag = ahAssetsNamesBinds.ContainsKey(sText2) ? ahAssetsNamesBinds[sText2] : null;
+                    aqDesignAssets.Enqueue(cAsset);
 				}
 				if (null != aqDesignAssets)
 					ahRetVal[tsBlockTime] = aqDesignAssets;
@@ -694,7 +697,8 @@ namespace webservice.services
 			List<PlaylistItem> aRetVal = new List<PlaylistItem>();
 			long nFramesQty = 0;
 			PlaylistItem cPLI = new PlaylistItem();
-			cNewLastPLI = null;
+            PlaylistItem cPLITmp;
+            cNewLastPLI = null;
             bool bAdvertisementBlockStopped = false;
 			string sVIBlockType, sVIBlockCover;
 			Asset cVIMark = VIMarkGet();
@@ -748,6 +752,17 @@ namespace webservice.services
 								cPLI.cAsset = cVIPL.BlockAssetDequeue(tsDesignBlockStart, sVIBlockType, sVIBlockCover);
 								if (null == cPLI.cAsset)
 									continue;
+                                if (sVIBlockType == "спонсор часа" && aRetVal.Count > 1 && (cPLITmp = aRetVal[aRetVal.Count - 1]).cAsset.oTag != null && cPLITmp.cAsset.oTag is Asset)
+                                {
+                                    nFramesQty -= cPLITmp.nFramesQty;
+                                    cPLI.dtStartPlanned = cPLI.dtStartPlanned.AddMilliseconds(-cPLITmp.nFramesQty * 40);
+                                    cPLITmp.cAsset = (Asset)cPLITmp.cAsset.oTag;
+                                    cPLITmp.sName = cPLITmp.cAsset.sName;
+                                    cPLITmp.nFramesQty = cPLITmp.cAsset.nFramesQty;
+                                    cPLI.dtStartPlanned = cPLI.dtStartPlanned.AddMilliseconds(cPLITmp.nFramesQty * 40);
+                                    CheckFileIsOk(cPLITmp.cAsset.cFile);
+                                    nFramesQty += cPLITmp.nFramesQty;
+                                }
 								cPLI.sName = cPLI.cAsset.sName;
 								cPLI.nFramesQty = cPLI.cAsset.nFramesQty;
 								dtPLIStart = cPLI.dtStartHardSoft.AddSeconds(1);
@@ -797,6 +812,12 @@ namespace webservice.services
 				}
 				else
 				{
+                    if (0 < aRetVal.Count 
+                        && aRetVal[aRetVal.Count - 1].sName.Replace("  ", " ").ToLower().StartsWith(sBumperOutNameBeginning) 
+                        && cPLI.sName.Replace("  ", " ").ToLower().StartsWith(sBumperOutNameBeginning))
+                    {
+                        continue;
+                    }
 					if (0 < cPLI.nFramesQty)
 					{
 						CheckFileIsOk(cPLI.cAsset.cFile);
@@ -847,7 +868,7 @@ namespace webservice.services
 			_ahAllAssets = null;
 			List<PlaylistItem> aRetVal = null;
 			if (null == aqPGPL || null == cVIPL || null == ahDsgnPL)
-				throw new Exception("can't find one of the intermediate PLs");
+				throw new Exception(" can't find one of the intermediate PLs 2");
 			aRetVal = new List<PlaylistItem>();
 			PlaylistItem cPLI = new PlaylistItem();
 

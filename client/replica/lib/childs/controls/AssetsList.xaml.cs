@@ -42,6 +42,8 @@ namespace controls.replica.sl
 				set
 				{
 					Dictionary<long, AssetSL> aID_Parent = new Dictionary<long, AssetSL>();
+                    if (value != null)
+                    {
 					foreach (AssetSL cAss in value)
 						if (null != cAss && null != cAss.cType && cAss.cType.eType != AssetType.part)
 						{
@@ -63,6 +65,7 @@ namespace controls.replica.sl
                                 aErrorChilds.Add(cAss.sName);
                             }
 					}
+                    }
 					_aAssetsOriginal = value;
 					MsgBox _dlgErr;
 					if (0 < aErrorChilds.Count)
@@ -146,10 +149,13 @@ namespace controls.replica.sl
         private Tab _eTabDefault;
 		private List<Tab> _aTabs;
 		private TabInnerHierarchy _cCurrentProgramHierarchy;
+        private Dictionary<Tab, AssetSL[]> _ahTab_Assets;
 		public delegate void OnDoubleClick(AssetSL cAssetSL);
 		public OnDoubleClick dgDoubleClick;
 		public delegate void dgSelectionChangedCallback(List<AssetSL> cAssetSelected);
         public dgSelectionChangedCallback dgSelectionChanged;
+        public delegate void dgTabChangedCallback(Tab eCurrentTab);
+        public dgTabChangedCallback dgOnTabChanged;
         public bool bReadOnly = false;
         public DataGridSelectionMode eDataGridSelectionMode
         {
@@ -179,9 +185,10 @@ namespace controls.replica.sl
 				_cDBI.ProgramsGetCompleted += new EventHandler<ProgramsGetCompletedEventArgs>(_cDBI_ProgramsGetCompleted);
 				_cDBI.AssetsParentAssignCompleted += new EventHandler<AssetsParentAssignCompletedEventArgs>(_cDBI_AssetsParentAssignCompleted);
 
+                _ahTab_Assets = new Dictionary<Tab, AssetSL[]>();
 				_aTabs = new List<Tab>();
 				_aTabs.AddRange(Enum.GetValues(typeof(Tab)));
-				_eTabDefault = Tab.Clips;
+				//_eTabDefault = Tab.Clips;
 				_cCurrentProgramHierarchy = new TabInnerHierarchy();
 
 				App.Current.Host.Content.Resized += new EventHandler(BrowserWindow_Resized);
@@ -193,15 +200,17 @@ namespace controls.replica.sl
 				_ui_Search.sCaption = g.Helper.sAssetSearch.ToLower() + ":";
 				_ui_Search.sDisplayMemberPath = "sName";
 				_ui_Search.DataContext = _ui_dgAssets;
+                //_ui_Search.nMaxItemsInListOrTable = 200;
 
-				_cAssetCurrent = null;
+                _cAssetCurrent = null;
 				_nIDAssetToScrollTo = -1;
 				_nSortedColumn = 0;
 				_cCurrent_dgAssetsSortState = new DataGridsSortState() { sHeaderName = g.Common.sName, bBackward = false, sBindingPath = "sName" }; // сортировка по умолчанию.
 
 				_ui_tpClips.Tag = "clip";
 				_ui_tpAdvertisement.Tag = "advertisement";
-			_ui_tpPrograms.Tag = (Action)_cDBI.ProgramsGetAsync;
+                // _ui_tpPrograms.Tag = (Action)_cDBI.ProgramsGetAsync;
+                _ui_tpPrograms.Tag = "program";
 				_ui_tpDesign.Tag = "design";
 
 				_ui_btnBack.Visibility = System.Windows.Visibility.Collapsed;
@@ -410,9 +419,10 @@ namespace controls.replica.sl
 		}
 		private void _ui_tcAssets_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+
             if (null != _ui_dgAssets)
             {
-                _dlgProgress.Show();
+                //_dlgProgress.Show();
 
 				if (_eTabCurrent == Tab.Programs && 1 == _cCurrentProgramHierarchy.nLevel)
 					_cCurrent_dgAssetsSortState.bBackward = true;
@@ -430,12 +440,23 @@ namespace controls.replica.sl
 					if (ui_ti.Tag is Action)
 						((Action)ui_ti.Tag)();
 					else
-						_cDBI.AssetsGetAsync(VideoTypeNameGet(_eTabCurrent));
+                    {
+                        if (sender != null && _ahTab_Assets.ContainsKey(_eTabCurrent)) // !refresh && contains
+                            AssetsGetCompletedRefresh(_ahTab_Assets[_eTabCurrent]);
+                        else
+                        {
+                            if (_ui_dgAssets.ItemsSource != null)
+                                AssetsGetCompletedRefresh(null);
+                            _cDBI.AssetsGetAsync(VideoTypeNameGet(_eTabCurrent), null, 0, _eTabCurrent);
+                        }
+                    }
+
+                    dgOnTabChanged(_eTabCurrent);
 				}
                 else
                 {
 					_ui_btnAdd.Visibility = System.Windows.Visibility.Collapsed;
-					_cDBI.AssetsGetAsync(null);
+					_cDBI.AssetsGetAsync(null, null, 0);
                 }
             }
 		}
@@ -1138,6 +1159,9 @@ namespace controls.replica.sl
 		{
 			_ui_dgAssets.Tag = aAssets;
 			_ui_dgAssets.ItemsSource = aAssets;
+            if (aAssets.IsNullOrEmpty())
+                return;
+
 			_ui_Search.DataContextUpdateInitial();
 			//_ui_Search.Search();
 			_ui_dgAssets.UpdateLayout();
@@ -1151,11 +1175,34 @@ namespace controls.replica.sl
 		}
 		void _cDBI_AssetsGetCompleted(object sender, AssetsGetCompletedEventArgs e)
 		{
-			try
-			{
-				if (null == e || null == e.Result)
-					throw new NullReferenceException();
-				ColumnsPrepare(_eTabCurrent);
+            try
+            {
+                if (null == e || null == e.Result)
+                    throw new NullReferenceException();
+
+                AssetSL[] aRes = AssetSL.GetArrayOfAssetSLs(e.Result);
+                Tab eT = (Tab)e.UserState;
+                _ahTab_Assets[eT] = aRes;
+
+                if (eT == _eTabCurrent)
+                {
+                    AssetsGetCompletedRefresh(aRes);
+                }
+                //_dlgProgress.Close();
+                _ui_dgAssets.Focus();
+            }
+            catch { }
+        }
+        void AssetsGetCompletedRefresh(AssetSL[] aAssets)
+        {
+            if (_eTabCurrent == Tab.Programs)
+            {
+                _cCurrentProgramHierarchy.aAssetsOriginal = aAssets;
+                ProgramsShow();
+            }
+            else
+            {
+                ColumnsPrepare(_eTabCurrent);
                 if (_eTabCurrent == Tab.Clips)
                 {
                     _ui_Search.sDisplayMemberPath = "sCuesName";
@@ -1166,12 +1213,8 @@ namespace controls.replica.sl
                     _ui_Search.sDisplayMemberPath = "sName";
                     _ui_Search.aAdditionalSearchFields = new string[2] { "nID", "sFilename" };
                 }
-                AssetSL[] aRes = AssetSL.GetArrayOfAssetSLs(e.Result);
-				AssetsListRefresh(aRes);
+                AssetsListRefresh(aAssets);
             }
-			catch { }
-			_dlgProgress.Close();
-			_ui_dgAssets.Focus();
 		}
         void _cDBI_AssetsRemoveCompleted(object sender, AssetsRemoveCompletedEventArgs e)
 		{
@@ -1228,7 +1271,7 @@ namespace controls.replica.sl
 				ProgramsShow();
 			}
 			catch { }
-			_dlgProgress.Close();
+			//_dlgProgress.Close();
 			_ui_dgAssets.Focus();
 		}
 		void ProgramsShow()
@@ -1255,6 +1298,11 @@ namespace controls.replica.sl
 					_nIDAssetToScrollTo = -1;
 				}
 			}
+            else
+            {
+                _ui_dgAssets.Tag = null;
+                _ui_dgAssets.ItemsSource = null;
+            }
 		}
 		AssetSL[] ProgramsFilter(AssetSL[] aAss)
 		{

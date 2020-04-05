@@ -10,10 +10,10 @@
 		) 
 		WITHOUT OIDS;
 	CREATE TRIGGER "HKManagement"
-			BEFORE INSERT OR UPDATE OR DELETE
-			ON cues."tTemplates"
-			FOR EACH ROW
-			EXECUTE PROCEDURE hk."fManagement"();
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON cues."tTemplates"
+		FOR EACH ROW
+		EXECUTE PROCEDURE hk."fManagement"();
 ----------------------------------- cues."tClassAndTemplateBinds"
 	CREATE TABLE cues."tClassAndTemplateBinds"
 		(
@@ -31,10 +31,10 @@
 		)
 		WITHOUT OIDS;
 	CREATE TRIGGER "HKManagement"
-			BEFORE INSERT OR UPDATE OR DELETE
-			ON cues."tClassAndTemplateBinds"
-			FOR EACH ROW
-			EXECUTE PROCEDURE hk."fManagement"();
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON cues."tClassAndTemplateBinds"
+		FOR EACH ROW
+		EXECUTE PROCEDURE hk."fManagement"();
 ----------------------------------- cues."tTemplatesSchedule"
 	CREATE TABLE cues."tTemplatesSchedule"
 		(
@@ -50,10 +50,10 @@
 		) 
 		WITHOUT OIDS;
 	CREATE TRIGGER "HKManagement"
-			BEFORE INSERT OR UPDATE OR DELETE
-			ON cues."tTemplatesSchedule"
-			FOR EACH ROW
-			EXECUTE PROCEDURE hk."fManagement"();
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON cues."tTemplatesSchedule"
+		FOR EACH ROW
+		EXECUTE PROCEDURE hk."fManagement"();
 ----------------------------------- cues."tDictionary"
 	CREATE TABLE cues."tDictionary"
 		(
@@ -85,8 +85,7 @@
 		)
 		WITHOUT OIDS;
 
-
-		------------------------------------ cues."tBindTypes"
+----------------------------------- cues."tBindTypes"
 	CREATE TABLE cues."tBindTypes"
 		(
 			id serial PRIMARY KEY,
@@ -97,7 +96,7 @@
 			UNIQUE("idTableSource", "sName")
 		) 
 		WITHOUT OIDS;
-		------------------------------------ cues."tBinds"
+----------------------------------- cues."tBinds"
 	CREATE TABLE cues."tBinds"
 		(
 			id bigserial PRIMARY KEY,
@@ -107,7 +106,7 @@
 			FOREIGN KEY ("idBindTypes") REFERENCES cues."tBindTypes" (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 		) 
 		WITHOUT OIDS;
-		------------------------------------ cues."tStrings"
+----------------------------------- cues."tStrings"
 	CREATE TABLE cues."tStrings"
 		(
 			id bigserial PRIMARY KEY,
@@ -116,12 +115,12 @@
 		) 
 		WITHOUT OIDS;
 	CREATE TRIGGER "cues_tStrings_fDictionary"
-			BEFORE INSERT OR UPDATE OR DELETE
-			ON cues."tStrings"
-			FOR EACH ROW
-			EXECUTE PROCEDURE "fDictionary"();
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON cues."tStrings"
+		FOR EACH ROW
+		EXECUTE PROCEDURE "fDictionary"();
 
-		------------------------------------ cues."tTimestamps"
+----------------------------------- cues."tTimestamps"
 	CREATE TABLE cues."tTimestamps"
 		(
 			id bigserial PRIMARY KEY,
@@ -130,14 +129,14 @@
 		) 
 		WITHOUT OIDS;
 	CREATE TRIGGER "cues_tTimestamps_fDictionary"
-			BEFORE INSERT OR UPDATE OR DELETE
-			ON cues."tTimestamps"
-			FOR EACH ROW
-			EXECUTE PROCEDURE "fDictionary"();
-		----------------------------------- cues."tPlugins"
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON cues."tTimestamps"
+		FOR EACH ROW
+		EXECUTE PROCEDURE "fDictionary"();
+----------------------------------- cues."tPlugins"
 	CREATE TABLE cues."tPlugins"
-		(
-			id serial PRIMARY KEY,
-			"sName" name UNIQUE
-		) 
-		WITHOUT OIDS;
+	(
+		id serial PRIMARY KEY,
+		"sName" name UNIQUE
+	) 
+	WITHOUT OIDS;

@@ -331,7 +331,7 @@ namespace helpers.replica
 						sSQL += " FROM ";
 
 					if (null == cPLI.cAsset)
-						sSQL += "pl.`fItemAddAsFile`(" + cPLI.cFile.nID + "," + cPLI.nFramesQty + "," + cPLI.cAsset.aClasses.ToNamesArrayForDB() + sStart + ");";
+						sSQL += "pl.`fItemAddAsFile`(" + cPLI.cFile.nID + "," + cPLI.nFramesQty + "," + cPLI.aClasses.ToNamesArrayForDB() + sStart + ");";        //.ToNamesArrayForDB()   
 					else
 						sSQL += "pl.`fItemAddAsAsset`(" + cPLI.cAsset.nID + "," + cPLI.cAsset.aClasses.ToIdsArrayForDB() + sStart + ");";
 					_cDB.Cache(sSQL);
@@ -356,6 +356,60 @@ namespace helpers.replica
 				throw new Exception("Unknown playlist Item Error: [id=" + cPLI.nID + "][name=" + cPLI.sName + "][start_planned=" + cPLI.dtStartPlanned + "]", ex);
 			}
 		}
+        public void PlaylistItemAdd(PlaylistItem cPLI)
+        {
+            if (null == cPLI)
+                return;
+            long nID = -1;
+            string sSQL = "", sStart = "";
+            try
+            {
+                _cDB.TransactionBegin();
+                sStart = "";
+
+                sSQL = "";
+                if (DateTime.MinValue < cPLI.dtStartHard && DateTime.MaxValue > cPLI.dtStartHard)
+                {
+                    sStart = $"'{cPLI.dtStartHard.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    sSQL = $"SELECT pl.`fItemStartHardSet`(%PLIID%, {sStart})";
+                }
+                else if (DateTime.MinValue < cPLI.dtStartSoft && DateTime.MaxValue > cPLI.dtStartSoft)
+                {
+                    sStart = $"'{cPLI.dtStartSoft.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    sSQL = $"SELECT pl.`fItemStartSoftSet`(%PLIID%, {sStart})";
+                }
+
+                if (DateTime.MinValue < cPLI.dtStartPlanned && DateTime.MaxValue > cPLI.dtStartPlanned)
+                    sStart = $"'{cPLI.dtStartPlanned.ToString("yyyy-MM-dd HH:mm:ss")}'";
+
+                if (null == cPLI.cAsset)
+                    nID = _cDB.GetValue($"SELECT `nValue` FROM pl.`fItemAddAsFile`({cPLI.cFile.nID}, {cPLI.nFramesQty}, {cPLI.aClasses.ToNamesArrayForDB()}, {sStart})").ToID();
+                else
+                    nID = _cDB.GetValue($"SELECT `nValue` FROM pl.`fItemAddAsAsset`({cPLI.cAsset.nID}, {cPLI.cAsset.aClasses.ToIdsArrayForDB()}, {sStart})").ToID();
+
+                _cDB.TransactionCommit();
+            }
+            catch (Exception ex)
+            {
+                _cDB.TransactionRollBack();
+                nID = -1;
+                throw new Exception("playlist Item add Error: [id=" + nID + "][name=" + cPLI.sName + "][start_planned=" + cPLI.dtStartPlanned + "]", ex);
+            }
+            finally
+            {
+                cPLI.nID = nID;
+            }
+        }
+        public void PlaylistItemTimingsUpdateSet(PlaylistItem cPLI)
+        {   
+            _cDB.Perform("SELECT pl.`fItemDTEventAdd`(" + 4 + ", " + cPLI.nID + ", " + (DateTime.MaxValue == cPLI.dtTimingsUpdate ? "NULL" : "'" + cPLI.dtTimingsUpdate.ToString("yyyy-MM-dd HH:mm:ss") + "'") + ")");
+        }
+        public void PlaylistItemNoteSet(PlaylistItem cPLI)
+        {
+            if (cPLI.sNote.IsNullOrEmpty())
+                return;
+            _cDB.Perform($"UPDATE pl.`tItems` SET `sNote`='{cPLI.sNote.ForDB()}' WHERE id={cPLI.nID}");
+        }
 		public void PlaylistItemStartsSet(long nItemID, DateTime dtPlanned, DateTime dtHard, DateTime dtSoft)
 		{
 			_cDB.Perform("SELECT pl.`fItemStartsSet`(" + nItemID + ", " + (DateTime.MaxValue == dtPlanned ? "NULL" : "'" + dtPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "'") + ", " + (DateTime.MaxValue == dtHard ? "NULL" : "'" + dtHard.ToString("yyyy-MM-dd HH:mm:ss") + "'") + ", " + (DateTime.MaxValue == dtSoft ? "NULL" : "'" + dtSoft.ToString("yyyy-MM-dd HH:mm:ss") + "'") + ")");
@@ -364,7 +418,7 @@ namespace helpers.replica
 		{
 			return _cDB.GetValueBool("SELECT `bValue` FROM pl.`fItemRemove`(" + nItemID + ")");
 		}
-        public bool PlaylistItemUncahe(long nItemID)
+        public bool PlaylistItemUncache(long nItemID)
         {
             //delete from pl."tItemsCached" where "idItems"=332134
             return _cDB.GetValueBool("DELETE FROM pl.`tItemsCached` WHERE `idItems`=" + nItemID );
@@ -672,7 +726,7 @@ namespace helpers.replica
 		}
 		private Dictionary<long, File> FilesGet(string sWhere)
 		{
-			Dictionary<long, File> aRetVal = new Dictionary<long, File>();
+			Dictionary<long, File> ahRetVal = new Dictionary<long, File>();
 			if (null == sWhere)
 				sWhere = "";
 			//_cDB.RoleSet("replica_assets");
@@ -681,9 +735,9 @@ namespace helpers.replica
 			while (null != aqDBValues && 0 < aqDBValues.Count)
 			{
 				cFile = new File(aqDBValues.Dequeue());
-				aRetVal.Add(cFile.nID, cFile);
+				ahRetVal.Add(cFile.nID, cFile);
 			}
-			return aRetVal;
+			return ahRetVal;
 		}
 		public Dictionary<long, File> FilesGet(long nStorageID)
 		{
@@ -731,6 +785,10 @@ namespace helpers.replica
 			_cDB.Perform("update media.`tFiles` set `sFilename` = '" + sNewName + "' where id=" + cFile.nID);
 		}
 
+        public Storage StorageAdd(long nIDStorageType, string sName, string sPath, bool bEnabled)
+        {
+            return StorageGet(_cDB.GetValue("SELECT `nValue` FROM media.`fStorageAdd`(" + nIDStorageType + ", '" + sName + "', '" + sPath + "', '" + (bEnabled ? "TRUE" : "FALSE") + "');").ToID());
+        }
 		public Storage StorageGet(string sName)
 		{
 			return StoragesGet("`sName`='" + sName + "'").Dequeue();
@@ -785,16 +843,20 @@ namespace helpers.replica
 
         #region mam
         public Queue<Asset> AssetsGet(string sWhere)
+        {
+            return new Queue<Asset>(AssetsResolvedGet(sWhere));
+        }
+        public Queue<Asset> AssetsGet(string sWhere, uint nLimit)
 		{
-			return new Queue<Asset>(AssetsResolvedGet(sWhere));
+			return new Queue<Asset>(AssetsResolvedGet(sWhere, nLimit));
 		}
-		protected Asset[] AssetsResolvedGet(string sWhere)
-		{
-			if (null == sWhere)
-				sWhere = "";
-			else if (0 < sWhere.Length)
-				sWhere = " WHERE " + sWhere;
-			return _cDB.Select("SELECT DISTINCT * FROM mam.`vAssetsResolved`" + sWhere + " ORDER BY `sName`").Select(o => AssetGet(o)).ToArray();
+        protected Asset[] AssetsResolvedGet(string sWhere)
+        {
+            return AssetsResolvedGet(sWhere, 0);
+        }
+        protected Asset[] AssetsResolvedGet(string sWhere, uint nLimit) // 0 => no limit
+        {
+			return _cDB.Select("SELECT DISTINCT * FROM mam.`vAssetsResolved`", sWhere, "`sName`", 0, nLimit).Select(o => AssetGet(o)).ToArray();
 		}
 		private Asset AssetGet(Hashtable ahValues)
 		{
@@ -937,7 +999,7 @@ namespace helpers.replica
 				sName = "='" + sName + "'";
 			return AssetsGet("`sName` " + sName);
 		}
-		public Queue<Asset> AssetsGet(IdNamePair cVideoTypeFilter)
+		public Queue<Asset> AssetsGet(IdNamePair cVideoTypeFilter, Asset.Type.AssetType? eAssetType, uint nLimit)
 		{
 			string sWhere = null;
 			if (null != cVideoTypeFilter)
@@ -947,7 +1009,14 @@ namespace helpers.replica
 				else if (0 < cVideoTypeFilter.sName.Length)
 					sWhere = "'" + cVideoTypeFilter.sName + "'=`sVideoTypeName`";
 			}
-			return AssetsGet(sWhere);
+            if (eAssetType != null)
+            {
+                if (!sWhere.IsNullOrEmpty())
+                    sWhere += " AND ";
+                sWhere += "'" + eAssetType.Value + "'=`sType`";
+            }
+
+			return AssetsGet(sWhere, nLimit);
 		}
 		public Queue<Asset> AssetsGet(File cFile)
 		{

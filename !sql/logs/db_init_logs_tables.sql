@@ -1,4 +1,5 @@
 ﻿CREATE SCHEMA logs;
+
 	CREATE TABLE logs."tPlaylistLog"
 		(
 			id serial PRIMARY KEY,

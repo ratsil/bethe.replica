@@ -653,9 +653,10 @@ namespace replica.failover
         static private int PLCount()
         {
             int nRetVal = 0;
+            DateTime dtNow = DateTime.Now.AddSeconds(-10);
             foreach (PlaylistItem cPLI in _aPlaylistOnline)
             {
-                if (cPLI.dtStartReal == DateTime.MaxValue && cPLI.dtStartPlanned > DateTime.Now)
+                if (cPLI.dtStartReal == DateTime.MaxValue && cPLI.dtStartPlanned > dtNow)
                     nRetVal++;
             }
             return nRetVal;
@@ -1114,6 +1115,19 @@ aFromOffline = null;
                 (new Logger.Sync()).WriteNotice("MakeBesiegedFortressPL. added to BF PL: " + cPLI.ToStringShort());
             }
         }
+        static private string CachedFileGet(PlaylistItem cPLI)
+        {
+            string sExt = SIO.Path.GetExtension(cPLI.cFile.sFilename);
+            string sFileInCache = "" + cPLI.nID + sExt;
+            string sRetVal = SIO.Path.Combine(Player.Preferences.sCacheFolder, sFileInCache);
+            if (SIO.File.Exists(sRetVal))
+                return sRetVal;
+            sFileInCache = "_" + sFileInCache;
+            sRetVal = SIO.Path.Combine(Player.Preferences.sCacheFolder, sFileInCache);
+            if (SIO.File.Exists(sRetVal))
+                return sRetVal;
+            return null;
+        }
         static private PlaylistItem LastCacheCoveredPLIGet(IEnumerable<PlaylistItem> aPL)
         {
             (new Logger.Sync()).WriteNotice("LastCacheCoveredPLIGet. start");
@@ -1532,7 +1546,13 @@ aFromOffline = null;
                 // по сути _bDoNotDeleteCacheMode не нужен? Т.к. если всем запрещено качать и удалять, то ситуация не может улучшаться...
                 // надо только, если конец ПЛ, кэш длинный и люди просто не положили еще следующий день. Подумать как отключить этот режим,
                 // если ПЛ опять длинный - надо резрешать качать синкеру... может ему можно качать до 2х кэша всегда? А тогда и из режима вскоре выйдем... ??
-                // да, так и сделали, только 1.5 кэша можно перебрать
+                // да, так и сделали, только 1.5, а не 2 сделал (размера кэша можно перебрать)
+
+                // TODO если был BM и ПЛ был короткий и перезагрузили, убрав BM, то он по запуску смотрит, что ПЛ короткий (из DAT) и сразу же обратно в BM, что не верно
+                //  см. logs sync 190531 перезапускал несколько раз.
+                // да, это т.к. первый раз после запуска мы не берем ПЛ новый, а только юзаем сохраненный, но уже тут же попадаем в BM
+
+                // TODO проверить, возвращается ли сам из режима не копирования...
                 PlaylistItem cPLILastCovered = null;
                 if (!_bBesiegedFortressMode)
                     cPLILastCovered = LastCacheCoveredPLIGet(_aPlaylistBig);
@@ -1543,9 +1563,9 @@ aFromOffline = null;
                         _bBesiegedFortressMode = true;
                         if (!SIO.File.Exists(_sBesiegedFortressFile))
                         {
-                            bool bRes = FailoverConstants.EnterBesiegedFortressMode(Player.Preferences.sCacheFolder, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  Besieged Fortress Mode entered by failover-1. Reason: Too short PL (or Offline_PL). [last_id=" + _aPlaylistBig.Last().nID + "][last_stopp=" + _aPlaylistBig.Last().dtStopPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "][cover_id="+ cPLILastCovered.nID + "][cover_stopp=" + cPLILastCovered.dtStopPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+                            bool bRes = FailoverConstants.EnterBesiegedFortressMode(Player.Preferences.sCacheFolder, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  Besieged Fortress Mode entered by failover-1. Reason: Too short PL (or Offline_PL). [last_id=" + _aPlaylistBig.Last().nID + "][last_stopp=" + _aPlaylistBig.Last().dtStopPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "][cover_id="+ cPLILastCovered.nID + "][cover_stopp=" + cPLILastCovered.dtStopPlanned.ToString("yyyy-MM-dd HH:mm:ss") + "]. \nAfter repairing, exit from BM MANUALLY by renaming this file (add ! to the end)");
                             if (bRes)
-                                cLogger.WriteError("We entered BesiegedFortressMode!! CHECK DB and RAID and SYNC service");
+                                cLogger.WriteError("We entered BesiegedFortressMode!! CHECK DB and RAID and SYNC service. After repairing, exit from BM MANUALLY by renaming file in cache dir");
                             else
                                 cLogger.WriteError("error entering BesiegedFortressMode!!");
                         }
@@ -1559,10 +1579,10 @@ aFromOffline = null;
                             _bDoNotDeleteCacheMode = true;
                             if (!SIO.File.Exists(FailoverConstants.sFilesDoNotRemoveFromCache))
                             {
-                                bool bRes = FailoverConstants.EnterFilesDoNotRemoveMode(Player.Preferences.sCacheFolder, "\n" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  Don't Remove Files From Cache Mode entered by failover-1. Reason: Sync service was probably stopped AND cache covers less than " + Preferences.tsMinCacheCover.TotalHours + " hours");
+                                bool bRes = FailoverConstants.EnterFilesDoNotRemoveMode(Player.Preferences.sCacheFolder, "\n" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  Don't Remove Files From Cache Mode entered by failover-2. Reason: Sync service was probably stopped AND cache covers less than " + Preferences.tsMinCacheCover.TotalHours + " hours");
 
                                 if (bRes)
-                                    cLogger.WriteError("We entered FilesDoNotRemoveFromCache Mode!! CHECK DB and RAID and SYNC service. Maybe PL is too short");
+                                    cLogger.WriteError("We entered FilesDoNotRemoveFromCache Mode!! CHECK DB and RAID and SYNC service. Maybe PL is too short.");
                                 else
                                     cLogger.WriteError("error entering FilesDoNotRemoveFromCache Mode!!");
                             }
@@ -1703,7 +1723,7 @@ aFromOffline = null;
 				{
 					cPLIFound = aqPLShort.FirstOrDefault(o => o.nID == _cLastOnlinePLI.nID);
 					if (cPLIFound == null)
-						cLogger.WriteNotice("end_of_playlist pli NOT found in new PL. We will add by time [id=" + _cLastOnlinePLI.nID + "][start_p=" + cPLIFound.dtStartPlanned.ToString("HH:mm:ss") + "]");
+						cLogger.WriteNotice("end_of_playlist pli NOT found in new PL. We will add by time [id=" + _cLastOnlinePLI.nID + "][old_stop=" + _cLastOnlinePLI.dtStopPlanned.ToString("HH:mm:ss") + "]");
 					else
 						cLogger.WriteNotice("end_of_playlist pli found in new PL [id=" + cPLIFound.nID + "][old_stop=" + _cLastOnlinePLI.dtStopPlanned.ToString("HH:mm:ss") + "][new_stop=" + cPLIFound.dtStopPlanned.ToString("HH:mm:ss") + "]");
 				}
@@ -1835,8 +1855,15 @@ aFromOffline = null;
 							cLogger.WriteDebug("try to add into playlist - 3 " + sPLILight);
 
 							cPLI.cStatus = _cStatusPlanned;
-							aPL.Add(cPLI);
-							cLogger.WriteNotice("\t\tadded [id=" + cPLI.nID + "][new start=" + cPLI.dtStartPlanned.ToString("HH:mm:ss") + "][new stopp=" + cPLI.dtStopPlanned.ToString("HH:mm:ss") + "]");
+                            if (FileIsOk(CachedFileGet(cPLI)) > 0)
+                            {
+                                aPL.Add(cPLI);
+                                cLogger.WriteNotice("\t\tadded [id=" + cPLI.nID + "][new start=" + cPLI.dtStartPlanned.ToString("HH:mm:ss") + "][new stopp=" + cPLI.dtStopPlanned.ToString("HH:mm:ss") + "]");
+                            }
+                            else
+                            {
+                                cLogger.WriteDebug($"\t\t\tfile is NOT ok - 2  [pliid={cPLI.nID}][{cPLI.cFile.sFile}]");
+                            }
 						}
 						else
 							break;
@@ -1871,8 +1898,7 @@ aFromOffline = null;
 							}
 
 							cPLI.dtStartPlanned = dtLastOnlinePLIStop;
-
-							PLIorPlugsAdd(aPL, cPLI, cPlugClass, cLogger, false);
+                            PLIorPlugsAdd(aPL, cPLI, cPlugClass, cLogger, false);
 
 							bFound = true;
 							cLogger.WriteNotice("start from this found by Time PLI " + sPLILight);
@@ -1885,10 +1911,10 @@ aFromOffline = null;
 			catch (Exception ex)
 			{
 				cLogger.WriteDebug("catch_in");
-				if (DateTime.MinValue == ahErrors[ErrorTarget.playlist])
-					cLogger.WriteError(ex);
-				ahErrors[ErrorTarget.playlist] = DateTime.Now;
-				cLogger.WriteDebug("catch_out");
+                //if (DateTime.MinValue == ahErrors[ErrorTarget.playlist])
+                cLogger.WriteError(ex);
+                ahErrors[ErrorTarget.playlist] = DateTime.Now;
+				cLogger.WriteDebug($"catch_out");
 			}
 
 
@@ -1896,7 +1922,7 @@ aFromOffline = null;
 			{
                 if (aPL.Count < 1)
                 {
-                    cLogger.WriteNotice("Strange situation - we cant add anything to PL!");
+                    cLogger.WriteWarning("Strange situation - we cant add anything to PL!  (aPL.Count < 1)");
                 }
                 else
                 {
@@ -1924,20 +1950,33 @@ aFromOffline = null;
 			}
 		}
 
-		private enum PLIorPlugs
+
+
+       //  я здесь
+        // суть ошибки - на конце добавленного оказался мегамикс. После вставлялось по времени, т.к. мегамикса нет в ПЛ, но из-за bFound?? 
+        // начал добавлятся не встычный пли, а следующий, но на правильное время - и ПЛ сполз весь на один клип выше )))
+        // пофикси!
+
+
+
+
+        private enum PLIorPlugs
 		{
 			PLI,
 			Plugs,
 		}
 		static private PLIorPlugs PLIorPlugsAdd(List<PlaylistItem> aPL, PlaylistItem cPLI, Class cPlugClass, Logger.Sync cLogger, bool bAddOnlyPlugs)
-		{
-			long nFileDur;
-			long nDiff=0;
-			DateTime dtPLIStop = cPLI.dtStartPlanned.AddMilliseconds((long)cPLI.nDuration * Player.Preferences.nFrameMs); // т.е. из пленнеда, а не из реала, который со сдвигом
+        {
+            long nFileDur;
+            long nDiff = 0;
+            DateTime dtPLIStop = cPLI.dtStartPlanned.AddMilliseconds((long)cPLI.nDuration * Player.Preferences.nFrameMs); // т.е. из пленнеда, а не из реала, который со сдвигом
 			cLogger.WriteDebug3("\t\t\t[PLIorPlugsAdd] - 0 ");
-			if (1 > (nFileDur = FileIsOk(cPLI.cFile)))
+
+            string sFileInCache = CachedFileGet(cPLI);
+
+            if (1 > (nFileDur = FileIsOk(sFileInCache)))
             {
-                cLogger.WriteDebug("\t\t\t[PLIorPlugsAdd] - file is NOT ok [dur=" + nFileDur + "]");
+                cLogger.WriteDebug($"\t\t\t[PLIorPlugsAdd] - file is NOT ok [pliid={cPLI.nID}][dur={ nFileDur}][{sFileInCache}][src = {cPLI.cFile.sFile}]");
                 PlaylistItem cPLIplug = null;
 				if (aPL.Count > 0 && (cPLIplug = aPL.Last()).bPlug)
 				{
@@ -1960,8 +1999,11 @@ aFromOffline = null;
 					cPLI.nFrameStart = cPLI.nFrameStart - nDiff < 1 ? 1 : cPLI.nFrameStart - nDiff;
 				}
 				cLogger.WriteDebug3("\t\t\t[PLIorPlugsAdd] - 4 ");
-				if (!bAddOnlyPlugs)
-					aPL.Add(cPLI);
+                if (!bAddOnlyPlugs)
+                {
+                    cPLI.cStatus = _cStatusPlanned;
+                    aPL.Add(cPLI);
+                }
 				return PLIorPlugs.PLI;
 			}
 		}
@@ -1971,9 +2013,9 @@ aFromOffline = null;
 			List<PlaylistItem> aPlugs = new List<PlaylistItem>();
 			PlaylistItem cPlug;
 			long nCurrentDur = 0, nPlugDur = 0;
-			if (1 > (nPlugDur = FileIsOk(cFPlug)))
+			if (1 > (nPlugDur = FileIsOk(cFPlug.sFile)))
 			{
-				if (1 > (nPlugDur = FileIsOk(Preferences.cDefaultPlug)))
+				if (1 > (nPlugDur = FileIsOk(Preferences.cDefaultPlug.sFile)))
 					throw new Exception("CANNOT FIND ANY VALID PLUG FILE!!!!! [first=" + cFPlug + "][second=" + Preferences.cDefaultPlug + "]");
 				cFPlug = Preferences.cDefaultPlug;
 			}
@@ -2065,22 +2107,22 @@ aFromOffline = null;
 			}
 			return nRetVal;
 		}
-		static private long FileIsOk(helpers.replica.media.File cFile)
+		static private long FileIsOk(string sFile)
 		{
 			(new Logger.Sync()).WriteDebug3("\t\t\t\t[FileIsOk] - in");
-			if (null == cFile)
+			if (null == sFile)
 			{
 				(new Logger.Sync()).WriteError("File is NULL!!");
 				return -1;
 			}
-			if (!SIO.File.Exists(cFile.sFile))
+			if (!SIO.File.Exists(sFile))
 			{
-				(new Logger.Sync()).WriteError("NO FILE!! ["+ cFile.sFile + "]");
+				(new Logger.Sync()).WriteError("NO FILE!! ["+ sFile + "]");
 				return -1;
 			}
 			(new Logger.Sync()).WriteDebug3("\t\t\t\t[FileIsOk] - 1 ");
-			if (_ahCheckedFiles.ContainsKey(cFile.sFile) && _ahCheckedFiles[cFile.sFile] == SIO.File.GetLastWriteTime(cFile.sFile))
-				return _ahCheckedFilesDurs[cFile.sFile];
+			if (_ahCheckedFiles.ContainsKey(sFile) && _ahCheckedFiles[sFile] == SIO.File.GetLastWriteTime(sFile))
+				return _ahCheckedFilesDurs[sFile];
 
 			long nDuration = -1;
 
@@ -2089,7 +2131,7 @@ aFromOffline = null;
 			{
 				try
 				{
-					nDuration = FileIsOkInFFMPEG(cFile);
+					nDuration = FileIsOkInFFMPEG(sFile);
 				}
 				catch (Exception ex) { (new Logger.Sync()).WriteError("FileIsOk:catch2:<br>", ex); }
 				finally
@@ -2110,20 +2152,20 @@ aFromOffline = null;
 			}
 			catch (Exception ex)
 			{
-				(new Logger.Sync()).WriteError("FileIsOk:catch2:<br>", ex);
+				(new Logger.Sync()).WriteError("FileIsOk:catch3:<br>", ex);
 			}
 			(new Logger.Sync()).WriteDebug3("\t\t\t\t[FileIsOk] - 3 ");
 			if (nDuration > 0)
 			{
-				if (_ahCheckedFiles.ContainsKey(cFile.sFile))
+				if (_ahCheckedFiles.ContainsKey(sFile))
 				{
-					_ahCheckedFiles[cFile.sFile] = SIO.File.GetLastWriteTime(cFile.sFile);
-					_ahCheckedFilesDurs[cFile.sFile] = nDuration;
+					_ahCheckedFiles[sFile] = SIO.File.GetLastWriteTime(sFile);
+					_ahCheckedFilesDurs[sFile] = nDuration;
 				}
 				else
 				{
-					_ahCheckedFiles.Add(cFile.sFile, SIO.File.GetLastWriteTime(cFile.sFile));
-					_ahCheckedFilesDurs.Add(cFile.sFile, nDuration);
+					_ahCheckedFiles.Add(sFile, SIO.File.GetLastWriteTime(sFile));
+					_ahCheckedFilesDurs.Add(sFile, nDuration);
 				}
 			}
 			else
@@ -2131,17 +2173,18 @@ aFromOffline = null;
 			(new Logger.Sync()).WriteDebug("\t\t\t\t[FileIsOk] - out");
 			return nDuration;
 		}
-		static private long FileIsOkInFFMPEG(helpers.replica.media.File cFile)
+		static private long FileIsOkInFFMPEG(string sFile)
 		{
 			(new Logger.Sync()).WriteDebug3("\t\t\t\t\t[FileIsOkInFFMPEG] - in");
 			long nDuration;
 			ffmpeg.net.File.Input cFileInput = null;
 			try
 			{
-				cFileInput = new ffmpeg.net.File.Input(cFile.sFile);
+				cFileInput = new ffmpeg.net.File.Input(sFile);
     //            cFileInput.nCacheSize = 15;
     //            cFileInput.nBlockSize = 10000000;
 				//ffmpeg.net.File.Input.nDecodingThreads = 3;
+
 				nDuration = (long)cFileInput.nFramesQty;
 
 				if (!Preferences.bDeepFileChecking)
@@ -2179,7 +2222,7 @@ aFromOffline = null;
 			}
 			catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError("PLI is not ok!!! [file=" + cFile.sFile + "]<br>", ex);
+				(new Logger("playlist")).WriteError("PLI is not ok!!! [file=" + sFile + "]<br>", ex);
 				return -1;
 			}
 			finally
@@ -2307,7 +2350,7 @@ aFromOffline = null;
                                 if (null != cPLIMain)
                                 {
                                     if (cPLIMain.dtStart < DateTime.MaxValue && Math.Abs(nDelta = (int)cPLI.dtStart.Subtract(cPLIMain.dtStart).TotalSeconds) > 20)
-                                        (new Logger("playlist")).WriteNotice("Delta > 20 seconds! [delta=" + nDelta + " sec][pli:" + cPLI.nID + "  " + cPLI.cFile.sFilename + "  sr=" + cPLI.dtStartReal.ToString("HH:mm:ss") + "][main_sr=" + cPLIMain.dtStart.ToString("HH:mm:ss") + "]");
+                                        (new Logger("playlist")).WriteWarning("Delta > 20 seconds! [delta=" + nDelta + " sec][pli:" + cPLI.nID + "  " + cPLI.cFile.sFilename + "  sr=" + cPLI.dtStartReal.ToString("HH:mm:ss") + "][main_sr=" + cPLIMain.dtStart.ToString("HH:mm:ss") + "]");
                                 }
                                 else
                                     (new Logger("playlist")).WriteNotice("UNIQUE PLI STOPPED (not found in PL) [pli:" + cPLI.nID + "  " + cPLI.cFile.sFilename + "  sr=" + cPLI.dtStartReal.ToString("HH:mm:ss") + "]");

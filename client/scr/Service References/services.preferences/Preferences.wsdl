@@ -27,6 +27,8 @@
               <s:element minOccurs="0" maxOccurs="1" name="sDBIServerName" type="s:string" />
               <s:element minOccurs="1" maxOccurs="1" name="nFragmentBeforeNow" type="s:int" />
               <s:element minOccurs="1" maxOccurs="1" name="nFragmentAfterNow" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="bIsWithCacheMode" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="sFilesDefaultSort" type="s:string" />
             </s:sequence>
           </s:extension>
         </s:complexContent>

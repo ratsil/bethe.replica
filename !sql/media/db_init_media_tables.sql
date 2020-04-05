@@ -72,7 +72,7 @@
 			ON media."tFileAttributes"
 			FOR EACH ROW
 			EXECUTE PROCEDURE hk."fManagement"();
-		----------------------------------- media."tStrings"
+----------------------------------- media."tStrings"
 	CREATE TABLE media."tStrings"
 		(
 			id bigserial PRIMARY KEY,
@@ -85,10 +85,34 @@
 			ON media."tStrings"
 			FOR EACH ROW
 			EXECUTE PROCEDURE "fDictionary"();
-		----------------------------------- media."tDates"
+----------------------------------- media."tDates"
 	CREATE TABLE media."tDates"
 		(
 			id serial NOT NULL,
 			dt timestamp with time zone,
 			CONSTRAINT "tDates_pkey" PRIMARY KEY (id)
 		);
+----------------------------------- media."tDictionary"
+	CREATE TABLE media."tDictionary"
+		(
+			id bigserial NOT NULL,
+			"idHK" integer NOT NULL,
+			"sValue" text,
+			"nReferencesQty" bigint NOT NULL DEFAULT 0,
+			CONSTRAINT "tDictionary_pkey" PRIMARY KEY (id),
+			CONSTRAINT "tDictionary_idHK_fkey" FOREIGN KEY ("idHK")
+				REFERENCES hk."tHouseKeeping" (id) MATCH SIMPLE
+				ON UPDATE RESTRICT ON DELETE RESTRICT,
+			CONSTRAINT "tDictionary_sValue_key" UNIQUE ("sValue")
+		)
+	CREATE TRIGGER "Dictionary"
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON media."tDictionary"
+		FOR EACH ROW
+		EXECUTE PROCEDURE public."fDictionary"();
+
+	CREATE TRIGGER "HKManagement"
+		BEFORE INSERT OR UPDATE OR DELETE
+		ON media."tDictionary"
+		FOR EACH ROW
+		EXECUTE PROCEDURE hk."fManagement"();

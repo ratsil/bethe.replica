@@ -75,12 +75,27 @@ namespace replica.cues
 
         private void WatcherCommands(object cStateInfo)
 		{
-			(new Logger("commands")).WriteNotice("модуль управления командами запущен");//TODO LANG
-			while (_bRunning)
+            try
+            {
+                if (Cues.Preferences.tsCommandsSleepDuration == TimeSpan.MaxValue || Cues.Preferences.tsCommandsSleepDuration == TimeSpan.MinValue)
+                {
+                    (new Logger("commands")).WriteNotice("модуль управления командами не будет запущен, т.к. нет раздела 'commands' в настройках");//TODO LANG
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                (new Logger("commands")).WriteError(ex);
+                return;
+            }
+
+            (new Logger("commands")).WriteNotice("модуль управления командами запущен");//TODO LANG
+            DBInteract cDBI = new DBInteract();
+            while (_bRunning)
 			{
 				try
 				{
-					(new DBInteract()).ProcessCommands();
+                    cDBI.ProcessCommands();
 					Thread.Sleep(300);
 				}
 				catch (Exception ex)

@@ -694,7 +694,7 @@ namespace replica
 					string sFileInCache = System.IO.Path.Combine(Player.Preferences.sCacheFolder, cPLI.nID + sExtension);
 					if (!System.IO.File.Exists(sFileInCache))
 					{
-						cLogger.WriteWarning("файл не найден в кэше - будем экстренно копировать! [cached:" + sFileInCache + "][original:" + cPLI.cFile.sFile + "]");//TODO LANG
+						cLogger.WriteError("файл не найден в кэше - будем экстренно копировать! [cached:" + sFileInCache + "][original:" + cPLI.cFile.sFile + "]");//TODO LANG
 						System.IO.File.Copy(cPLI.cFile.sFile, sFileCached);
 					}
 				}

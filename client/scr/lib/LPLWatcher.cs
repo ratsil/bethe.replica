@@ -233,9 +233,9 @@ namespace scr
                         _cPage._cPlayer_PlaylistItemsGet();
                         _aRefreshed.Add(cCurrentLPLItem.nID);
                     }
-                    if (PLIType.AdvBlockItem == cCurrentLPLItem.eType)   // блокировка скипа
+                    if (PLIType.AdvBlockItem == cCurrentLPLItem.eType || _cCurrentLPLItem == null)   // блокировка скипа
                         _cPage._ui_ctrTB_PlayList.bSkipBtnIsEnabled = false;
-                    else
+                    else if (_cPage._ui_ctrTB_PlayList.bSkipBtnIsEnabled != true)
                         _cPage._ui_ctrTB_PlayList.bSkipBtnIsEnabled = true;
                     ConvertToString();
                     _cPage.RenewTimers();

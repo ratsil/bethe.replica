@@ -146,12 +146,12 @@
       </Row>
       <Row>
         <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
-          <Data ss:Type="String">от 30.06.09г. № 563-09/КТВ-тк</Data>
+          <Data ss:Type="String">№________________ от __.__.____</Data>
         </Cell>
       </Row>
       <Row>
         <Cell ss:MergeAcross="7" ss:StyleID="caption_middle">
-          <Data ss:Type="String">Между РАО и ЗАО &quot;Мьюзик Один&quot;</Data>
+          <Data ss:Type="String">Между РАО и ___________________</Data>
         </Cell>
       </Row>
       <Row>

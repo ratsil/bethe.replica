@@ -26,7 +26,8 @@ namespace replica.sync
             public TimeSpan tsCacheRewriteMinimum;
             public string[] aIgnoreFiles;
 			public string[] aIgnoreStorages;
-		}
+            public Dictionary<string, TimeSpan> aIgnoreStoragesTreshold;
+        }
 		public class Preview
 		{
 			public TimeSpan tsSleepDuration;
@@ -166,8 +167,27 @@ namespace replica.sync
                 }
                 else
                     _cCache.aIgnoreStorages = new string[0];
+
+                sIgnore = cXmlNodeChild.AttributeValueGet("except_smaller_than", false);
+                if (null != sIgnore)
+                {
+                    TimeSpan[] aTS = sIgnore.Split(new char[] { ',', ';' }).Select(o => o.Trim().To<TimeSpan>()).ToArray();
+                    if (aTS.Length != _cCache.aIgnoreStorages.Length)
+                        throw new Exception("ignor_storages and except_smaller_than arrays must be the same length");
+
+                    _cCache.aIgnoreStoragesTreshold = new Dictionary<string, TimeSpan>();
+                    for (int nI = 0; nI < aTS.Length; nI++)
+                        _cCache.aIgnoreStoragesTreshold.Add(_cCache.aIgnoreStorages[nI], aTS[nI]);
+
+                    sIgnore = "";
+                    foreach (TimeSpan sStr in _cCache.aIgnoreStoragesTreshold.Values)
+                        sIgnore += "[" + sStr.ToString("hh\\:mm\\:ss") + "]\t";
+                    (new Logger("sync_prefs")).WriteNotice("ignore storage except_smaller_than:" + sIgnore);
+                }
+                else
+                    _cCache.aIgnoreStoragesTreshold = new Dictionary<string, TimeSpan>();
             }
-			if (null != (cXmlNodeChild = cXmlNode.NodeGet("storage", false)))
+            if (null != (cXmlNodeChild = cXmlNode.NodeGet("storage", false)))
 			{
 				_cStorage = new Storage();
 				_cStorage.sMoveToFolder = cXmlNodeChild.AttributeValueGet("move_folder", false);

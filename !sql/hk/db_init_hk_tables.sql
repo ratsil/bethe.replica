@@ -9,6 +9,7 @@
 
 		GRANT ALL ON SCHEMA hk TO replica_init;
 		GRANT ALL ON TABLE hk."tUsers" TO replica_init;
+--    SET SESSION AUTHORIZATION 'replica_init';
 		INSERT INTO hk."tUsers" VALUES (0, 'pgsql');
 ----------------------------------- hk."tRegisteredTables"
 	CREATE TABLE hk."tRegisteredTables"

@@ -252,11 +252,13 @@ namespace replica.management
 			return Sex.duet;
 		}
 		private Clip GetNext(Type eType, DateTime dtTargetTime, BlockType eBT)
-		{
-			RArray cRA = _aAllRotations[eType];
-			if (eBT == BlockType.minimum && cRA.nTimeMinimalFork == 0 || eBT == BlockType.forced && cRA.nTimeForcedFork == 0)
+        {
+            (new Logger()).WriteDebug2("Rotations.cs: GetNext.in [rotType=" + eType + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "][blockType=" + eBT + "]");
+            RArray cRA = _aAllRotations[eType];
+            (new Logger()).WriteDebug2("Rotations.cs: GetNext [cRA=" + (cRA == null ? "NULL" : "" + cRA.Count) + "]");
+            if (eBT == BlockType.minimum && cRA.nTimeMinimalFork == 0 || eBT == BlockType.forced && cRA.nTimeForcedFork == 0)
 			{
-				(new Logger()).WriteDebug("Rotations.cs: GetNext.before return UPPER [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+				(new Logger()).WriteDebug("Rotations.cs: GetNext.before_while return null [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
 				return null;
 			}
 			if (eBT == BlockType.minimum)
@@ -266,8 +268,8 @@ namespace replica.management
 
 			Clip cClip = null;
 			int nInd = 0;
-			(new Logger()).WriteDebug("Rotations.cs: GetNext.before while [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
-			while (null != (cClip = cRA.GetNext(dtTargetTime)))
+            (new Logger()).WriteDebug("Rotations.cs: GetNext.before_while [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "][cRA=" + cRA.Count + "]");
+            while (null != (cClip = cRA.GetNext(dtTargetTime)))
 			{
 				nInd++;
 				if (nInd % 100 == 0)
@@ -279,14 +281,14 @@ namespace replica.management
 			}
 			if (null == cClip && eBT == BlockType.forced)
 				throw new Exception("Кончились либо блокированы клипы во всех ротациях со слабым условием блокировки!  [pos=" + _nIndex + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
-			(new Logger()).WriteDebug("Rotations.cs: GetNext.before return [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "][clip=" + (null == cClip ? "null" : cClip.sName) + "]");
+			(new Logger()).WriteDebug("Rotations.cs: GetNext.before_return [block=" + eBT + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "][clip=" + (null == cClip ? "null" : cClip.sName) + "]");
 			return cClip;
 		}
 		public Clip GetNextClip(Type eType, DateTime dtTargetTime)
 		{
 			_nIndex++;
-			(new Logger()).WriteNotice("Rotations.cs: GetNextClip in [pos=" + _nIndex + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
-			_eCurrentRotation = eType;
+            (new Logger()).WriteNotice("Rotations.cs: GetNextClip in [rottype=" + eType + "][pos=" + _nIndex + "][time=" + dtTargetTime.ToString("yyyy-MM-dd HH:mm:ss") + "]");
+            _eCurrentRotation = eType;
 			Clip cRetVal;
 			while (true)
 			{
@@ -406,8 +408,8 @@ namespace replica.management
 			{
 				case 0:
 				case 2:
-					if (0 == nForeign)
-						return Type.foreign;
+                    if (0 == nForeign && _aAllRotations.ContainsKey(Type.foreign))
+                        return Type.foreign;
 					else
 						return Type.third;
 				case 1:

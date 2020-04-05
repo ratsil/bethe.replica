@@ -322,7 +322,7 @@ namespace replica.sl
 							nBytesRead = cFileTask._cSource.cStream.Read(aBytes, 0, nBytesRead);
 							cFileTask._cTarget.cStream.Write(aBytes, 0, nBytesRead);
 							cFileTask._cTarget.nBytesTotal += nBytesRead;
-							if (null != cFileTask.cUI)
+                            if (null != cFileTask.cUI)
 								cFileTask.cUI.Update((float)cFileTask._cTarget.nBytesTotal / cFileTask._cSource.nBytesTotal);
 						}
 					}
@@ -347,8 +347,9 @@ namespace replica.sl
 			public void Close()
 			{
 				_cSource.Close();
+                _cTarget.cStream?.Flush();
 				_cTarget.Close();
-				//_cTarget.RestoreFilename();   // после БД надо...
+				//_cTarget.RestoreFilename();   // после внесения в БД это надо...
 				Completed(this, bCanceled ? null :  new EventArgs());
             }
 		}
@@ -1070,25 +1071,26 @@ namespace replica.sl
         private string FileInfoGet(File cFile)
         {
             string sAge = cFile.nAge < 0 ? "will delete at %AGE%" : (cFile.nAge > 0 ? "will move at %AGE%" : "will never delete");
-            return "Info about file:\n" + "id = \t" + cFile.nID + "\n" + "filename = \t" + cFile.sFilename + "\n" + "status = \t" + cFile.eStatus + "\n"
-                                    + "error = \t" + cFile.eError + "\n" + "storage = \t" + cFile.cStorage.sName + "\t(" + cFile.cStorage.sPath + ")\n"
-                                    + "last event = \t" + cFile.dtLastEvent.ToString("yyyy-MM-dd HH:mm:ss") + "\t(change status to in_stock)\n" + "age = \t" + cFile.nAge + "\t(" + sAge + ")\n";
+            return "Info about file:\n" + "id = " + cFile.nID + "\n" + "filename = " + cFile.sFilename + "\n" + "status = " + cFile.eStatus + "\n"
+                                    + "error = " + cFile.eError + "\n" + "storage = " + cFile.cStorage.sName + "\t(" + cFile.cStorage.sPath + ")\n"
+                                    + "last event = " + cFile.dtLastEvent.ToString("yyyy-MM-dd HH:mm:ss") + "\t(status changed to 'in_stock')\n" + "age = " + cFile.nAge + "\t(" + sAge + ")\n";
         }
         private string FileAdditionalInfoGet(File cFile)
         {
             string sAspect = null;
             if (cFile.nAspectRatioDivd != null && cFile.nAspectRatioDivr != null)
                 sAspect = cFile.nAspectRatioDivd + ":" + cFile.nAspectRatioDivr;
-            return "\n" + "modification date = \t" + cFile.dtModification.ToString("yyyy-MM-dd HH:mm:ss") + "\t(in source file)\n" + "FPS = \t" + cFile.nFPS + "\n" + "source file = \t" + cFile.sSourceFile + "\n" + "song = \t" + cFile.sSong + "\n"
-                                    + "series = \t" + cFile.sSeries + "\n" + "episode = \t" + cFile.sEpisode + "\n" + "custom id = \t" + cFile.sCustomValue + "\n"
-                                    + "aspect ratio = \t" + sAspect + "\n" + "power gold ID = \t" + cFile.nPGID + "\n" + "width = \t" + cFile.nWidth + "\n" + "height = \t" + cFile.nHeight + "\n"
-                                    + "frames quantity = \t" + cFile.nFramesQTY + "\n" + "to delete = \t" + cFile.bToDelete + "\n";
+            return "\n" + "modification date = " + cFile.dtModification.ToString("yyyy-MM-dd HH:mm:ss") + "\t(of source file)\n" + "FPS = " + cFile.nFPS + "\n" + "source file = " + cFile.sSourceFile + "\n" + "song = " + cFile.sSong + "\n"
+                                    + "series = " + cFile.sSeries + "\n" + "episode = " + cFile.sEpisode + "\n" + "custom id = " + cFile.sCustomValue + "\n"
+                                    + "aspect ratio = " + sAspect + "\n" + "power gold ID = " + cFile.nPGID + "\n" + "width = " + cFile.nWidth + "\n" + "height = " + cFile.nHeight + "\n"
+                                    + "frames quantity = " + cFile.nFramesQTY + "\n" + "to delete = " + cFile.bToDelete + "\n";
         }
-        private void FileTextCorrect(string sText, File cFile)
-        {
+        private string FileTextCorrect(string sText, File cFile)
+        { // cFile.dtModification - date in the src file, not in DB-file for air! So we need to take last event date, wich is date of modification DB-file (+- 5 min) (only sync sets last event)
             if (null == cFile)
-                return;
-            sText.Replace("%AGE%", cFile.dtModification.AddMonths(cFile.nAge).ToString("yyyy-MM-dd HH:mm:ss"));
+                return sText;
+            int nAge = cFile.nAge < 0 ? -cFile.nAge : cFile.nAge;
+            return sText.Replace("%AGE%", cFile.dtLastEvent.AddMonths(nAge).ToString("yyyy-MM-dd HH:mm:ss"));
         }
 
         private void _ui_lbFilesChanged(object sender, SelectionChangedEventArgs e)
@@ -1101,6 +1103,7 @@ namespace replica.sl
 
 				File cF = (File)_ui_lbFiles.SelectedItem;
                 _ui_tbFileInfo.Text = FileInfoGet(cF);
+                _ui_tbFileInfo.Text = FileTextCorrect(_ui_tbFileInfo.Text, cF);
                 _ui_tbFileInfo.Tag = cF.nID;
 				if (!_bAdditionalInfoGetting && _cRTStrings != null && _cRTAssets != null)
 				{
@@ -1355,7 +1358,7 @@ namespace replica.sl
             {
                 _cSelectedFile = cFT.cSelectedFile;
                 _ui_tbFileInfo.Text = FileInfoGet(_cSelectedFile) + FileAdditionalInfoGet(_cSelectedFile);
-                FileTextCorrect(_ui_tbFileInfo.Text, _cSelectedFile);
+                _ui_tbFileInfo.Text = FileTextCorrect(_ui_tbFileInfo.Text, _cSelectedFile);
             }
         }
         private void _cDBI_ErrorLastGetCompleted(object sender, ErrorLastGetCompletedEventArgs e)
@@ -1632,7 +1635,6 @@ namespace replica.sl
                     _cSelectedFile.bToDelete = e.Result.bToDelete;
                     _cSelectedFile.dtModification = e.Result.dtModification;
                 }
-                FileTextCorrect(_ui_tbFileInfo.Text, _cSelectedFile);
             }
 		}
 		private void _cDBI_FileCheckIsInPLCompleted(object sender, FileCheckIsInPlaylistCompletedEventArgs e)

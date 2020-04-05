@@ -9,11 +9,11 @@ CREATE TABLE grid."tStringValues"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tStringValues"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tStringValues"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tNumericValues"
 	(
@@ -24,11 +24,11 @@ CREATE TABLE grid."tNumericValues"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tNumericValues"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tNumericValues"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tGrids"
 	(
@@ -39,11 +39,11 @@ CREATE TABLE grid."tGrids"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tGrids"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tGrids"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tGridDays"
 	(
@@ -54,11 +54,11 @@ CREATE TABLE grid."tGridDays"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tGridDays"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tGridDays"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tClocks"
 	(
@@ -69,11 +69,11 @@ CREATE TABLE grid."tClocks"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tClocks"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tClocks"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tClockBinds"
 	(
@@ -92,11 +92,11 @@ CREATE TABLE grid."tClockBinds"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tClockBinds"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tClockBinds"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tPropertyTypes"
 	(
@@ -109,11 +109,11 @@ CREATE TABLE grid."tPropertyTypes"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tPropertyTypes"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tPropertyTypes"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tProperties"
 	(
@@ -127,11 +127,11 @@ CREATE TABLE grid."tProperties"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tProperties"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tProperties"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tRangeMarks"
 	(
@@ -145,11 +145,11 @@ CREATE TABLE grid."tRangeMarks"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tRangeMarks"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tRangeMarks"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tRanges"
 	(
@@ -163,11 +163,11 @@ CREATE TABLE grid."tRanges"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tRanges"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tRanges"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tFunctionKnotTypes"
 	(
@@ -178,11 +178,11 @@ CREATE TABLE grid."tFunctionKnotTypes"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tFunctionKnotTypes"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tFunctionKnotTypes"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tFunctions"
 	(
@@ -195,11 +195,11 @@ CREATE TABLE grid."tFunctions"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tFunctions"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tFunctions"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tFunctionKnotTypeBinds"
 	(
@@ -214,11 +214,11 @@ CREATE TABLE grid."tFunctionKnotTypeBinds"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tFunctionKnotTypeBinds"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tFunctionKnotTypeBinds"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tFunctionKnots"
 	(
@@ -235,11 +235,11 @@ CREATE TABLE grid."tFunctionKnots"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tFunctionKnots"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tFunctionKnots"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tRulesSets"
 	(
@@ -250,11 +250,11 @@ CREATE TABLE grid."tRulesSets"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tRulesSets"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tRulesSets"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tRules"
 	(
@@ -269,11 +269,11 @@ CREATE TABLE grid."tRules"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tRules"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tRules"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 
 CREATE TABLE grid."tRulesSetBinds"
 	(
@@ -288,9 +288,9 @@ CREATE TABLE grid."tRulesSetBinds"
 	) 
 	WITHOUT OIDS;
 
-CREATE TRIGGER "HKManagement"
-		BEFORE INSERT OR UPDATE OR DELETE
-		ON grid."tRulesSetBinds"
-		FOR EACH ROW
-		EXECUTE PROCEDURE hk."fManagement"();
+	CREATE TRIGGER "HKManagement"
+			BEFORE INSERT OR UPDATE OR DELETE
+			ON grid."tRulesSetBinds"
+			FOR EACH ROW
+			EXECUTE PROCEDURE hk."fManagement"();
 

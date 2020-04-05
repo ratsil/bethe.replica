@@ -347,72 +347,97 @@ namespace replica.player
 		public void PlaylistItemQueue(PlaylistItem cPLI)
 		{
 			try
-			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemQueued`(" + cPLI.nID + ", '" + cPLI.dtStartPlanned.ToString("yyyy-MM-dd HH:mm:ss.ff") + "')");
-				//TODO LOG ошибочный статус селекта
-			}
+            {
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemQueued`(" + cPLI.nID + ", '" + cPLI.dtStartPlanned.ToString("yyyy-MM-dd HH:mm:ss.ff") + "')");
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemQueue: [" + cPLI.cFile.sFilename + "]");
+                //TODO LOG ошибочный статус селекта
+            }
 			catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
+				(new Logger("playlist")).WriteError("PlaylistItemQueue", ex);
 			}
 		}
 		public void PlaylistItemPrepare(PlaylistItem cPLI)
 		{
 			try
 			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemPrepared`(" + cPLI.nID + ")");
-				//TODO LOG ошибочный статус селекта
-			}
-			catch (Exception ex)
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemPrepared`(" + cPLI.nID + ")");
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemPrepare: [" + cPLI.cFile.sFilename + "]");
+                //TODO LOG ошибочный статус селекта
+            }
+            catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
-			}
+				(new Logger("playlist")).WriteError("PlaylistItemPrepare", ex);
+
+            }
 		}
 		public void PlaylistItemStart(PlaylistItem cPLI, ulong nDelay) //EMERGENCY нужно обрабатывать delay
 		{
 			try
 			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStarted`(" + cPLI.nID + ", " + cPLI.nFrameStart + ");");
-				//TODO LOG ошибочный статус селекта
-			}
-			catch (Exception ex)
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStarted`(" + cPLI.nID + ", " + (cPLI.nFrameCurrent > 0 ? cPLI.nFrameCurrent : cPLI.nFrameStart) + ");"); // .nFrameStart  - sets stopPlanned on the first pli to greater value in PL (after start pleer)
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemStart: [" + cPLI.cFile.sFilename + "]");
+
+                //TODO LOG ошибочный статус селекта
+            }
+            catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
-			}
+				(new Logger("playlist")).WriteError("PlaylistItemStart", ex);
+
+            }
 		}
 		public void PlaylistItemStop(PlaylistItem cPLI)
 		{
 			try
 			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStopped`(" + cPLI.nID + ")");
-				//TODO LOG ошибочный статус селекта
-			}
-			catch (Exception ex)
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemStopped`(" + cPLI.nID + ")");
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemStop: [" + cPLI.cFile.sFilename + "]");
+
+                //TODO LOG ошибочный статус селекта
+            }
+            catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
-			}
+				(new Logger("playlist")).WriteError("PlaylistItemStop", ex);
+
+            }
 		}
 		public void PlaylistItemFail(PlaylistItem cPLI)
 		{
 			try
 			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemFailed`(" + cPLI.nID + ")");
-			}
-			catch (Exception ex)
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemFailed`(" + cPLI.nID + ")");
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemFail: [" + cPLI.cFile.sFilename + "]");
+            }
+            catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
-			}
+				(new Logger("playlist")).WriteError("PlaylistItemFail", ex);
+
+            }
 		}
 		public void PlaylistItemSkip(PlaylistItem cPLI)
 		{
 			try
 			{
-				_cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemSkipped`(" + cPLI.nID + ")");
-			}
-			catch (Exception ex)
+                if (cPLI.nID > 0)
+                    _cDB.PerformAsync("SELECT `bValue` FROM pl.`fItemSkipped`(" + cPLI.nID + ")");
+                else
+                    (new Logger("playlist")).WriteNotice("PlaylistItemSkip: [" + cPLI.cFile.sFilename + "]");
+            }
+            catch (Exception ex)
 			{
-				(new Logger("playlist")).WriteError(ex);
-			}
+				(new Logger("playlist")).WriteError("PlaylistItemSkip", ex);
+
+            }
 		}
 
 		#region реализация Playlist.IInteract

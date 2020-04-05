@@ -125,7 +125,14 @@ namespace replica
 					return _cInstance._tsCommandsSleepDuration;
 				}
 			}
-			static public string sChannel
+            static public string sBlockAdvTemplate
+            {
+                get
+                {
+                    return _cInstance._sBlockAdvTemplate;
+                }
+            }
+            static public string sChannel
 			{
 				get
 				{
@@ -237,7 +244,8 @@ namespace replica
 			private TimeSpan _tsBlockClip_4minimum_Duration;
 			private TimeSpan _tsSleepDuration;
 			private TimeSpan _tsCommandsSleepDuration;
-			private string _sPgDumpBinPath;
+            private string _sBlockAdvTemplate;
+            private string _sPgDumpBinPath;
 			private string _sPgDumpPath;
 			private string _sPgDumpName;
 			private string _sPgDBName;
@@ -275,15 +283,16 @@ namespace replica
 					_tsBlockArtistDuration = cNodeChild.AttributeGet<TimeSpan>("artist");
 					_tsBlockForeignArtistDuration = cNodeChild.AttributeGet<TimeSpan>("foreign");
 					_tsBlockClipDuration = cNodeChild.AttributeGet<TimeSpan>("clip");
-					_tsBlockClip_1_Duration = null == cNodeChild.AttributeValueGet("clip_1", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_1");
-					_tsBlockClip_2_Duration = null == cNodeChild.AttributeValueGet("clip_2", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_2");
-					_tsBlockClip_3_Duration = null == cNodeChild.AttributeValueGet("clip_3", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_3");
-					_tsBlockClip_4_Duration = null == cNodeChild.AttributeValueGet("clip_4", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_4");
-					_tsBlockClip_foreign_Duration = null == cNodeChild.AttributeValueGet("clip_foreign", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_foreign");
-					_tsBlockClip_3minimum_Duration = null == cNodeChild.AttributeValueGet("clip_3min", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_3min");
-					_tsBlockClip_4minimum_Duration = null == cNodeChild.AttributeValueGet("clip_4min", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_4min");
-					_tsBlockClip_force_Duration = null == cNodeChild.AttributeValueGet("clip_force", false) ? TimeSpan.MinValue : cNodeChild.AttributeGet<TimeSpan>("clip_force");
-				}
+					_tsBlockClip_1_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_1", TimeSpan.MinValue);
+					_tsBlockClip_2_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_2", TimeSpan.MinValue);
+					_tsBlockClip_3_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_3", TimeSpan.MinValue);
+					_tsBlockClip_4_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_4", TimeSpan.MinValue);
+                    _tsBlockClip_foreign_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_foreign", TimeSpan.MinValue);
+					_tsBlockClip_3minimum_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_3min", TimeSpan.MinValue);
+					_tsBlockClip_4minimum_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_4min", TimeSpan.MinValue);
+					_tsBlockClip_force_Duration = cNodeChild.AttributeOrDefaultGet<TimeSpan>("clip_force", TimeSpan.FromHours(1));
+                    _sBlockAdvTemplate = cNodeChild.AttributeOrDefaultGet<string>("adv_template", null);
+                }
 				else
 					_bPlaylistGenerating = false;
 

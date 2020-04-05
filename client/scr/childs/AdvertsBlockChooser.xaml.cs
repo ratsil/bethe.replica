@@ -16,6 +16,7 @@ using IP = scr.services.ingenie.player;
 using scr.services.ingenie.player;
 using controls.sl;
 using controls.childs.sl;
+using controls.extensions.sl;
 using helpers.extensions;
 using scr;
 
@@ -100,6 +101,7 @@ namespace scr.childs
 			_cDBI.LogoBindingGetCompleted += new EventHandler<LogoBindingGetCompletedEventArgs>(_cDBI_LogoBindingGetCompleted);
             _cDBI.FileIDsInStockGetCompleted += _cDBI_FileIDsInStockGetCompleted;
             _cPlayer.ItemsCachedGetCompleted += _cPlayer_ItemsCachedGetCompleted;
+            _cPlayer.CacheClipCompleted += _cPlayer_CacheClipCompleted;
 
             _ui_btnRefresh.Visibility = Visibility.Collapsed;
 
@@ -128,7 +130,8 @@ namespace scr.childs
             }
             else
                 throw new Exception("Unknown type of AdvertsBlockChooser [" + enType + "]");
-        } 
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             _cDBI.ClipsGetCompleted -= _cDBI_ClipsGetCompleted;
@@ -185,11 +188,11 @@ namespace scr.childs
 		#region . UI .
 		private void _ui_btnOk_Click(object sender, RoutedEventArgs e)
         {
-            if (null == _ui_lblNameOfSelected.Content || (string)_ui_lblNameOfSelected.Content == g.Common.sNoSelection.ToUpper())
-                this.DialogResult = false;
+            if (_ui_btnOk.IsEnabled)
+                this.DialogResult = true;
 			else
 			{
-				this.DialogResult = true;
+				this.DialogResult = false;
 			}
 		}
 		private void _ui_btnCancel_Click(object sender, RoutedEventArgs e)
@@ -315,6 +318,10 @@ namespace scr.childs
         }
         private SolidColorBrush ColorTB3Get(LivePLItem cPLI)
         {
+            if (!SCR._bIsWithCacheMode)
+            {
+                return Coloring.SCR.Cached.cCachedBackgrGray;
+            }
             switch (cPLI.eCacheType)
             {
                 case LivePLItem.CacheType.cached:
@@ -355,8 +362,11 @@ namespace scr.childs
         {
             _ui_lblStatus.Content = "";
             ClearSelected();
+            _ui_btnOk.IsEnabled = false;
             if (_ui_dgCached.SelectedItem == null)
+            {
                 return;
+            }
             DataGridRow cRow;
             if (null != _cPLISelected)
             {
@@ -366,6 +376,10 @@ namespace scr.childs
 
             _cPLISelected = (LivePLItem)_ui_dgCached.SelectedItem;
             _ui_lblNameOfSelected.Content = _cPLISelected.cAdvertSCR == null || _cPLISelected.cAdvertSCR.dtStartSoft < DateTime.MaxValue ? g.Common.sNoSelection.ToUpper() : _cPLISelected.cAdvertSCR.sName;
+            if ((string)_ui_lblNameOfSelected.Content != g.Common.sNoSelection.ToUpper() && _cPLISelected.eCacheType == LivePLItem.CacheType.cached)
+            {
+                _ui_btnOk.IsEnabled = true;
+            }
             _nRowIndexSelected = _ui_dgCached.SelectedIndex;
             cRow = RowCurrentSelected(_nRowIndexSelected, _cPLISelected);
 
@@ -390,6 +404,57 @@ namespace scr.childs
             if (cRow.GetIndex() != _nRowIndexSelected)
                 MarkCachedTBsInRow(cRow, Coloring.DataGridRowColorType.MouseOver);
         }
+
+        #region . cached cm .
+        private void _ui_dgCached_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (1 >= _ui_dgCached.SelectedItems.Count)
+                try
+                {
+                    LivePLItem cSelected = (LivePLItem)((FrameworkElement)(((RoutedEventArgs)(e)).OriginalSource)).DataContext;
+                    _ui_dgCached.SelectedItem = cSelected;
+                }
+                catch
+                {
+                }
+        }
+        private void _ui_cmCached_Opened(object sender, RoutedEventArgs e)
+        {
+            _ui_cmCachedAdd.IsEnabled = false;
+            _ui_cmCachedToCache.IsEnabled = false;
+            if (0 < _ui_dgCached.SelectedItems.Count)
+            {
+                if (1 == _ui_dgCached.SelectedItems.Count)
+                {
+                    _ui_cmCachedAdd.Header = g.SCR.sNotice18 + ": \"" + ((LivePLItem)_ui_dgCached.SelectedItem).sName + "\"";
+                    _ui_cmCachedToCache.Header = g.SCR.sNotice44 + ": \"" + ((LivePLItem)_ui_dgCached.SelectedItem).sName + "\"";
+                }
+                //else
+                //    _ui_cmCachedAdd.Header = g.SCR.sNotice19 + ": " + _ui_dgCached.SelectedItems.Count + " items";
+                _ui_cmCachedToCache.IsEnabled = ((LivePLItem)_ui_dgCached.SelectedItem).cAdvertSCR != null && ((LivePLItem)_ui_dgCached.SelectedItem).cAdvertSCR.dtStartSoft == DateTime.MaxValue;
+                _ui_cmCachedAdd.IsEnabled = _ui_btnOk.IsEnabled;
+            }
+            _ui_cmCachedAdd.Refresh();
+            _ui_cmCachedToCache.Refresh();
+        }
+        private void _ui_cmCachedAdd_Click(object sender, RoutedEventArgs e)
+        {
+            _ui_btnOk_Click(null, null);
+        }
+        private void _ui_cmCachedToCache_Click(object sender, RoutedEventArgs e)
+        {
+            if (null != _ui_dgCached.SelectedItem)
+            {
+                LivePLItem cLPLI = (LivePLItem)_ui_dgCached.SelectedItem;
+                if (cLPLI.cAdvertSCR.dtStartSoft == DateTime.MaxValue)
+                {
+                    ProgressOn();
+                    IP.Clip cC = new IP.Clip() { nID = cLPLI.cAdvertSCR.nAssetID, sName = cLPLI.cAdvertSCR.sName, nFramesQty = cLPLI.cAdvertSCR.nFramesQty, sFilename = cLPLI.sFilename, sStoragePath = cLPLI.cAdvertSCR.sStoragePath };
+                    _cPlayer.CacheClipAsync(cC);
+                }
+            }
+        }
+        #endregion
         #endregion
 
         #region . DB interact .
@@ -747,8 +812,10 @@ namespace scr.childs
             else
                 ProgressOff();
         }
-
-
+        private void _cPlayer_CacheClipCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            _ui_btnRefresh_Click(null, null);
+        }
         #endregion
 
     }

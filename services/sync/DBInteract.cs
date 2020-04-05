@@ -39,9 +39,11 @@ namespace replica.sync
             aPLFramesDur = new Dictionary<long, long>();
             try
 			{
-				Queue<Hashtable> aqDBValues = _cDB.Select("SELECT id, `sPath`, `sFilename`, `dtStartPlanned`, `nFrameStop` - `nFrameStart` as `nFramesDur` FROM pl.`vPlayListResolvedOrdered` WHERE `sStatusName`='planned' AND `dtStartPlanned` > '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartPlanned` < '" + DateTime.Now.AddMinutes(nMinutesQty).ToString("yyyy-MM-dd HH:mm:ss") + "' OFFSET " + nOffset);
+                string sSQL = "SELECT id, `sPath`, `sFilename`, `dtStartPlanned`, `nFrameStop` - `nFrameStart` as `nFramesDur` FROM pl.`vPlayListResolvedOrdered` WHERE `sStatusName`='planned' AND `dtStartPlanned` > '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' AND `dtStartPlanned` < '" + DateTime.Now.AddMinutes(nMinutesQty).ToString("yyyy-MM-dd HH:mm:ss") + "' OFFSET " + nOffset;
+                Queue<Hashtable> aqDBValues = _cDB.Select(sSQL);
 				Hashtable ahRow = null;
 				string sFile;
+                int nCount = aqDBValues.Count;
 				while (null != aqDBValues && 0 < aqDBValues.Count)
 				{
 					ahRow = aqDBValues.Dequeue();
@@ -54,10 +56,10 @@ namespace replica.sync
                         aPLFramesDur.Add(ahRow["id"].ToID(), ahRow["nFramesDur"].ToLong());
                         aRetVal.Add(ahRow["id"].ToID());
                     }
-					catch (Exception ex)
-					{
-						(new Logger()).WriteError(ex); //TODO LANG
-					}
+                    catch (Exception ex)
+                    {
+                        (new Logger()).WriteError("[id=" + ahRow["id"] + "][count=" + nCount + "][sql=" + sSQL + "]", ex); //TODO LANG
+                    }
 				}
 			}
 			catch (Exception ex)

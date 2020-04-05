@@ -118,6 +118,7 @@ namespace scr
                 return _sCachedInfo;
             }
         }
+        public string sModificationDate { get; set; }
         public string sStartPlanned
         {
             get

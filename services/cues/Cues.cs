@@ -29,35 +29,48 @@ namespace replica
 			Queue<PlaylistItem> PlaylistItemsPreparedGet();
 			TemplateBind[] TemplateBindsGet(PlaylistItem cPLI);
 		}
-        /*
 		public class Preferences : helpers.Preferences
 		{
 			static protected Preferences _cInstance = new Preferences();
 
-			static public string sCacheFolder
-			{
-				get
-				{
-					return _cInstance._sCacheFolder;
-				}
-			}
+            static public TimeSpan tsSleepDuration
+            {
+                get
+                {
+                    return _cInstance._tsSleepDuration;
+                }
+            }
+            static public TimeSpan tsCommandsSleepDuration
+            {
+                get
+                {
+                    return _cInstance._tsCommandsSleepDuration;
+                }
+            }
 
-			private string _sCacheFolder;
+            private TimeSpan _tsSleepDuration;
+            private TimeSpan _tsCommandsSleepDuration;
 
-			public Preferences()
-				: base("//replica/player")
+            public Preferences()
+				: base("//replica/cues")
 			{
 			}
 			override protected void LoadXML(XmlNode cXmlNode)
 			{
-				if (null == cXmlNode)
-					return;
-				_sCacheFolder = cXmlNode.AttributeValueGet("cache");
-				if (!System.IO.Directory.Exists(_sCacheFolder))
-					throw new Exception("указанная папка кэша плеера не существует [cache:" + _sCacheFolder + "][" + cXmlNode.Name + "]"); //TODO LANG
-			}
-		}
-        */
+                if (null == cXmlNode || _bInitialized)
+                    return;
+                _tsSleepDuration = cXmlNode.AttributeGet<TimeSpan>("sleep");
+                (new Logger()).WriteNotice("prefs: _tsSleepDuration = " + (int)_tsSleepDuration.TotalMilliseconds + " ms");
+
+                XmlNode cNodeChild;
+                _tsCommandsSleepDuration = TimeSpan.MaxValue;
+                if (null != (cNodeChild = cXmlNode.NodeGet("commands", false)))
+                {
+                    _tsCommandsSleepDuration = cNodeChild.AttributeGet<TimeSpan>("sleep");
+                    (new Logger()).WriteNotice("prefs: _tsCommandsSleepDuration = " + (int)_tsCommandsSleepDuration.TotalMilliseconds + " ms");
+                }
+            }
+        }
 		public class Logger : helpers.Logger
 		{
 			static public string sFile = null;
@@ -141,10 +154,10 @@ namespace replica
                 (new Logger()).WriteNotice("модуль титрования запущен");//TODO LANG
 
                 while (_bRunning)
-				{
-					Thread.Sleep(500);
-//					_iInteract = _iInteract.Init();
-					try
+                {
+                    Thread.Sleep((int)Preferences.tsSleepDuration.TotalMilliseconds);
+                    //					_iInteract = _iInteract.Init();
+                    try
 					{
 						try
 						{
