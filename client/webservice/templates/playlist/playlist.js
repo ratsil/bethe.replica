@@ -12,4 +12,9 @@ $(document).ready(function () {
         $('#insertAsset').modal('show');
     });
 
+    $('#archiveTable').DataTable({
+        paging: false,
+        scrollY: 400
+    });
+
 });

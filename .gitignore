@@ -7,3 +7,4 @@ packages/
 client/webservice/App_Data/lib/
 client/webservice/bin/
 desktop.ini
+/client/webservice/replica.pfx

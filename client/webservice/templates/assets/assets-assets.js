@@ -37,6 +37,7 @@ $(document).ready(el => {
         })
     });
 
+
     // btn Add Advertisement
     $('#addAd').click(function() {
         $('#modalAddAd').modal('show');
@@ -88,7 +89,12 @@ function loadClipsInTable() {
         $(oValue).each(function(index, el) {
             $(makeRow(el, true)).appendTo('#tableAssetClips');
         });
+        $('[data-table-id=tableAssetClips]').DataTable({
+            paging: false,
+            scrollY: 400
+        });
     })
+    
 }
 
 function loadAdvertisementInTable() {

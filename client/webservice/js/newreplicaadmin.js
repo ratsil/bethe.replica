@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
 
     API.Authorize(function() {
@@ -31,12 +32,24 @@ $(document).ready(function() {
             let sNameUi = $(this).attr('name');
             let ui = $('#mainContent').empty();
             setNavLinkActive(sNameUi);
+
+            console.log ('/' + sNameUi + '/' + sNameUi + '.html');
+            
             Templates.Attach('/' + sNameUi + '/' + sNameUi + '.html', ui, function() {
                 // Loader.Hide();
             });
             Cookies.Set('page', sNameUi, 10);
             return false;
         });
+
+        //switch language
+        $('.dropdown-item').click(function(){
+            if ($(this).data('switchLang') === 'ru') {
+                alert ('choosen Ru');
+            } else {
+                alert ('choosen En');
+            }
+        })
 
     })
 
