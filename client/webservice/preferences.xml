@@ -29,6 +29,7 @@
 			</replica>
 		</clients>
 		<database server="127.0.0.1" port="5432" name="replica" user="" password="" timeout="240" />
+		<services_ia username="user" pass="" />
 	</webservice>
 	<helpers>
 		<common>

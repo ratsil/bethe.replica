@@ -31,7 +31,7 @@ namespace webservice.ia
 			{
 				if (XML.Redirect(this))
 					return;
-				DBInteract cDBI = new DBInteract("replica_ia", "");
+				DBInteract cDBI = new DBInteract(Preferences.sIaUsername, Preferences.sIaPass);
                 byte[] aImageBytes = null;
                 string sBindID = null, sText = null;
                 int nCount = -1;

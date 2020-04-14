@@ -30,7 +30,7 @@ namespace webservice.ia
 			{
 				Response.ContentType = "application/octet-stream";
 				Response.AddHeader("content-disposition", "filename = clips.xml");
-				DBInteract cDBI = new DBInteract("replica_ia", "");
+				DBInteract cDBI = new DBInteract(Preferences.sIaUsername, Preferences.sIaPass);
 				Queue<Clip> aqClips = cDBI.ClipsGet();
                 String sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><clips>";
 				while (0 < aqClips.Count)

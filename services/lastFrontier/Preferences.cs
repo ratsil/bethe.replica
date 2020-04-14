@@ -31,7 +31,7 @@ namespace replica.lfrontier
 				return;
             _sFolder = cXmlNode.AttributeValueGet("folder");
 			if (!System.IO.Directory.Exists(_sFolder))
-				throw new Exception("указанная папка не существует [folder:" + _sFolder + "][" + cXmlNode.Name + "]"); //TODO LANG
+				throw new Exception("СѓРєР°Р·Р°РЅРЅР°СЏ РїР°РїРєР° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ [folder:" + _sFolder + "][" + cXmlNode.Name + "]"); //TODO LANG
 		}
 	}
 }
