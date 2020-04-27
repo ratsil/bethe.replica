@@ -272,6 +272,7 @@
     </Compile>
     <Compile Include="api.aspx.cs">
       <DependentUpon>api.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ia\chat.aspx.cs">
       <DependentUpon>chat.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
