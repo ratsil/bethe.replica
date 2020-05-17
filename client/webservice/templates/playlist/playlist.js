@@ -17,4 +17,11 @@ $(document).ready(function () {
         scrollY: 400
     });
 
+    
+
+    dtToday = new Date();
+    PL.Items.ArchiveList( dtStart, dtToday, o => {
+        
+    })
+
 });

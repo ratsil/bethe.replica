@@ -799,7 +799,7 @@ var API = (function() {
                 List: function(aStatuses, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('PlaylistItemsGet', [aStatuses], function(oResponse) {
+                    Request.Send('PlaylistItemsGet', JSON.stringify({ data: [aStatuses], types: ['helpers.IdNamePair[], helpers.common'] }), false, function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue || []);
@@ -808,7 +808,7 @@ var API = (function() {
                 ArchiveList: function(dtBegin, dtEnd, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('PlaylistItemsArchGet', [dtBegin, dtEnd], function(oResponse) {
+                    Request.Send('PlaylistItemsArchGet', JSON.stringify({ data: [dtBegin, dtEnd], types: ['System.DateTime', 'System.DateTime'] }), false, function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue || []);
@@ -817,7 +817,7 @@ var API = (function() {
                 PlannedList: function(dtBegin, dtEnd, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('PlaylistItemsPlanGet', [dtBegin, dtEnd], function(oResponse) {
+                    Request.Send('PlaylistItemsPlanGet', JSON.stringify({ data: [dtBegin, dtEnd], types: ['System.DateTime', 'System.DateTime'] }), false, function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue || []);
@@ -826,7 +826,7 @@ var API = (function() {
                 AdvertisementsList: function(dtBegin, dtEnd, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('PlaylistItemsAdvertsGet', [dtBegin, dtEnd], function(oResponse) {
+                    Request.Send('PlaylistItemsAdvertsGet', JSON.stringify({ data: [dtBegin, dtEnd], types: ['System.DateTime', 'System.DateTime'] }), false,  function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue || []);

@@ -75,6 +75,7 @@ $(document).ready(el => {
 })
 
 function loadAllAssets() {
+    Loader.Show();
     $('#tableAssetsAll').empty();
     API.MAM.Assets.List("all", function(oValue) {
         $(oValue).each(function(index, el) {
@@ -84,6 +85,7 @@ function loadAllAssets() {
 }
 
 function loadClipsInTable() {
+    Loader.Show();
     $('#tableAssetClips').empty();
     API.MAM.Clips.List(function(oValue) {
         $(oValue).each(function(index, el) {
@@ -93,34 +95,41 @@ function loadClipsInTable() {
             paging: false,
             scrollY: 400
         });
+        Loader.Hide();
     })
     
 }
 
 function loadAdvertisementInTable() {
+    Loader.Show();
     $('#tableAssetsAdvertisement').empty();
     API.MAM.Advertisements.List(function(oValue) {
         $(oValue).each(function(index, el) {
             $(makeRow(el)).appendTo('#tableAssetsAdvertisement');
         });
+        Loader.Hide();
     })
 }
 
 function loadProgramsInTable() {
+    Loader.Show();
     $('#tableAssetsPrograms').empty();
     API.MAM.Programs.List(function(oValue) {
         $(oValue).each(function(index, el) {
             $(makeRow(el)).appendTo('#tableAssetsPrograms');
         });
+        Loader.Hide();
     })
 }
 
 function loadDesignInTable() {
+    Loader.Show();
     $('#tableAssetsDesign').empty();
     API.MAM.Designs.List(function(oValue) {
         $(oValue).each(function(index, el) {
             $(makeRow(el)).appendTo('#tableAssetsDesign');
         });
+        Loader.Hide();
     })
 }
 
