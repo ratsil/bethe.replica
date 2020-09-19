@@ -1,4 +1,5 @@
 class ReplicaTable {
+<<<<<<< HEAD
 
     oTypeTables = {
         PlayListArchive: {
@@ -7,30 +8,62 @@ class ReplicaTable {
         },
         PlayListAir: {
             sName: "PlayListAir",
+=======
+    oTables = {
+        PlayListArchive: {
+            sName: "PlayListArchive",
+            nCol: 8,
+            aColNames: ["Дата и время выхода", "Название ассета", "Хронометраж", "Статус", "Имя файла", "Класс", "Ротация", "Тип"]
+        },        
+        PlayListAir: {
+            sName: "PlayListAir",
+            nCol: 8,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["Дата и время выхода", "Название ассета", "Хронометраж", "Статус", "Имя файла", "Класс", "Ротация", "Тип"]
         },
         PlayListPlan: {
             sName: "PlayListPlan",
+<<<<<<< HEAD
+=======
+            nCol: 8,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["Дата и время выхода", "Название ассета", "Хронометраж", "Статус", "Имя файла", "Класс", "Ротация", "Тип"]
         },
         AssetsAssetsAll: {
             sName: "AssetsAssetsAll",
+<<<<<<< HEAD
+=======
+            nCol: 7,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
         },
         AssetsAssetsClips: {
             sName: "AssetsAssetsClips",
+<<<<<<< HEAD
+=======
+            nCol: 7,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
         },
         AssetsAssetsAd: {
             sName: "AssetsAssetsAd",
+<<<<<<< HEAD
+=======
+            nCol: 7,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
         },
         AssetsAssetsProgram: {
             sName: "AssetsAssetsProgram",
+<<<<<<< HEAD
+=======
+            nCol: 7,
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
             aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
         },
         AssetsAssetsDesign: {
             sName: "AssetsAssetsDesign",
+<<<<<<< HEAD
             aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
         },
         AssetsPersons: {
@@ -111,4 +144,57 @@ class ReplicaTable {
     }
 
     //конец класса
+=======
+            nCol: 7,
+            aColNames: ["ID", "Исполнитель : Клип", "Файл", "Длительность", "Тип", "Ротация", "Класс"]
+        },
+        AssetsPersons:{
+            sName: "AssetsPersons",
+            nCol: 3,
+            aColNames: ["Название", "Тип", "id"]
+        }
+    }
+
+//Конструктор. просто конструктор
+    constructor(sTypeTable){
+        this.title = oTitle;
+    }
+
+// Получить даные для таблицы
+    getData(oTypeTable){
+        switch (oTypeTable.sName) {
+            case "PlayListArchive":
+                break
+            case "PlayListAir":
+                break
+            case "PlayListPlan":
+                break
+            case "AssetsAssetsAll":
+                break
+            case "AssetsAssetsClips":
+                break
+            case "AssetsAssetsAd":
+                break
+            case "AssetsAssetsProgram":
+                break
+            case "AssetsAssetsDesign":
+                break    
+            case "AssetsPersons":
+                break
+        }
+
+    }
+
+// Сгенерировать строку таблицы в HTML
+    makeRow(){
+
+    }
+
+//Вывести таблицу в нужное место
+    static attachTableTo(oAttachPoint){
+
+    }
+
+//конец класса
+>>>>>>> b8b619966ef26a4bc9b5fa861f4558eb84c9896e
 }
