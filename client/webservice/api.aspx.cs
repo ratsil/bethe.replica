@@ -114,33 +114,54 @@ namespace webservice
                             default:
                                 Data oData = null;
                                 object[] aParameters = null;
-
+                                //(new Logger()).WriteNotice("1");
                                 try
                                 {
+                                    //(new Logger()).WriteNotice("2");
                                     oData = JsonConvert.DeserializeObject<Data>(RequestBodyGet());
+                                    //(new Logger()).WriteNotice("3");
                                     aParameters = oData.data;
                                 } catch { }
                                 MethodInfo oMethod;
                                 //object[] aParameters = JsonConvert.DeserializeObject<Data>(RequestBodyGet()).data;
                                 Type[] aTypes = null;
+                                //(new Logger()).WriteNotice("4");
                                 if (null != aParameters)
                                 {
+                                    //(new Logger()).WriteNotice("5");
                                     aTypes = new Type[aParameters.Length];
                                     for (int n = 0; aParameters.Length > n; n++) {
                                         aTypes[n] = Type.GetType(oData.types[n], true);
-                                            }
+                                        switch (oData.data[n].GetType().Name) {
+                                            case "JArray":
+                                                switch (aTypes[n].Name)
+                                                {
+                                                    case "IdNamePair[]":
+                                                        oData.data[n]= ((Newtonsoft.Json.Linq.JArray)oData.data[n]).Select(o => new IdNamePair
+                                                        {
+                                                            nID = (long)o["nID"],
+                                                            sName = (string)o["sName"]
+                                                        }).ToArray();
+                                                        break;
+                                                }
+                                                break;
+                                        }
+                                    }
                                 }
                                 else
                                     aTypes = new Type[0];
-                                
+                                //(new Logger()).WriteNotice("6");
+
                                 var oDBI = Init();
                                 Type oType = oDBI.GetType();
                                 if (null == aTypes)
                                     oMethod = oType.GetMethod(aRequests[0]);
                                 else
                                     oMethod = oType.GetMethod(aRequests[0], aTypes);
+                                //(new Logger()).WriteNotice("7");
                                 if (null != oMethod)
                                     oResult = oMethod.Invoke(oDBI, aParameters);
+                                //(new Logger()).WriteNotice("8");
                                 break;
                         }
                     }

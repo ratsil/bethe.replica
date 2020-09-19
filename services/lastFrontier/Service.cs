@@ -30,7 +30,7 @@ namespace replica.lfrontier
 			try
 			{
 				//Thread.Sleep(15000);
-				(new Logger()).WriteWarning("получен сигнал на запуск");//TODO LANG
+				(new Logger()).WriteWarning("РїРѕР»СѓС‡РµРЅ СЃРёРіРЅР°Р» РЅР° Р·Р°РїСѓСЃРє");//TODO LANG
 				_cMREStop = new ManualResetEvent(false);
 				ThreadPool.QueueUserWorkItem(Play, this);
 
@@ -44,7 +44,7 @@ namespace replica.lfrontier
         {
 			try
 			{
-				(new Logger()).WriteWarning("получен сигнал на остановку");//TODO LANG
+				(new Logger()).WriteWarning("РїРѕР»СѓС‡РµРЅ СЃРёРіРЅР°Р» РЅР° РѕСЃС‚Р°РЅРѕРІРєСѓ");//TODO LANG
 				_cMREStop.Set();
 				DateTime dt = DateTime.Now;
 				while (1 > _nThreadsFinished && DateTime.Now.Subtract(dt).TotalSeconds < 2)
@@ -61,7 +61,7 @@ namespace replica.lfrontier
         {
 			try
 			{
-				(new Logger()).WriteNotice("модуль \"последний рубеж\" запущен");//TODO LANG
+				(new Logger()).WriteNotice("РјРѕРґСѓР»СЊ \"РїРѕСЃР»РµРґРЅРёР№ СЂСѓР±РµР¶\" Р·Р°РїСѓС‰РµРЅ");//TODO LANG
 				Animation cAnimation = new Animation();
 				cAnimation.Prepared += new EventDelegate(OnAnimationPrepared);
 				cAnimation.Started += new EventDelegate(OnAnimationStarted);
@@ -81,21 +81,21 @@ namespace replica.lfrontier
             {
 				(new Logger()).WriteError(ex);
 			}
-			(new Logger()).WriteNotice("модуль  \"последний рубеж\" остановлен");//TODO LANG
+			(new Logger()).WriteNotice("РјРѕРґСѓР»СЊ  \"РїРѕСЃР»РµРґРЅРёР№ СЂСѓР±РµР¶\" РѕСЃС‚Р°РЅРѕРІР»РµРЅ");//TODO LANG
 			_nThreadsFinished++;
 		}
 
 		static void OnAnimationPrepared(Atom cAtom)
 		{
-			(new Logger()).WriteNotice("подготовлено");
+			(new Logger()).WriteNotice("РїРѕРґРіРѕС‚РѕРІР»РµРЅРѕ");
 		}
 		static void OnAnimationStarted(Atom cAtom)
 		{
-			(new Logger()).WriteNotice("запущенно");
+			(new Logger()).WriteNotice("Р·Р°РїСѓС‰РµРЅРЅРѕ");
 		}
 		static void OnAnimationStopped(Atom cAtom)
 		{
-			(new Logger()).WriteNotice("остановлено");
+			(new Logger()).WriteNotice("РѕСЃС‚Р°РЅРѕРІР»РµРЅРѕ");
 		}
 
 		static void cAnimation_EventDone()

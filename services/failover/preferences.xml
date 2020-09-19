@@ -12,7 +12,7 @@
 						<template path="/path" key="start_offset" value="0" />
 					</binds>
 				</class>
-				<cues drive_letter="DRIVE" />
+				<cues drive_letter="DRIVE:" />
 				<plug id="0" file="/path" class="design_common" />
 				<statuses>
 					<failed id="0" name="failed" />

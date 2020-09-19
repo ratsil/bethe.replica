@@ -201,7 +201,6 @@
     <Content Include="index.aspx" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
-    <None Include="Properties\PublishProfiles\replica-debug.pubxml" />
     <None Include="Properties\PublishProfiles\replica-local.pubxml" />
     <None Include="Properties\PublishProfiles\replica-release.pubxml" />
     <None Include="services\.htaccess" />
@@ -272,6 +271,8 @@
     </Compile>
     <Compile Include="api.aspx.cs">
       <DependentUpon>api.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="ia\chat.aspx.cs">
       <DependentUpon>chat.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

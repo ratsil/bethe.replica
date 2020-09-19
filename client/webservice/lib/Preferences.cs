@@ -202,7 +202,21 @@ namespace webservice
                 return _cInstance._sVKontakteSecret;
             }
         }
-		static public bool bPowerGoldIDsAreAssetIDs
+        static public string sIaUsername
+        {
+            get
+            {
+                return _cInstance._sIaUsername;
+            }
+        }
+        static public string sIaPass
+        {
+            get
+            {
+                return _cInstance._sIaPass;
+            }
+        }
+        static public bool bPowerGoldIDsAreAssetIDs
 		{
 			get
 			{
@@ -243,7 +257,9 @@ namespace webservice
         private string _sTwitterSecret;
         private string _sVKontakteAppID;
         private string _sVKontakteSecret;
-		private bool _bPowerGoldIDsAreAssetIDs;
+        private string _sIaUsername;
+        private string _sIaPass;
+        private bool _bPowerGoldIDsAreAssetIDs;
         private bool _bMakeAdvertAsset;
         private int _nColumnWithPGIds;
         private TimeSpan _tsSafeRange;
@@ -261,6 +277,12 @@ namespace webservice
 			XmlNode cXmlNodeClient;
 
 			string sChName = cXmlNode.AttributeOrDefaultGet<string>("name", "channel");
+
+            if (null != (cXmlNodeClient = cXmlNode.NodeGet("services_ia", false)))
+            {
+                 _sIaUsername = cXmlNodeClient.AttributeValueGet("username");
+                _sIaPass = cXmlNodeClient.AttributeValueGet("pass");
+            }
 
             _cDBCredentials = new DB.Credentials(cXmlNode.NodeGet("database"));
 

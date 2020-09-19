@@ -29,9 +29,9 @@ namespace webservice.ia
 			{
 				Response.ContentType = "application/octet-stream";
 				Response.AddHeader("content-disposition", "filename = pl.xml");
-				DBInteract cDBI = new DBInteract("replica_ia", "");
+				DBInteract cDBI = new DBInteract(Preferences.sIaUsername, Preferences.sIaPass);
 
-				string sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><playlist>";
+                string sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><playlist>";
 				helpers.replica.scr.Shift cSCRShift = cDBI.ShiftCurrentGet();
 				if (null == cSCRShift || null == cSCRShift.cPreset || 0 >= cSCRShift.cPreset.nID)
 				{

@@ -27,8 +27,8 @@ namespace webservice.ia
 					return;
 				if (null == Request.Params["text"])
                     throw new Exception("parameter text is missing");
-				DBInteract cDBI = new DBInteract("replica_ia", "");
-				string sText = HttpUtility.ParseQueryString(Request.RawUrl, Encoding.GetEncoding("utf-8"))["text"];
+				DBInteract cDBI = new DBInteract(Preferences.sIaUsername, Preferences.sIaPass);
+                string sText = HttpUtility.ParseQueryString(Request.RawUrl, Encoding.GetEncoding("utf-8"))["text"];
 				if (null == sText || 1 > sText.Length)
 				{
 					if(null != cDBI.VJMessageCurrentGet())

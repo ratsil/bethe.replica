@@ -26,7 +26,7 @@ namespace webservice.ia
             {
                 Response.ContentType = "application/octet-stream";
                 Response.AddHeader("content-disposition", "filename = chat.xml");
-                DBInteract cDBI = new DBInteract("replica_ia", "");
+                DBInteract cDBI = new DBInteract(Preferences.sIaUsername, Preferences.sIaPass);
                 ChatLog cChat = cDBI.ChatLastLogGet();
                 String sXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?><chat";
                 DateTime dtRetVal = DateTime.Now;
