@@ -152,16 +152,25 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="js\api.js" />
+    <Content Include="js\Chart.bundle.min.js" />
+    <Content Include="js\Chart.min.js" />
+    <Content Include="js\class-ReplicaTable.js" />
     <Content Include="js\common.js" />
     <Content Include="ia\chat.aspx" />
+    <Content Include="js\jquery-3.4.1.min.js" />
+    <Content Include="js\newreplica.js" />
     <Content Include="js\newreplicaadmin.js" />
     <Content Include="js\newreplicalogin.js" />
+    <Content Include="js\popper.min.js" />
+    <Content Include="js\testapi.js" />
+    <Content Include="newindex.html" />
     <Content Include="newreplicaadmin.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="newreplicalogin.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="newtestapi.html" />
     <Content Include="social.aspx" />
     <Content Include="images\social_fb.png" />
     <Content Include="images\social_tt.png" />

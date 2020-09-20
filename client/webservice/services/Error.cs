@@ -29,7 +29,7 @@ namespace webservice.services
 		}
 		#region errors handling
 
-		static private Queue<WebServiceError> _aqServerErrors;
+		static private Queue<WebServiceError> _aqServerErrors = new Queue<WebServiceError>();
 
 		static public bool IsThereAny(SessionInfo cSI)
 		{
@@ -92,8 +92,6 @@ namespace webservice.services
             else
                 (new Logger()).WriteError(sAdditionalInfo, ex);
 			WebServiceError cError = new WebServiceError(ex);
-			if (null == _aqServerErrors)
-				_aqServerErrors = new Queue<WebServiceError>();
 			_aqServerErrors.Enqueue(cError);
 
 			if (null != cSI)

@@ -591,18 +591,18 @@ namespace webservice.services
 			return sRetVal;
 		}
 
-        public string[] WebPagesAccessGet()
-		{
-			try
-			{
-				return _cDB.Select("SELECT * FROM hk.`fUserWebPageAccessGet`('" + _cSI.cDBCredentials.sUser + "')").Select(o => o["sPage"].ToStr()).ToArray();
-			}
-			catch (Exception ex)
-			{
-				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
-			}
-			return null;
-		}
+        //public string[] WebPagesAccessGet()
+		//{
+		//	try
+		//	{
+		//		return _cDB.Select("SELECT * FROM hk.`fUserWebPageAccessGet`('" + _cSI.cDBCredentials.sUser + "')").Select(o => o["sPage"].ToStr()).ToArray();
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+		//	}
+		//	return null;
+		//}
 
 		[WebMethod(EnableSession = true)]
 		public access.types.AccessScope[] AccessScopesGet()
@@ -2209,6 +2209,8 @@ namespace webservice.services
 				PlaylistItem[] aPLI = base.PlaylistItemsFastGet(DateTime.Now.AddMinutes(-30), DateTime.Now.AddHours(1)).ToArray();
 				List<PlaylistItem> aPLIAdvertsStarts = new List<PlaylistItem>();
 				PlaylistItem cPLIOnAir = base.PlaylistItemOnAirGet();
+                if (null == cPLIOnAir)
+                    return DateTime.MaxValue;
 				DateTime dtNextBlock;
 				if (DateTime.MaxValue > HardSoftGet(cPLIOnAir))
 					dtNearestAdvertsBlock = DateTime.MaxValue;
@@ -2236,7 +2238,7 @@ namespace webservice.services
 			{
 				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
 			}
-			return DateTime.Now.AddHours(3); // на эфире сразу станет ясно, что произошла хуйня - ближайший блок не найден
+			return DateTime.MaxValue; // на эфире сразу станет ясно, что произошла хуйня - ближайший блок не найден
 		}
 		[WebMethod(EnableSession = true)]
 		public int PlaylistItemsDeleteSince(DateTime dtBegin)
@@ -3057,7 +3059,7 @@ namespace webservice.services
 		[WebMethod(EnableSession = true)]
 		new public Announcement[] AnnouncementsActualGet()
 		{
-			return AnnouncementsActualGet();
+			return base.AnnouncementsActualGet();
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -3797,33 +3799,33 @@ ORDER BY "dtStartPlanned";
 		}
 		#endregion
 
-		#region rt   
+		//#region rt   
 		// УСТАРЕЛО ?????
-		[WebMethod(EnableSession = true)]
-		public List<int[]> RingtonesBindsGet()
-		{
-			List<int[]> aRetVal = new List<int[]>();
-			try
-			{
-				Queue<Hashtable> aqDBValues = null;
-				if (null != (aqDBValues = _cDB.Select("SELECT * FROM cues.`tRingtones`")))
-				{
-					Hashtable ahRow = null;
-					while (0 < aqDBValues.Count)
-					{
-						ahRow = aqDBValues.Dequeue();
-						aRetVal.Add(new int[] { ahRow["nBindCode"].ToInt32(), ahRow["nReplaceCode"].ToInt32() });
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
-			}
-			return aRetVal;
-		}
-
-		#endregion
+		//[WebMethod(EnableSession = true)]
+		//public List<int[]> RingtonesBindsGet()
+		//{
+		//	List<int[]> aRetVal = new List<int[]>();
+		//	try
+		//	{
+		//		Queue<Hashtable> aqDBValues = null;
+		//		if (null != (aqDBValues = _cDB.Select("SELECT * FROM cues.`tRingtones`")))
+		//		{
+		//			Hashtable ahRow = null;
+		//			while (0 < aqDBValues.Count)
+		//			{
+		//				ahRow = aqDBValues.Dequeue();
+		//				aRetVal.Add(new int[] { ahRow["nBindCode"].ToInt32(), ahRow["nReplaceCode"].ToInt32() });
+		//			}
+		//		}
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		WebServiceError.Add(_cSI, ex, "[user=" + _cSI.cProfile.sUsername + "][server=" + _cSI.cDBCredentials.sServer + ":" + _cSI.cDBCredentials.nPort + "]");
+		//	}
+		//	return aRetVal;
+		//}
+        //
+		//#endregion
 
 		#region ui
 		[WebMethod(EnableSession = true)]

@@ -22,6 +22,7 @@ namespace webservice
 {
     public partial class api : System.Web.UI.Page
     {
+
         class Logger : helpers.Logger
         {
             public Logger()
@@ -69,7 +70,7 @@ namespace webservice
                 Session["_cProfile"] = value;
             }
         }
-
+        
         protected void Page_Load(object sender, EventArgs e)
         {
             Object oResult = new NotImplementedException();
