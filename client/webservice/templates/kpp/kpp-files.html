@@ -84,3 +84,150 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="plus-tab" data-toggle="tab" href="#addInfo" role="tab" aria-controls="contact" aria-selected="false">+</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <h3>This is Home</h3>
+            </div>
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <h3>This is Profile</h3>
+            </div>
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <h3>This is Contact</h3>
+            </div>
+            <div class="tab-pane fade show active" id="addInfo" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="row collapse" id="addInfoRow">
+                    <div class="col">
+                        <div class="form-group mt-2">
+                            <label for="exampleFormControlTextarea1">Папка:</label>
+                            <div class="">
+                                <div onclick="tree_toggle(arguments[0])">
+                                    <div>Tree</div>
+                                    <ul class="tree-Container">
+                                        <li class="tree-Node tree-IsRoot tree-IsLast tree-ExpandClosed">
+                                            <div class="tree-Expand"></div>
+                                            <div class="tree-Content">Root</div>
+                                            <ul class="tree-Container">
+                                                <li class="tree-Node tree-ExpandClosed">
+                                                    <div class="tree-Expand"></div>
+                                                    <div class="tree-Content">Item 1</div>
+                                                    <ul class="tree-Container">
+                                                        <li class="tree-Node tree-ExpandLeaf tree-IsLast">
+                                                            <div class="tree-Expand"></div>
+                                                            <div class="tree-Content">Item 1.2</div>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li class="tree-Node tree-ExpandLeaf tree-IsLast">
+                                                    <div class="tree-Expand"></div>
+                                                    <div class="tree-Content">Item 2</div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                            <!-- <textarea class="form-control" id="exampleFormControlTextarea1" rows="12"></textarea> -->
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mt-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basicType">Тип:</span>
+                            </div>
+                            <select class="custom-select" id="inputTypeSelect">
+                                <option value="1" selected>Да</option>
+                                <option value="2">Нет</option>
+                              </select>
+                        </div>
+                        <div class="input-group mt-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basicSafe">Хранилище:</span>
+                            </div>
+                            <select class="custom-select" id="inputSafeSelect">
+                                <option value="1" selected>Да</option>
+                                <option value="2">Нет</option>
+                              </select>
+                        </div>
+                        <div class="input-group mt-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basicName">Название:</span>
+                            </div>
+                            <input type="text" class="form-control" id="basic-name" aria-describedby="basic-addon3">
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary mt-2" id="btnExtension">Дополнительно</button>
+                        <div class="collapse" id='sectionExtension'>
+                            <div class="input-group mt-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basicAdv">Путь к рекламе:</span>
+                                </div>
+                                <input type="text" class="form-control" id="basic-adv" aria-describedby="basic-addon3">
+                            </div>
+                            <div class="input-group mt-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basicAnons">Путь к анонсам:</span>
+                                </div>
+                                <input type="text" class="form-control" id="basic-anons" aria-describedby="basic-addon3">
+                            </div>
+                            <div class="input-group mt-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basicSafe">Хранилище рекламы:</span>
+                                </div>
+                                <select class="custom-select" id="inputSafeSelect">
+                                    <option value="1" selected>Да</option>
+                                    <option value="2">Нет</option>
+                                  </select>
+                            </div>
+                            <div class="input-group mt-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basicSafe">Хранилище анонсов:</span>
+                                </div>
+                                <select class="custom-select" id="inputSafeSelect">
+                                    <option value="1" selected>Да</option>
+                                    <option value="2">Нет</option>
+                                  </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary mt-2" id="btnAdd">Добавить</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+<div class="row">
+    <div class="col mt-3">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputVersion">Путь целевого файла: </label>
+            </div>
+            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username with two button addons" aria-describedby="button-addon4">
+            <div class="input-group-append" id="button-addon4">
+                <button class="btn btn-outline-secondary" type="button">Копировать</button>
+                <button class="btn btn-outline-secondary" type="button">Переместить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="templates/kpp/kpp-files.js"></script>

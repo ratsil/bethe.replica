@@ -180,3 +180,95 @@ input.chk-btn:checked+label {
     background-color: steelblue;
     color: white;
 }
+
+
+/* ------------------- Дерево файлов ---------------- */
+
+.tree-Container {
+    padding: 0;
+    margin: 0;
+}
+
+.tree-Container li {
+    list-style-type: none;
+}
+
+
+/* indent for all tree children excepts root */
+
+.tree-Node {
+    background-image: url(/images/i.gif);
+    background-position: top left;
+    background-repeat: repeat-y;
+    margin-left: 18px;
+    zoom: 1;
+}
+
+.tree-IsRoot {
+    margin-left: 0;
+}
+
+
+/* left vertical line (grid) for all nodes */
+
+.tree-IsLast {
+    background-image: url(/images/i_half.gif);
+    background-repeat: no-repeat;
+}
+
+.tree-ExpandOpen .tree-Expand {
+    background-image: url(/images/expand_minus.gif);
+}
+
+
+/* closed is higher priority than open */
+
+.tree-ExpandClosed .tree-Expand {
+    background-image: url(/images/expand_plus.gif);
+}
+
+
+/* highest priority */
+
+.tree-ExpandLeaf .tree-Expand {
+    background-image: url(/images/expand_leaf.gif);
+}
+
+.tree-Content {
+    min-height: 18px;
+    margin-left: 18px;
+}
+
+* html .tree-Content {
+    height: 18px;
+}
+
+.tree-Expand {
+    width: 18px;
+    height: 18px;
+    float: left;
+}
+
+.tree-ExpandLoading {
+    width: 18px;
+    height: 18px;
+    float: left;
+    background-image: url(/images/expand_loading.gif);
+}
+
+.tree-ExpandOpen .tree-Container {
+    display: block;
+}
+
+.tree-ExpandClosed .tree-Container {
+    display: none;
+}
+
+.tree-ExpandOpen .tree-Expand,
+.tree-ExpandClosed .tree-Expand {
+    cursor: pointer;
+}
+
+.tree-ExpandLeaf .tree-Expand {
+    cursor: auto;
+}

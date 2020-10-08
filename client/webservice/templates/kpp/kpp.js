@@ -2,6 +2,14 @@
 
 $(document).ready(function() {
 
+    let aTypes = [
+        "clip", "advertisment", "program", "design"
+    ]
+
+    let aSafe = [
+        "анонсы", "заставки", "клипы", "новости", "оформление", "программы", "реклама"
+    ]
+
     // load template kpp-files
     Templates.Attach('kpp/kpp-files.html', $('[name=filesSection]'), function() {});
 
