@@ -111,13 +111,14 @@
             <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                 <h3>This is Contact</h3>
             </div>
+            
             <div class="tab-pane fade show active" id="addInfo" role="tabpanel" aria-labelledby="contact-tab">
                 <div class="row collapse" id="addInfoRow">
                     <div class="col">
                         <div class="form-group mt-2">
                             <label for="exampleFormControlTextarea1">Папка:</label>
                             <div class="">
-                                <div onclick="tree_toggle(arguments[0])">
+                                <div onclick="tree_toggle(arguments[0])" id="treeStart">
                                     <div>Tree</div>
                                     <ul class="tree-Container">
                                         <li class="tree-Node tree-IsRoot tree-IsLast tree-ExpandClosed">
