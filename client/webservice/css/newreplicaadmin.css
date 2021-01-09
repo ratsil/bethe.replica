@@ -7341,3 +7341,65 @@ input.chk-btn:checked + label {
 
 .tree-ExpandLeaf .tree-Expand {
   cursor: auto; }
+
+.borderows {
+  border: lightgray 1px solid;
+  border-radius: 3px;
+  width: 100%; }
+
+.borderows .h-5 {
+  height: 5em; }
+
+.borderows .h-8 {
+  height: 8em; }
+
+.sticky {
+  position: -webkit-sticky;
+  /* for Safari */
+  position: sticky;
+  top: -1px;
+  background-color: white;
+  border-top: 1px solid #dee2e6 !important;
+  border-bottom: 2px solid #dee2e6 !important; }
+
+.tr-onair {
+  background-color: #f19797; }
+
+.tr-prepared {
+  background-color: lightgoldenrodyellow; }
+
+.tr-queued {
+  background-color: lightgreen; }
+
+.td-clips {
+  background-color: #aec96e; }
+
+.td-clips {
+  background-color: #aec96e; }
+
+.td-ad {
+  background-color: #ff9c8f; }
+
+.td-design {
+  background-color: #ffcb8b; }
+
+.td-prog {
+  background-color: #d1a9ff; }
+
+.td-zastavki {
+  background-color: #a9fff8; }
+
+.tr-clips-planned {
+  background-color: #e4f5bd; }
+
+.tr-ad-planned {
+  background-color: #fde5e2; }
+
+.tr-design-planned {
+  background-color: #fce2c3; }
+
+.tr-prog-planned {
+  background-color: #ebd9ff; }
+
+.tr-zastavki-planned {
+  background-color: #c9fcf7; }

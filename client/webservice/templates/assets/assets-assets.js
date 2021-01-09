@@ -81,6 +81,7 @@ function loadAllAssets() {
         $(oValue).each(function(index, el) {
             $(makeRow(el)).appendTo('#tableAssetsAll');
         });
+        Loader.Hide();
     });
 }
 
@@ -91,13 +92,13 @@ function loadClipsInTable() {
         $(oValue).each(function(index, el) {
             $(makeRow(el, true)).appendTo('#tableAssetClips');
         });
-        $('[data-table-id=tableAssetClips]').DataTable({
-            paging: false,
-            scrollY: 400
-        });
+        // $('[data-table-id=tableAssetClips]').DataTable({
+        //     paging: false,
+        //     scrollY: 400
+        // });
         Loader.Hide();
     })
-    
+
 }
 
 function loadAdvertisementInTable() {
@@ -111,17 +112,19 @@ function loadAdvertisementInTable() {
     })
 }
 
+// таблица закладки Программ
 function loadProgramsInTable() {
     Loader.Show();
     $('#tableAssetsPrograms').empty();
     API.MAM.Programs.List(function(oValue) {
         $(oValue).each(function(index, el) {
-            $(makeRow(el)).appendTo('#tableAssetsPrograms');
+            $(makeRow(el, true)).appendTo('#tableAssetsPrograms');
         });
         Loader.Hide();
     })
 }
 
+// таблица закладки Дизайн
 function loadDesignInTable() {
     Loader.Show();
     $('#tableAssetsDesign').empty();
@@ -155,4 +158,27 @@ function makeRow(el, bRot) {
     row += "<td>" + sClass + "</td>";
     row += "</tr>";
     return row;
+}
+
+// генерирует объект для массива таблицы с исользованием DataTable
+function makeObjectForTable(el, bRot) {
+    let sFile, sType, sClass, sRotation;
+    try { sFile = el.cFile.sFilename; } catch { sFile = ""; };
+    try { sType = el.stVideo.cType.sName; } catch { sType = ""; };
+    try { sRotation = el.cRotation.sName; } catch { sRotation = ""; };
+    try { sClass = el.aClasses[0].sName; } catch { sClass = ""; };
+
+    oTemp = {
+        nID: el.nID,
+        sName: el.sName,
+        sDuration: getDuration(el.nFramesQty),
+        sFile: sFile,
+        sType: sType,
+        sClass: sClass
+    }
+    if (bRot) {
+        oTemp.sRotation = sRotation;
+    }
+
+    return oTemp;
 }

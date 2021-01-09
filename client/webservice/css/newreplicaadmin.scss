@@ -272,3 +272,91 @@ input.chk-btn:checked+label {
 .tree-ExpandLeaf .tree-Expand {
     cursor: auto;
 }
+
+.borderows {
+    border: lightgray 1px solid;
+    border-radius: 3px;
+    width: 100%;
+}
+
+.borderows .h-5 {
+    height: 5em;
+}
+
+.borderows .h-8 {
+    height: 8em;
+}
+
+.sticky {
+    position: -webkit-sticky;
+    /* for Safari */
+    position: sticky;
+    top: -1px;
+    background-color: white;
+    border-top: 1px solid #dee2e6 !important;
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+// оформление плейлиста onAir
+.tr-onair {
+    background-color: rgb(241, 151, 151);
+}
+
+.tr-prepared {
+    background-color: lightgoldenrodyellow;
+}
+
+.tr-queued {
+    background-color: lightgreen;
+}
+
+.td-clips {
+    background-color: #aec96e;
+    // color: white;
+}
+
+// оформление плейлиста onAir
+.td-clips {
+    background-color: #aec96e;
+    // color: white;
+}
+
+.td-ad {
+    background-color: #ff9c8f;
+    // color: white;
+}
+
+.td-design {
+    background-color: rgb(255, 203, 139);
+}
+
+.td-prog {
+    background-color: rgb(209, 169, 255);
+}
+
+.td-zastavki {
+    background-color: rgb(169, 255, 248);
+}
+
+// оформление плейлиста Planned
+.tr-clips-planned {
+    background-color: #e4f5bd;
+    // color: white;
+}
+
+.tr-ad-planned {
+    background-color: #fde5e2;
+    // color: white;
+}
+
+.tr-design-planned {
+    background-color: rgb(252, 226, 195);
+}
+
+.tr-prog-planned {
+    background-color: rgb(235, 217, 255);
+}
+
+.tr-zastavki-planned {
+    background-color: rgb(201, 252, 247);
+}

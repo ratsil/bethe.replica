@@ -249,8 +249,8 @@ var API = (function() {
                 Get: function(id, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('ClipGet',JSON.stringify({ data: [id], types: ['System.Int64'] }), function(oResponse) {
-                    // Request.Send('ClipGet', [id], function(oResponse) {
+                    Request.Send('ClipGet', JSON.stringify({ data: [id], types: ['System.Int64'] }), function(oResponse) {
+                        // Request.Send('ClipGet', [id], function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue);
@@ -826,7 +826,7 @@ var API = (function() {
                 AdvertisementsList: function(dtBegin, dtEnd, fCallback) {
                     if (!fCallback)
                         return;
-                    Request.Send('PlaylistItemsAdvertsGet', JSON.stringify({ data: [dtBegin, dtEnd], types: ['System.DateTime', 'System.DateTime'] }), false,  function(oResponse) {
+                    Request.Send('PlaylistItemsAdvertsGet', JSON.stringify({ data: [dtBegin, dtEnd], types: ['System.DateTime', 'System.DateTime'] }), false, function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         fCallback(oResponse.oValue || []);
