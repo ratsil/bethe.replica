@@ -157,7 +157,7 @@
                     </table>
                 </div>
 
-                <div class="text-right">
+                <div class="text-right mt-2">
                     <span class="pr-3" id="itemsPlannedTotal"><strong>0 items total</strong></span>
                     <button class="btn btn-outline-secondary btn-sm" id='btnPlannedRefresh'>Обновить</button>
                 </div>
@@ -557,5 +557,59 @@
         </div>
     </div>
 </div>
+
+<!-- <div class="list-group context-menu" id="context-menu">
+    <button type="button" class="list-group-item list-group-item-action context-menu__item">Передвинуть на другое время</button>
+    <button type="button" class="list-group-item list-group-item-action">Вставить ассеты после или добавить блок...</button>
+    <button type="button" class="list-group-item list-group-item-action">Удалить</button>
+    <button type="button" class="list-group-item list-group-item-action">Удалить ВСЁ что ниже</button>
+    <button type="button" class="list-group-item list-group-item-action">Свойства</button>
+    </hr>
+    <button type="button" class="list-group-item list-group-item-action">обновить плейлист</button>
+    <button type="button" class="list-group-item list-group-item-action">Пересчитать на 5 часов вперед</button>
+    <button type="button" class="list-group-item list-group-item-action">Групповое перемещение</button>
+    <button type="button" class="list-group-item list-group-item-action">Копировать на время</button>
+    <button type="button" class="list-group-item list-group-item-action">Копировать в конец</button>
+    <button type="button" class="list-group-item list-group-item-action">Верстка первоочередного плейлиста</button>
+</div> -->
+
+<nav id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="View">Передвинуть на другое время</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Edit">Вставить ассеты после или добавить блок...</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Удалить</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Удалить ВСЁ что ниже</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Свойства</a>
+        </li>
+        <hr/>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Обновить плейлист</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Пересчитать на 5 часов вперед</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Групповое перемещение</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Копировать на время</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Копировать в конец</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Delete">Верстка первоочередного плейлиста</a>
+        </li>
+    </ul>
+</nav>
 
 <script src="templates/playlist/playlist.js"></script>
