@@ -2,27 +2,8 @@
 
     <div class="alert alert-danger" role="alert" style="margin-bottom: 0.5rem;">
         <table class="table table-sm" style="margin-bottom: 0;">
-            <tbody class="table-hover">
-                <tr>
-                    <th scope="row">on air:</th>
-                    <td>Pent</td>
-                    <th>show time:</th>
-                    <td>43:02</td>
-                    <th>type:</th>
-                    <td>adv</td>
-                    <th>left:</th>
-                    <th>00:12:23</th>
-                </tr>
-                <tr>
-                    <th scope="row">next:</th>
-                    <td>Jacob</td>
-                    <th>show time:</th>
-                    <td>01:23:23</td>
-                    <th>type:</th>
-                    <td>move</td>
-                    <td></td>
-                    <td></td>
-                </tr>
+            <tbody class="table-hover" id='thePinkData'>
+                <!-- сюда инфо грузится скриптом -->
             </tbody>
         </table>
     </div>
@@ -66,14 +47,24 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="text-right">
-                    <span class="pr-3" id='itemsInArchive'><strong>0 items total</strong></span>
-                    <input type="date">
-                    <button class="btn btn-outline-secondary btn-sm">Показать</button>
-                    <input type="number">
-                    <span class="pr-3">дня назад</span>
-                    <button class="btn btn-outline-secondary btn-sm">Вчера</button>
-                    <button class="btn btn-outline-secondary btn-sm" id='btnArchiveToday'>Сегодня</button>
+                <div class="row mt-2">
+                    <div class="col-sm-8 text-center ">
+                        <span class="pr-3" id='itemsInArchive'><strong>0 items total</strong></span>
+                    </div>
+                    <div class="col">
+                        <input type="date" id='btnArchiveByDate'>
+                    </div>
+                    <div class="col">
+                        <div class="input-group  input-group-sm mb-3">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnArchiveShowDaysAgo">Показать</button>
+                            <input type="number" class="form-control" id="daysAgo" style="width: 4em;" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                            <span class="input-group-text">дня назад</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-outline-secondary btn-sm" id='btnArchiveYesterday'>Вчера</button>
+                        <button class="btn btn-outline-secondary btn-sm" id='btnArchiveToday'>Сегодня</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -151,15 +142,37 @@
                             </tr>
                         </thead>
                         <tbody class="table-hover" id="onPlannedTable">
-                            <!-- сюда подгружается onAir таблица -->
+                            <!-- сюда подгружается onPlanned таблица -->
 
                         </tbody>
                     </table>
                 </div>
-
-                <div class="text-right mt-2">
-                    <span class="pr-3" id="itemsPlannedTotal"><strong>0 items total</strong></span>
-                    <button class="btn btn-outline-secondary btn-sm" id='btnPlannedRefresh'>Обновить</button>
+                <div class="row mt-2">
+                    <div class="col">
+                        <button class="btn btn-outline-secondary btn-sm" id='btnPlannedImport'>Импорт</button>
+                        <button class="btn btn-outline-secondary btn-sm" id='btnPlannedInsert'>Вставка</button>
+                        <button class="btn btn-outline-danger btn-sm ml-3" id='btnPlannedDeleteSelection'>Удалить выделенное</button>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control" type="number" value="3">
+                            <button class="btn btn-outline-secondary btn-sm" id='btnPlannedRefresh'>Пересчитать часов</button>
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <span id="itemsPlannedTotal"><strong>0 items total</strong></span>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Дата</span>
+                            </div>
+                            <input class="form-control" type="date">
+                            <button class="btn btn-outline-secondary btn-sm" id='btnPlannedToday'>Сегодня</button>
+                            <button class="btn btn-outline-secondary btn-sm" id='btnPlannedTomorrow'>Завтра</button>
+                            <button class="btn btn-outline-secondary btn-sm" id='btnPlannedAfterTomorrow'>Послезавтра</button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -558,56 +571,84 @@
     </div>
 </div>
 
-<!-- <div class="list-group context-menu" id="context-menu">
-    <button type="button" class="list-group-item list-group-item-action context-menu__item">Передвинуть на другое время</button>
-    <button type="button" class="list-group-item list-group-item-action">Вставить ассеты после или добавить блок...</button>
-    <button type="button" class="list-group-item list-group-item-action">Удалить</button>
-    <button type="button" class="list-group-item list-group-item-action">Удалить ВСЁ что ниже</button>
-    <button type="button" class="list-group-item list-group-item-action">Свойства</button>
-    </hr>
-    <button type="button" class="list-group-item list-group-item-action">обновить плейлист</button>
-    <button type="button" class="list-group-item list-group-item-action">Пересчитать на 5 часов вперед</button>
-    <button type="button" class="list-group-item list-group-item-action">Групповое перемещение</button>
-    <button type="button" class="list-group-item list-group-item-action">Копировать на время</button>
-    <button type="button" class="list-group-item list-group-item-action">Копировать в конец</button>
-    <button type="button" class="list-group-item list-group-item-action">Верстка первоочередного плейлиста</button>
-</div> -->
+<!-- Modal вызываются из контекстного меню ------------------------------ -->
+<!-- Modal Передвинуть на другое время -->
+<div class="modal fade" id="moveClipToAnotherTime" tabindex="-1" role="dialog" aria-labelledby="insertTheNewTime" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="insertTheNewTime">Введите новое время выхода:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="input-group input-group-sm mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Дата</span>
+                            </div>
+                            <input class="form-control" type="date">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="input-group input-group-sm mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Время</span>
+                            </div>
+                            <input class="form-control" type="time">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" data-dismiss="modal" aria-label="Close">Отмена</button>
+                <button class="btn btn-primary" id="btnOkNewTime">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+
+<!-- Контекстное меню для закладки запланированно -->
 <nav id="context-menu" class="context-menu">
     <ul class="context-menu__items">
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="View">Передвинуть на другое время</a>
+            <a href="#" class="context-menu__link" data-action="PlanMoveTime">Передвинуть на другое время</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Edit">Вставить ассеты после или добавить блок...</a>
+            <a href="#" class="context-menu__link" data-action="PlanEdit">Вставить ассеты после или добавить блок...</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Удалить</a>
+            <a href="#" class="context-menu__link" data-action="PlanDelete">Удалить</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Удалить ВСЁ что ниже</a>
+            <a href="#" class="context-menu__link" data-action="PlanDeleteAllDown">Удалить ВСЁ что ниже</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Свойства</a>
+            <a href="#" class="context-menu__link" data-action="PlanProperty">Свойства</a>
         </li>
         <hr/>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Обновить плейлист</a>
+            <a href="#" class="context-menu__link" data-action="PlanRefresh">Обновить плейлист</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Пересчитать на 5 часов вперед</a>
+            <a href="#" class="context-menu__link" data-action="PlanRecalcToFive">Пересчитать на 5 часов вперед</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Групповое перемещение</a>
+            <a href="#" class="context-menu__link" data-action="PlanGroupeMove">Групповое перемещение</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Копировать на время</a>
+            <a href="#" class="context-menu__link" data-action="PlanCopyToTime">Копировать на время</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Копировать в конец</a>
+            <a href="#" class="context-menu__link" data-action="PlanCopyToEnd">Копировать в конец</a>
         </li>
         <li class="context-menu__item">
-            <a href="#" class="context-menu__link" data-action="Delete">Верстка первоочередного плейлиста</a>
+            <a href="#" class="context-menu__link" data-action="PlanMakePL">Верстка первоочередного плейлиста</a>
         </li>
     </ul>
 </nav>

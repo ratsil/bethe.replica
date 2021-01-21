@@ -2,7 +2,40 @@
 
 $(document).ready(function() {
 
+    aStatuses = [{ nID: 1, sName: "planned" },
+        { nID: 2, sName: "queued" },
+        { nID: 3, sName: "prepared" },
+        { nID: 4, sName: "onair" },
+        { nID: 5, sName: "played" },
+        { nID: 6, sName: "skipped" },
+        { nID: 7, sName: "failed" }
+    ]
 
+    let timerID = setInterval(getInfoForPinkString, 1000)
+
+    // Закладка Archive ------------------------------------------------
+    // кнопка Insert
+
+    // кнопка Сегодня 
+    $('#btnArchiveToday').click(function() {
+        loadArchiveTable();
+    });
+    // кнопка Вчера 
+    $('#btnArchiveYesterday').click(function() {
+        let dtStart = new Date();
+        dtStart.setDate(dtStart.getDate() - 2);
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() - 1);
+        loadArchiveTable(dtStart, dtEnd);
+    });
+
+    // кнопка Изменить время выхода
+    $('#btnOkNewTime').click(function() {
+        $('#moveClipToAnotherTime').modal('hide');
+        alert('Изменили время выхода');
+    });
+
+    // Закладка OnAir --------------------------------------------------
     // кнопка Import
     $('[name=playlistImport]').click(function() {
         $('#playListImport').modal('show');
@@ -13,36 +46,39 @@ $(document).ready(function() {
         loadOnAirInTable();
     });
 
-    // кнопка Refresh - закладка в эфире
-    $('#btnPlannedRefresh').click(function() {
-        loadPlannedInTable();
-    });
-
-    // кнопка Insert
-    $('[name=insertAssets]').click(function() {
+    // Закладка Planned ------------------------------------------------
+    // кнопка Today 
+    $('#btnPlannedImport').click(function() {
         $('#insertAsset').modal('show');
     });
 
-    // кнопка Сегодня - закладка архив
-    $('#btnArchiveToday').click(function() {
-        loadArchiveToday();
+    $('#btnPlannedToday').click(function() {
+        let dtStart = new Date();
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() + 1);
+        loadPlannedInTable(dtStart, dtEnd);
+    });
+    // кнопка Tomorrow
+    $('#btnPlannedTomorrow').click(function() {
+        let dtStart = new Date();
+        dtStart.setDate(dtStart.getDate() + 1);
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() + 2);
+        loadPlannedInTable(dtStart, dtEnd);
+    });
+    // кнопка AfterTomorrow
+    $('#btnPlannedAfterTomorrow').click(function() {
+        let dtStart = new Date();
+        dtStart.setDate(dtStart.getDate() + 2);
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() + 3);
+        loadPlannedInTable(dtStart, dtEnd);
     });
 
-    $('#archiveTable').DataTable({
-        paging: false,
-        scrollY: 400
-    });
+
 
     //если у нас есть кука плейлиста, то открываем вкладку которая прописана в куке
     //иначе и по дефолту открываем вкладку onAir
-    aStatuses = [{ nID: 1, sName: "planned" },
-        { nID: 2, sName: "queued" },
-        { nID: 3, sName: "prepared" },
-        { nID: 4, sName: "onair" },
-        { nID: 5, sName: "played" },
-        { nID: 6, sName: "skipped" },
-        { nID: 7, sName: "failed" }
-    ]
 
     if (Cookies.Get('plFoder')) {
         let plFolder = Cookies.Get('plFoder');
@@ -60,17 +96,34 @@ $(document).ready(function() {
                     alert('воу! щас будем смотреть план!');
                 })
                 break;
-            default:
-                dtToday = new Date();
-                PL.Items.List([4], o => {
-                    alert('воу! щас будем смотреть то, что в эфире!');
-                })
         }
     } else {
         loadOnAirInTable();
     }
 
-    // при клике на строку в таблице 
+    // клики по закладкам --------------------------------
+
+    $('[data-target="#collapseOne"]').on('click', function() {
+        // alert('Клик на ссылке архив');
+        CoockiesReStore('Archive');
+        loadArchiveTable();
+    })
+
+    $('[data-target="#collapseTwo"]').on('click', function() {
+        // alert('Клик на ссылке В эфире');
+        CoockiesReStore('OnAir');
+    })
+
+    $('[data-target="#collapseThree"]').on('click', function() {
+        // alert('Клик на ссылке Планы');
+        CoockiesReStore('Planned');
+        let dtStart = new Date();
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() + 1);
+        loadPlannedInTable(dtStart, dtEnd);
+    })
+
+    // при клике на строку в таблице Planned
     // запоминаем объект строки в куки или берем ID из первого td
     // вызываем окно с меню
     $(document).on('click', '#onPlannedTable tr', function(e) {
@@ -80,8 +133,89 @@ $(document).ready(function() {
         toggleMenuOn();
     });
 
+    //  ----------------------------------------------------------------- Клики на контекстном меню
+
+    // Передвинуть на другое время
+    $('[data-action=PlanMoveTime]').on('click', function() {
+            toggleMenuOff();
+            $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Вставить ассеты после или добавить блок...
+    $('[data-action=PlanEdit]').on('click', function() {
+            toggleMenuOff();
+            alert('Вставить ассеты после или добавить блок...');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Удалить
+    $('[data-action=PlanDelete]').on('click', function() {
+            toggleMenuOff();
+            alert('Удалить');
+
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Удалить ВСЁ что ниже
+    $('[data-action=PlanDeleteAllDown]').on('click', function() {
+            toggleMenuOff();
+            alert('Удалить ВСЁ что ниже');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Свойства
+    $('[data-action=PlanProperty]').on('click', function() {
+            toggleMenuOff();
+            alert('Удалить ВСЁ что ниже');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Обновить плейлис
+    $('[data-action=PlanRefresh]').on('click', function() {
+            toggleMenuOff();
+            alert('Обновить плейлис');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Пересчитать на 5 часов вперед
+    $('[data-action=PlanRecalcToFive]').on('click', function() {
+            toggleMenuOff();
+            alert('Пересчитать на 5 часов вперед');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Групповое перемещение
+    $('[data-action=PlanGroupeMove]').on('click', function() {
+            toggleMenuOff();
+            alert('Групповое перемещение');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Копировать на время
+    $('[data-action=PlanCopyToTime]').on('click', function() {
+            toggleMenuOff();
+            alert('Копировать на время');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Копировать в конец
+    $('[data-action=PlanCopyToEnd]').on('click', function() {
+            toggleMenuOff();
+            alert('Копировать в конец');
+            // $('#moveClipToAnotherTime').modal('show');
+            // return false;
+        })
+        // Верстка первоочередного плейлиста
+    $('[data-action=PlanMakePL]').on('click', function() {
+        toggleMenuOff();
+        alert('Верстка первоочередного плейлиста');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    })
+
+
     /**
-     * Listens for keyup events.
+     * ---------------------------------------------------------------- Контекстное меню -------------------------
      */
 
     /**
@@ -199,9 +333,70 @@ $(document).ready(function() {
 
 });
 
+//-------------------------------------------- on document end -----------------------------------------------------------------------------
 
+// получает и выводит информацию по клипам в эфире в розовой строке
+function getInfoForPinkString() {
+    API.PL.Items.ComingUpGet(function(oValue) {
+        if (0 < oValue.length) {
+            let nameOnAir = oValue[0].sName;
+            let dtOnAir = getReplicaDataTime(oValue[0].dtStart);
+            let typeOnAir = oValue[0].cFile.cStorage.sName;
+            let nameNext = oValue[1].sName;
+            let dtNext = getReplicaDataTime(oValue[1].dtStart);
+            let typeNext = oValue[1].cFile.cStorage.sName;
+            let firstRow = '<tr><td class="font-size-1" style="width: 40%;"> <b>Сейчас в эфире:</b> ' +
+                nameOnAir + '</td><td  class="text-center font-size-1" style="width: 25%;"> <b>Время выхода: </b>' +
+                dtOnAir + '</td><td class="font-size-1" style="width: 15%;"> <b>Тип:</b> ' +
+                typeOnAir + '</td><td class="font-size-1  style="width: 15%;""> <b>Осталось:</b></td></tr>';
+            firstRow += '<tr><td class="font-size-1 "> <b>Далее:</b> ' +
+                nameNext + '</td><td class="text-center font-size-1"><b> Время выхода:</b> ' +
+                dtNext + '</td><td class="font-size-1 "><b> Тип:</b> ' +
+                typeNext + '</td><td> </td></tr>';
+            $('#thePinkData').html(firstRow);
+        }
+    });
+    return false;
+}
 
-// таблица закладки OnAir
+// перезапоминание куков
+function CoockiesReStore(sCookieValue) {
+    let aNames = ['Archive', 'OnAir', 'Planned'];
+    Cookies.Delete('plFoder');
+    if (0 < aNames.indexOf(sCookieValue)) {
+        Cookies.Set('plFolder', sCookieValue);
+    } else {
+        console.log('ошибка при запоминании кука закладки плейлиста - где-то неверный аргумент при вызове.')
+    }
+}
+
+// ------------------------------------------------------------------------------- таблица закладки Архив
+// получение данных и формирование таблицы
+function loadArchiveTable(dtStart, dtEnd) {
+    Loader.Show();
+    $('#onArchiveTable').empty();
+    // если аргументов нет - выводим архив за сегодня
+    if (undefined === dtStart && undefined === dtEnd) {
+        dtStart = new Date();
+        dtStart.setDate(dtStart.getDate() - 1);
+        dtEnd = new Date();
+    }
+    API.PL.Items.ArchiveList(dtStart, dtEnd, oValue => {
+
+        // API.PL.Items.List(ret, oValue => {
+        $(oValue).each(function(index, el) {
+            $(makeRow(el, 'arh')).appendTo('#onArchiveTable');
+        });
+
+        let target = $('#itemsInArchive');
+        target.empty();
+        target.html('<strong>' + oValue.length + ' items total</strong> ');
+        Loader.Hide();
+    })
+    return false;
+}
+
+// ------------------------------------------------------------------------------------- таблица закладки OnAir
 function loadOnAirInTable() {
     Loader.Show();
     $('#onAirTable').empty();
@@ -217,13 +412,11 @@ function loadOnAirInTable() {
     })
 }
 
-// таблица закладки Planned
-function loadPlannedInTable() {
+// ------------------------------------------------------------------------------------ таблица закладки Planned
+function loadPlannedInTable(dtStart, dtEnd) {
     Loader.Show();
     $('#onPlannedTable').empty();
-    let dtStart = new Date();
-    let dtEnd = new Date();
-    dtEnd.setDate(dtEnd.getDate() + 1);
+
     API.PL.Items.PlannedList(dtStart, dtEnd, oValue => {
         $(oValue).each(function(index, el) {
             $(makeRow(el, 'plan')).appendTo('#onPlannedTable');
@@ -236,30 +429,7 @@ function loadPlannedInTable() {
     });
 }
 
-// таблица закладки Архив
-function loadArchiveToday() {
-    Loader.Show();
-    $('#onArchiveTable').empty();
-    let ret = [{ nID: 5, sName: "played" }];
-    let dtYesterday = new Date();
-    dtYesterday.setDate(dtYesterday.getDate() - 1);
-    let dtToday = new Date();
-    // dtToday.setDate(dtToday.getDate() - 1);
-
-    API.PL.Items.ArchiveList(dtYesterday, dtToday, oValue => {
-
-        // API.PL.Items.List(ret, oValue => {
-        $(oValue).each(function(index, el) {
-            $(makeRow(el, 'arh')).appendTo('#onArchiveTable');
-        });
-
-        let target = $('#itemsInArchive');
-        target.empty();
-        target.html('<strong>' + oValue.length + ' items total</strong> ');
-        Loader.Hide();
-    })
-}
-
+// -------------------------------------------------------- Делает HTML строчки таблиц -----------------------------------------------------------------------------------
 // sNameTab - arh или plan
 function makeRow(el, sNameTab) {
     let row;
@@ -272,11 +442,12 @@ function makeRow(el, sNameTab) {
     try { sRotation = el.cAsset.cRotation.sName; } catch { sRotation = ""; };
     try { sClass = el.aClasses[0].sName; } catch { sClass = ""; };
     if (sNameTab == 'arh') {
-        try { dtLastDate = getDataTime(el.dtStartReal); } catch { dtLastDate = ""; };
+        try { dtLastDate = getReplicaDataTime(el.dtStart); } catch { dtLastDate = ""; };
+        // try { dtLastDate = getReplicaDataTime(el.dtStartReal); } catch { dtLastDate = ""; };
     } else if (sNameTab == 'plan') {
-        try { dtLastDate = getDataTime(el.dtStartPlanned); } catch { dtLastDate = ""; };
+        try { dtLastDate = getReplicaDataTime(el.dtStartPlanned); } catch { dtLastDate = ""; };
     } else {
-        try { dtLastDate = getDataTime(el.dtStart); } catch { dtLastDate = ""; };
+        try { dtLastDate = getReplicaDataTime(el.dtStart); } catch { dtLastDate = ""; };
     }
     try { sStatus = el.cStatus.sName; } catch { sStatus = ""; };
 
@@ -350,8 +521,8 @@ function makeRow(el, sNameTab) {
     return row;
 }
 
-// преобразует строку из бд в немного другой формат
-function getDataTime(sdtDT) {
+// преобразует строку даты из бд в немного другой формат для таблицы
+function getReplicaDataTime(sdtDT) {
 
     let sDT, dtTemp;
     dtTemp = String(sdtDT);
