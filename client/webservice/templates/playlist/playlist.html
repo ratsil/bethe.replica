@@ -47,21 +47,22 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-sm-8 text-center ">
+
+                <div class="d-flex mt-2">
+                    <div class="p-2 flex-grow-1 text-center">
                         <span class="pr-3" id='itemsInArchive'><strong>0 items total</strong></span>
                     </div>
-                    <div class="col">
+                    <div class="p-2 ">
                         <input type="date" id='btnArchiveByDate'>
                     </div>
-                    <div class="col">
+                    <div class="p-2 ">
                         <div class="input-group  input-group-sm mb-3">
                             <button class="btn btn-outline-secondary btn-sm" type="button" id="btnArchiveShowDaysAgo">Показать</button>
-                            <input type="number" class="form-control" id="daysAgo" style="width: 4em;" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                            <input type="number" class="form-control" id="daysAgo" min="1" size="3" placeholder="" aria-label="дней назад" aria-describedby="button-addon1">
                             <span class="input-group-text">дня назад</span>
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="p-2">
                         <button class="btn btn-outline-secondary btn-sm" id='btnArchiveYesterday'>Вчера</button>
                         <button class="btn btn-outline-secondary btn-sm" id='btnArchiveToday'>Сегодня</button>
                     </div>
@@ -104,9 +105,14 @@
                     </table>
                 </div>
 
-                <div class="text-right mt-2">
-                    <span class="pr-3" id="itemsTotal"><strong>0 items total</strong></span>
-                    <button class="btn btn-outline-secondary btn-sm" id='btnPLOnAirRefresh'>Обновить</button>
+
+                <div class="d-flex mt-2">
+                    <div class="p-2 flex-grow-1 text-center">
+                        <span class="pr-3" id="itemsTotal"><strong>0 items total</strong></span>
+                    </div>
+                    <div class="p-2">
+                        <button class="btn btn-outline-secondary btn-sm" id='btnPLOnAirRefresh'>Обновить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -147,27 +153,29 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row mt-2">
-                    <div class="col">
+                <div class="d-flex mt-2">
+                    <div class="p-2">
                         <button class="btn btn-outline-secondary btn-sm" id='btnPlannedImport'>Импорт</button>
                         <button class="btn btn-outline-secondary btn-sm" id='btnPlannedInsert'>Вставка</button>
                         <button class="btn btn-outline-danger btn-sm ml-3" id='btnPlannedDeleteSelection'>Удалить выделенное</button>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="p-2">
                         <div class="input-group input-group-sm">
-                            <input class="form-control" type="number" value="3">
+                            <input class="form-control" type="number" size="3" value="5">
                             <button class="btn btn-outline-secondary btn-sm" id='btnPlannedRefresh'>Пересчитать часов</button>
                         </div>
                     </div>
-                    <div class="col text-center">
+                    <div class="p-2 flex-grow-1 text-center">
                         <span id="itemsPlannedTotal"><strong>0 items total</strong></span>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="p-2">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">Дата</span>
                             </div>
-                            <input class="form-control" type="date">
+                            <input class="form-control" type="date" id='datePlanned'>
+                            <script>
+                            </script>
                             <button class="btn btn-outline-secondary btn-sm" id='btnPlannedToday'>Сегодня</button>
                             <button class="btn btn-outline-secondary btn-sm" id='btnPlannedTomorrow'>Завтра</button>
                             <button class="btn btn-outline-secondary btn-sm" id='btnPlannedAfterTomorrow'>Послезавтра</button>

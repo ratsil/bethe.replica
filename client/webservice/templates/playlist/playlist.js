@@ -14,18 +14,40 @@ $(document).ready(function() {
     let timerID = setInterval(getInfoForPinkString, 1000)
 
     // Закладка Archive ------------------------------------------------
-    // кнопка Insert
+
+    // устанавливаем минимум в календаре
+    $('#btnArchiveByDate').attr('max', getMaxMinDate);
 
     // кнопка Сегодня 
     $('#btnArchiveToday').click(function() {
         loadArchiveTable();
     });
+
     // кнопка Вчера 
     $('#btnArchiveYesterday').click(function() {
         let dtStart = new Date();
         dtStart.setDate(dtStart.getDate() - 2);
         let dtEnd = new Date();
         dtEnd.setDate(dtEnd.getDate() - 1);
+        loadArchiveTable(dtStart, dtEnd);
+    });
+
+    // кнопка ... дней назад 
+    $('#btnArchiveShowDaysAgo').click(function() {
+        let nDaysAgo = $('#daysAgo').val();
+        let dtStart = new Date();
+        dtStart.setDate(dtStart.getDate() - nDaysAgo);
+        let dtEnd = new Date();
+        dtEnd.setDate(dtEnd.getDate() - (nDaysAgo - 1));
+        loadArchiveTable(dtStart, dtEnd);
+    });
+
+    // кнопка календарь дней назад 
+    $('#btnArchiveByDate').on("change", function() {
+        let nCalDay = $('#btnArchiveByDate').val();
+        let dtStart = new Date(nCalDay);
+        let dtEnd = new Date(nCalDay);
+        dtEnd.setDate(dtEnd.getDate() + 1);
         loadArchiveTable(dtStart, dtEnd);
     });
 
@@ -47,6 +69,11 @@ $(document).ready(function() {
     });
 
     // Закладка Planned ------------------------------------------------
+
+    // устанавливаем минимум в календаре
+
+    $('#datePlanned').attr('min', getMaxMinDate);
+
     // кнопка Today 
     $('#btnPlannedImport').click(function() {
         $('#insertAsset').modal('show');
@@ -75,6 +102,14 @@ $(document).ready(function() {
         loadPlannedInTable(dtStart, dtEnd);
     });
 
+    // кнопка календарь дней назад 
+    $('#datePlanned').on("change", function() {
+        let nCalDay = $('#datePlanned').val();
+        let dtStart = new Date(nCalDay);
+        let dtEnd = new Date(nCalDay);
+        dtEnd.setDate(dtEnd.getDate() + 1);
+        loadPlannedInTable(dtStart, dtEnd);
+    });
 
 
     //если у нас есть кука плейлиста, то открываем вкладку которая прописана в куке
@@ -534,6 +569,15 @@ function getReplicaDataTime(sdtDT) {
     return sDT;
 }
 
+//преобразование текущей даты в строку для ограничения календарей
+function getMaxMinDate() {
+    let sDate = "";
+    let dtToday = new Date();
+    let sYY = String(dtToday.getFullYear());
+    let sMM = (10 < dtToday.getMonth()) ? String(dtToday.getMonth() + 1) : "0" + (dtToday.getMonth() + 1);
+    let sDD = String(dtToday.getDate());
+    return sDate = sYY + '-' + sMM + '-' + sDD;
+}
 
 
 //
