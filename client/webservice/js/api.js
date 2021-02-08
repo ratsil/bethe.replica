@@ -861,7 +861,7 @@ var API = (function() {
                     });
                 },
                 StartsSet: function(id, dtStartPlanned, dtOld, fCallback) {
-                    Request.Send('PlaylistItemStartsSet', [id, dtStartPlanned, dtOld], false, function(oResponse) {
+                    Request.Send('PlaylistItemStartsSet', JSON.stringify({ data: [id, dtStartPlanned, dtOld], types: ['System.Int64', 'System.DateTime', 'System.DateTime'] }), false, function(oResponse) {
                         if (!_ResponseCheck(oResponse))
                             return console.log(JSON.stringify(oResponse));
                         if (fCallback)

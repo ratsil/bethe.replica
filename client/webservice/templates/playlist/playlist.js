@@ -51,10 +51,25 @@ $(document).ready(function() {
         loadArchiveTable(dtStart, dtEnd);
     });
 
-    // кнопка Изменить время выхода
+    // кнопка Изменить время выхода в модальном окне
     $('#btnOkNewTime').click(function() {
-        $('#moveClipToAnotherTime').modal('hide');
-        alert('Изменили время выхода');
+        let dtNewDT = $('#modalNewDateField').val();
+        let dtNewTime = $('#modalNewTimeField').val();
+        if (dtNewDT == '' || dtNewTime == '') {
+            // $('#warnEmptFieldMoveClip').removeClass('hidden');
+            return false;
+        } else {
+            let jAsset = Cookies.Get('itemId');
+            let oAsset = JSON.parse(jAsset);
+            let dtStartPlanned = new Date(dtNewDT + ' ' + dtNewTime);
+            API.PL.Items.StartsSet(parseInt(oAsset.nID), dtStartPlanned, oAsset.dtDate, function(oValue) {
+                // API.PL.Items.StartsSet('1321895', dtStartPlanned, oAsset.dtDate, function(oValue) {
+                let orr = oValue;
+                $('#moveClipToAnotherTime').modal('hide');
+                alert('Изменили время выхода для ' + oAsset.sName);
+            });
+
+        }
     });
 
     // Закладка OnAir --------------------------------------------------
@@ -73,12 +88,13 @@ $(document).ready(function() {
     // устанавливаем минимум в календаре
 
     $('#datePlanned').attr('min', getMaxMinDate);
+    $('#modalNewDateField').attr('min', getMaxMinDate);
 
-    // кнопка Today 
     $('#btnPlannedImport').click(function() {
         $('#insertAsset').modal('show');
     });
 
+    // кнопка Today 
     $('#btnPlannedToday').click(function() {
         let dtStart = new Date();
         let dtEnd = new Date();
@@ -159,11 +175,18 @@ $(document).ready(function() {
     })
 
     // при клике на строку в таблице Planned
-    // запоминаем объект строки в куки или берем ID из первого td
+    // запоминаем ID из tr , наименование композиции и дату проигрывапния в куки
     // вызываем окно с меню
     $(document).on('click', '#onPlannedTable tr', function(e) {
-        let parent = e.target.parentNode;
-        let nId = parseInt(parent.firstElementChild.innerHTML);
+        let oAsset = {};
+        oAsset.nID = e.currentTarget.attributes.dataId.nodeValue;
+        oAsset.sName = e.currentTarget.cells[1].innerText;
+        oAsset.dtDate = new Date(e.currentTarget.cells[0].innerText);
+        // let parent = e.target.parentNode;
+        // let nId = parseInt(parent.firstElementChild.innerHTML);
+        // alert(nID + ' Clicked');
+        jValue = JSON.stringify(oAsset);
+        CookiesItemsIdRestore(jValue);
         positionMenu(e);
         toggleMenuOn();
     });
@@ -172,81 +195,81 @@ $(document).ready(function() {
 
     // Передвинуть на другое время
     $('[data-action=PlanMoveTime]').on('click', function() {
-            toggleMenuOff();
-            $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Вставить ассеты после или добавить блок...
+        toggleMenuOff();
+        $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Вставить ассеты после или добавить блок...
     $('[data-action=PlanEdit]').on('click', function() {
-            toggleMenuOff();
-            alert('Вставить ассеты после или добавить блок...');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Удалить
+        toggleMenuOff();
+        alert('Вставить ассеты после или добавить блок...');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Удалить
     $('[data-action=PlanDelete]').on('click', function() {
-            toggleMenuOff();
-            alert('Удалить');
+        toggleMenuOff();
+        alert('Удалить');
 
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Удалить ВСЁ что ниже
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Удалить ВСЁ что ниже
     $('[data-action=PlanDeleteAllDown]').on('click', function() {
-            toggleMenuOff();
-            alert('Удалить ВСЁ что ниже');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Свойства
+        toggleMenuOff();
+        alert('Удалить ВСЁ что ниже');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Свойства
     $('[data-action=PlanProperty]').on('click', function() {
-            toggleMenuOff();
-            alert('Удалить ВСЁ что ниже');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Обновить плейлис
+        toggleMenuOff();
+        alert('Удалить ВСЁ что ниже');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Обновить плейлис
     $('[data-action=PlanRefresh]').on('click', function() {
-            toggleMenuOff();
-            alert('Обновить плейлис');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Пересчитать на 5 часов вперед
+        toggleMenuOff();
+        alert('Обновить плейлис');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Пересчитать на 5 часов вперед
     $('[data-action=PlanRecalcToFive]').on('click', function() {
-            toggleMenuOff();
-            alert('Пересчитать на 5 часов вперед');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Групповое перемещение
+        toggleMenuOff();
+        alert('Пересчитать на 5 часов вперед');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Групповое перемещение
     $('[data-action=PlanGroupeMove]').on('click', function() {
-            toggleMenuOff();
-            alert('Групповое перемещение');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Копировать на время
+        toggleMenuOff();
+        alert('Групповое перемещение');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Копировать на время
     $('[data-action=PlanCopyToTime]').on('click', function() {
-            toggleMenuOff();
-            alert('Копировать на время');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Копировать в конец
+        toggleMenuOff();
+        alert('Копировать на время');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Копировать в конец
     $('[data-action=PlanCopyToEnd]').on('click', function() {
-            toggleMenuOff();
-            alert('Копировать в конец');
-            // $('#moveClipToAnotherTime').modal('show');
-            // return false;
-        })
-        // Верстка первоочередного плейлиста
+        toggleMenuOff();
+        alert('Копировать в конец');
+        // $('#moveClipToAnotherTime').modal('show');
+        // return false;
+    });
+    // Верстка первоочередного плейлиста
     $('[data-action=PlanMakePL]').on('click', function() {
         toggleMenuOff();
         alert('Верстка первоочередного плейлиста');
         // $('#moveClipToAnotherTime').modal('show');
         // return false;
-    })
+    });
 
 
     /**
@@ -256,21 +279,40 @@ $(document).ready(function() {
     /**
      * Va riables.
      */
-    let contextMenuClassName = "context-menu";
-    let contextMenuItemClassName = "context-menu__item";
+    // let contextMenuClassName = "context-menu";
+    // let contextMenuItemClassName = "context-menu__item";
     let contextMenuLinkClassName = "context-menu__link";
     let contextMenuActive = "context-menu--active";
     let menu = document.querySelector("#context-menu");
-    let menuItems = menu.querySelectorAll(".context-menu__item");
+    // let menuItems = menu.querySelectorAll(".context-menu__item");
     let menuState = 0;
     let menuWidth;
     let menuHeight;
-    let menuPosition;
-    let menuPositionX;
-    let menuPositionY;
+    // let menuPosition;
+    // let menuPositionX;
+    // let menuPositionY;
 
     let windowWidth;
     let windowHeight;
+
+    /**
+     * Listens for click events.
+     */
+    // function clickListener() {
+    //     document.addEventListener("click", function(e) {
+    //         var clickeElIsLink = clickInsideElement(e, contextMenuLinkClassName);
+
+    //         if (clickeElIsLink) {
+    //             e.preventDefault();
+    //             menuItemListener(clickeElIsLink);
+    //         } else {
+    //             var button = e.which || e.button;
+    //             if (button === 1) {
+    //                 toggleMenuOff();
+    //             }
+    //         }
+    //     });
+    // }
 
     function keyupListener() {
         window.onkeyup = function(e) {
@@ -365,6 +407,9 @@ $(document).ready(function() {
     }
 
     keyupListener();
+    resizeListener();
+    // clickListener();
+
 
 });
 
@@ -403,6 +448,11 @@ function CoockiesReStore(sCookieValue) {
     } else {
         console.log('ошибка при запоминании кука закладки плейлиста - где-то неверный аргумент при вызове.')
     }
+}
+
+function CookiesItemsIdRestore(jValue) {
+    Cookies.Delete('itemId');
+    Cookies.Set('itemId', jValue);
 }
 
 // ------------------------------------------------------------------------------- таблица закладки Архив
@@ -489,39 +539,39 @@ function makeRow(el, sNameTab) {
     if (sNameTab == 'plan') {
         switch (sType) {
             case 'клипы':
-                row = "<tr class='tr-control tr-clips-planned'>";
+                row = "<tr class='tr-control tr-clips-planned' dataId='" + nID + "'>";
                 break;
             case 'оформление':
-                row = "<tr class='tr-control tr-design-planned'>";
+                row = "<tr class='tr-control tr-design-planned' dataId='" + nID + "'>";
                 break;
             case 'реклама':
-                row = "<tr class='tr-control tr-ad-planned'>";
+                row = "<tr class='tr-control tr-ad-planned' dataId='" + nID + "'>";
                 break;
             case 'анонсы':
-                row = "<tr class='tr-control tr-ad-planned'>";
+                row = "<tr class='tr-control tr-ad-planned' dataId='" + nID + "'>";
                 break;
             case 'программы':
-                row = "<tr class='tr-control tr-prog-planned'>";
+                row = "<tr class='tr-control tr-prog-planned' dataId='" + nID + "'>";
                 break;
             case 'заставки':
-                row = "<tr class='tr-control tr-zastavki-planned'>";
+                row = "<tr class='tr-control tr-zastavki-planned' dataId='" + nID + "'>";
                 break;
             default:
-                row = "<tr class='tr-control>";
+                row = "<tr class='tr-control dataId='" + nID + "'>";
         }
     } else {
         switch (sStatus) {
             case 'onair':
-                row = "<tr class='tr-control tr-onair'>";
+                row = "<tr class='tr-control tr-onair' dataId='" + nID + "'>";
                 break;
             case 'prepared':
-                row = "<tr class='tr-control tr-prepared'>";
+                row = "<tr class='tr-control tr-prepared' dataId='" + nID + "'>";
                 break;
             case 'queued':
-                row = "<tr class='tr-control tr-queued'>";
+                row = "<tr class='tr-control tr-queued' dataId='" + nID + "'>";
                 break;
             default:
-                row = "<tr class='tr-control'>";
+                row = "<tr class='tr-control' dataId='" + nID + "'>";
         }
     }
     row += "<td>" + dtLastDate + "</td>";
